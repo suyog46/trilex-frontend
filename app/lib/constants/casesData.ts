@@ -1,0 +1,211 @@
+// Case type definition
+export interface Case {
+  id: string
+  caseName: string
+  courtType: string
+  clientName: string
+  warisName: string
+  files: number
+  tarikDate: string
+  status?: 'draft' | 'ongoing' | 'completed'
+  description?: string
+}
+
+// Dummy data for draft cases
+export const draftCasesData: Case[] = [
+  {
+    id: '1',
+    caseName: 'Property Dispute Case',
+    courtType: 'District Court',
+    clientName: 'Rajesh Kumar',
+    warisName: 'Sita Devi',
+    files: 5,
+    tarikDate: '2026-01-25',
+    status: 'draft',
+    description: 'Land ownership dispute between family members',
+  },
+  {
+    id: '2',
+    caseName: 'Contract Breach Case',
+    courtType: 'Commercial Court',
+    clientName: 'Tech Solutions Pvt Ltd',
+    warisName: 'Ram Sharma',
+    files: 12,
+    tarikDate: '2026-01-28',
+    status: 'draft',
+    description: 'Breach of service contract agreement',
+  },
+  {
+    id: '3',
+    caseName: 'Divorce Petition',
+    courtType: 'Family Court',
+    clientName: 'Maya Adhikari',
+    warisName: 'Krishna Bahadur',
+    files: 8,
+    tarikDate: '2026-02-01',
+    status: 'draft',
+    description: 'Mutual consent divorce with asset division',
+  },
+  {
+    id: '4',
+    caseName: 'Criminal Defense Case',
+    courtType: 'Supreme Court',
+    clientName: 'Binod Chaudhary',
+    warisName: 'Hari Prasad',
+    files: 15,
+    tarikDate: '2026-02-05',
+    status: 'draft',
+    description: 'Defense against fraud allegations',
+  },
+  {
+    id: '5',
+    caseName: 'Inheritance Dispute',
+    courtType: 'District Court',
+    clientName: 'Sunita Rana',
+    warisName: 'Gita Thapa',
+    files: 10,
+    tarikDate: '2026-02-08',
+    status: 'draft',
+    description: 'Will contestation case',
+  },
+]
+
+// Dummy data for ongoing cases
+export const ongoingCasesData: Case[] = [
+  {
+    id: '6',
+    caseName: 'Labor Law Violation',
+    courtType: 'Labor Court',
+    clientName: 'Workers Union Nepal',
+    warisName: 'Mohan Karki',
+    files: 18,
+    tarikDate: '2026-01-20',
+    status: 'ongoing',
+    description: 'Wrongful termination case',
+  },
+  {
+    id: '7',
+    caseName: 'Land Acquisition Case',
+    courtType: 'Supreme Court',
+    clientName: 'Shyam Prasad Gupta',
+    warisName: 'Laxmi Devi',
+    files: 22,
+    tarikDate: '2026-01-22',
+    status: 'ongoing',
+    description: 'Government land acquisition compensation',
+  },
+  {
+    id: '8',
+    caseName: 'Trademark Infringement',
+    courtType: 'Commercial Court',
+    clientName: 'Nepal Foods Ltd',
+    warisName: 'Deepak Shrestha',
+    files: 14,
+    tarikDate: '2026-01-24',
+    status: 'ongoing',
+    description: 'Brand protection case',
+  },
+  {
+    id: '9',
+    caseName: 'Child Custody Case',
+    courtType: 'Family Court',
+    clientName: 'Anita Magar',
+    warisName: 'Prakash Tamang',
+    files: 9,
+    tarikDate: '2026-01-26',
+    status: 'ongoing',
+    description: 'Joint custody negotiation',
+  },
+  {
+    id: '10',
+    caseName: 'Construction Dispute',
+    courtType: 'District Court',
+    clientName: 'Himalayan Builders',
+    warisName: 'Ramesh Poudel',
+    files: 16,
+    tarikDate: '2026-01-29',
+    status: 'ongoing',
+    description: 'Contract default and quality issues',
+  },
+  {
+    id: '11',
+    caseName: 'Medical Negligence',
+    courtType: 'Supreme Court',
+    clientName: 'Bishnu Thakuri',
+    warisName: 'Keshab Pandey',
+    files: 25,
+    tarikDate: '2026-02-02',
+    status: 'ongoing',
+    description: 'Hospital malpractice claim',
+  },
+]
+
+// Dummy data for completed cases
+export const completedCasesData: Case[] = [
+  {
+    id: '12',
+    caseName: 'Tenant Eviction Case',
+    courtType: 'District Court',
+    clientName: 'Bikash Gautam',
+    warisName: 'Suman Thapa',
+    files: 7,
+    tarikDate: '2025-12-15',
+    status: 'completed',
+    description: 'Successfully evicted defaulting tenant',
+  },
+  {
+    id: '13',
+    caseName: 'Insurance Claim',
+    courtType: 'Commercial Court',
+    clientName: 'Ratna Insurance Ltd',
+    warisName: 'Gopal Adhikari',
+    files: 11,
+    tarikDate: '2025-12-18',
+    status: 'completed',
+    description: 'Vehicle insurance claim settlement',
+  },
+  {
+    id: '14',
+    caseName: 'Assault Case Defense',
+    courtType: 'District Court',
+    clientName: 'Dipak Gurung',
+    warisName: 'Nirmala KC',
+    files: 13,
+    tarikDate: '2025-12-20',
+    status: 'completed',
+    description: 'Client acquitted of all charges',
+  },
+  {
+    id: '15',
+    caseName: 'Property Sale Dispute',
+    courtType: 'Supreme Court',
+    clientName: 'Prem Bahadur Rai',
+    warisName: 'Santosh Limbu',
+    files: 19,
+    tarikDate: '2025-12-22',
+    status: 'completed',
+    description: 'Sale agreement upheld',
+  },
+  {
+    id: '16',
+    caseName: 'Corporate Merger Case',
+    courtType: 'Commercial Court',
+    clientName: 'Global Corp Nepal',
+    warisName: 'Bijay Lama',
+    files: 28,
+    tarikDate: '2025-12-28',
+    status: 'completed',
+    description: 'Merger successfully completed',
+  },
+  {
+    id: '17',
+    caseName: 'Adoption Case',
+    courtType: 'Family Court',
+    clientName: 'Kamala Bhattarai',
+    warisName: 'Tek Bahadur',
+    files: 6,
+    tarikDate: '2026-01-05',
+    status: 'completed',
+    description: 'Adoption finalized successfully',
+  },
+]

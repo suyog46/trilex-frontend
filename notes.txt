@@ -1,0 +1,67 @@
+onMounted(() => {
+  fetchData()
+}
+rather use htis 
+const { data, pending, error } = await useFetch('/api/users')
+
+
+4️⃣ Computed values
+React
+const fullName = useMemo(() => first + last, [first, last])
+
+Vue
+const fullName = computed(() => first.value + last.value)
+
+
+Vue tracks dependencies automatically.
+
+layouts/ (like layout.tsx)
+layouts/
+ ├─ default.vue
+ ├─ auth.vue
+
+
+Used like:
+
+definePageMeta({
+  layout: 'auth'
+})
+
+const user = reactive({ age: 22 })
+
+watchEffect(() => {
+  console.log('Age changed to:', user.age)
+})
+
+user.age++
+user.age++
+
+
+
+const user = {
+  name: 'Suyog',
+  age: 22
+}
+
+const proxyUser = new Proxy(user, {
+  get(target, key) {
+    console.log(`GET → ${key}`)
+    return target[key]
+  },
+  set(target, key, value) {
+    console.log(`SET → ${key} = ${value}`)
+    target[key] = value
+    return true
+  }
+})
+
+
+
+:prop="value"        → v-bind
+@click="fn"          → v-on
+v-model="state"      → two-way binding
+v-if="condition"     → conditional
+v-for="item in list" → loop
+v-slot="{ data }"    → slot props
+
+

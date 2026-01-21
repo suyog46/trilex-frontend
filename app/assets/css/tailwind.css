@@ -1,0 +1,79 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary-light: #E6E9EF;
+    --primary-light-hover: #DADDE6;
+    --primary-light-active: #B3BACC;
+    --primary-normal: #091F5B;
+  
+    --primary-normal-hover: #081C52;
+    --primary-normal-active: #071949;
+    --primary-dark: #071744;
+    --primary-dark-hover: #051337;
+    --primary-dark-active: #040E29;
+    --primary-darker: #030B20;
+    --secondary-light: #b2bbc6;
+    --secondary-light-hover: #a3adbb;
+    --secondary-light-active: #909dad;
+    --secondary-normal: #546881;
+    --secondary-normal-hover: #47586e;
+    --secondary-normal-active: #3d4c5e;
+    --secondary-dark: #1d242d;
+    --secondary-dark-hover: #151a20;
+    --secondary-dark-active: #090b0e;
+    
+    --border: #e5e7eb;
+    --input: #f3f4f6;
+    --ring: #3b82f6;
+  }
+
+  .dark {
+    --primary-light: #E6E9EF;
+    --primary-light-hover: #DADDE6;
+    --primary-light-active: #B3BACC;
+    --primary-normal: #091F5B;
+    --primary-normal-hover: #081C52;
+    --primary-normal-active: #071949;
+    --primary-dark: #071744;
+    --primary-dark-hover: #051337;
+    --primary-dark-active: #040E29;
+    --primary-darker: #030B20;
+    --secondary-light: #b2bbc6;
+    --secondary-light-hover: #a3adbb;
+    --secondary-light-active: #909dad;
+    --secondary-normal: #546881;
+    --secondary-normal-hover: #47586e;
+    --secondary-normal-active: #3d4c5e;
+    --secondary-dark: #1d242d;
+    --secondary-dark-hover: #151a20;
+    --secondary-dark-active: #090b0e;
+    --border: #1f2937;
+    --input: #111827;
+    --ring: #60a5fa;
+  }
+
+  * {
+    @apply border-current;
+  }
+
+  body {
+    @apply bg-white text-gray-900;
+    font-family: 'Poppins', sans-serif;
+  }
+}
+
+
+@layer components {
+  .title-gradient {
+    background: linear-gradient(180deg, #091F5B 0%, #47586e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 700;
+  }
+} 
