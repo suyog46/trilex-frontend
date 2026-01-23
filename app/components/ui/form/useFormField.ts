@@ -10,7 +10,7 @@ export function useFormField() {
     throw new Error("useFormField should be used within <FormField>")
 
   const { name, errorMessage: error, meta } = fieldContext
-  const id = fieldItemContext
+  const id = fieldItemContext || name
 
   const fieldState = {
     valid: computed(() => meta.valid),

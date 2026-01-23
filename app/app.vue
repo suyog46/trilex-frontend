@@ -16,6 +16,23 @@
 <script setup lang="ts">
 import { Toaster } from '~/components/ui/sonner'
 import 'sonner/dist/styles.css'
+import { ref } from 'vue'
+
+// Initialize auth state on app startup to restore user from stored token
+const authStore = useAuthStore()
+const isAuthInitialized = ref(false)
+
+// Initialize on client side mount
+onMounted(async () => {
+  try {
+    await authStore.initializeAuth()
+    console.log('Auth initialization complete. isAuthenticated:', authStore.isAuthenticated)
+  } catch (err) {
+    console.error('Failed to initialize auth:', err)
+  } finally {
+    isAuthInitialized.value = true
+  }
+})
 
 useHead({
   htmlAttrs: {

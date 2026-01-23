@@ -5,8 +5,10 @@ import type {
   AuthResponse, 
   LawyerRegisterInput, 
   UserRegisterInput,
+  LawyerSignupInput,
   User 
 } from "~/types/auth"
+import { URL } from "~/lib/constants/url"
 
 export const authApi = {
   /**
@@ -14,7 +16,7 @@ export const authApi = {
    */
   login: (payload: LoginInput): Promise<AuthResponse> => {
     const apiFetch = useApiFetch()
-    return apiFetch("/auth/login", {
+    return apiFetch(URL.API.AUTH.LOGIN, {
       method: "POST", 
       body: payload,
     })
@@ -26,7 +28,7 @@ export const authApi = {
    */
   registerUser: (payload: UserRegisterInput): Promise<AuthResponse> => {
     const apiFetch = useApiFetch()
-    return apiFetch("/api/clients/signup/", {
+    return apiFetch(URL.API.AUTH.USER_SIGNUP, {
       method: "POST",
       body: {
         email: payload.email,
@@ -37,7 +39,45 @@ export const authApi = {
   },
 
   /**
-   * Register as lawyer with file uploads
+   * Register as lawyer with address and services
+   * Endpoint: POST /api/lawyers/signup/
+   */
+  registerLawyerSignup: (payload: LawyerSignupInput): Promise<AuthResponse> => {
+    const apiFetch = useApiFetch()
+    return apiFetch(URL.API.AUTH.LAWYER_SIGNUP, {
+      method: "POST",
+      body: {
+        email: payload.email,
+        password: payload.password,
+        client_type: payload.client_type || "web",
+        services: payload.services,
+        address: payload.address,
+        verification: payload.verification,
+      },
+    })
+  },
+
+  /**
+   * Register as law firm with address and services
+   * Endpoint: POST /api/lawyers/signup/
+   */
+  registerLawFirmSignup: (payload: LawyerSignupInput): Promise<AuthResponse> => {
+    const apiFetch = useApiFetch()
+    return apiFetch(URL.API.AUTH.LAW_FIRM_SIGNUP, {
+      method: "POST",
+      body: {
+        email: payload.email,
+        password: payload.password,
+        client_type: payload.client_type || "web",
+        services: payload.services,
+        address: payload.address,
+        verification: payload.verification,
+      },
+    })
+  },
+
+  /**
+   * Register as lawyer with file uploads (old method)
    * Handles multipart/form-data for citizenship photos
    */
   registerLawyer: (payload: LawyerRegisterInput): Promise<AuthResponse> => {
@@ -53,7 +93,7 @@ export const authApi = {
     formData.append("citizenshipPhotoFront", payload.citizenshipPhotoFront)
     formData.append("citizenshipPhotoBack", payload.citizenshipPhotoBack)
 
-    return apiFetch("/auth/register/lawyer", {
+    return apiFetch(URL.API.AUTH.LAWYER_REGISTER, {
       method: "POST",
       body: formData,
     })
@@ -64,7 +104,7 @@ export const authApi = {
    */
   me: (): Promise<User> => {
     const apiFetch = useApiFetch()
-    return apiFetch("/auth/me")
+    return apiFetch(URL.API.AUTH.ME)
   },
 
   /**
@@ -72,7 +112,7 @@ export const authApi = {
    */
   refreshToken: (token: string): Promise<AuthResponse> => {
     const apiFetch = useApiFetch()
-    return apiFetch("/auth/refresh", {
+    return apiFetch(URL.API.AUTH.REFRESH, {
       method: "POST",
       body: { refreshToken: token },
     })
@@ -83,8 +123,64 @@ export const authApi = {
    */
   logout: (): Promise<void> => {
     const apiFetch = useApiFetch()
-    return apiFetch("/auth/logout", {
+    return apiFetch(URL.API.AUTH.LOGOUT, {
       method: "POST",
+    })
+  },
+
+
+  verifyEmail: (payload: { token: string }): Promise<AuthResponse> => {
+    const apiFetch = useApiFetch()
+    return apiFetch(URL.API.AUTH.VERIFY_LINK, {
+      method: "POST",
+      body: payload,
+    })
+  },
+
+  /**
+   * Resend verification link to email
+   */
+  resendVerificationLink: (payload: { email: string }): Promise<{ message: string }> => {
+    const apiFetch = useApiFetch()
+    return apiFetch(URL.API.AUTH.RESEND_VERIFICATION_LINK, {
+      method: "POST",
+      body: payload,
+    })
+  },
+
+  /**
+   * Request password reset link
+   * Endpoint: POST /api/auth/forgot-password/
+   */
+  forgotPassword: (payload: { email: string }): Promise<{ message: string }> => {
+    const apiFetch = useApiFetch()
+    return apiFetch(URL.API.AUTH.FORGOT_PASSWORD, {
+      method: "POST",
+      body: payload,
+    })
+  },
+
+  /**
+   * Verify OTP for forgot password
+   * Endpoint: POST /api/auth/verify-forgot-password-otp/
+   */
+  verifyForgotPasswordOtp: (payload: { email: string; otp: string }): Promise<{ message: string; reset_token?: string }> => {
+    const apiFetch = useApiFetch()
+    return apiFetch(URL.API.AUTH.VERIFY_FORGOT_PASSWORD_OTP, {
+      method: "POST",
+      body: payload,
+    })
+  },
+
+  /**
+   * Reset password with token
+   * Endpoint: POST /api/auth/reset-password/
+   */
+  resetPassword: (payload: { token: string; new_password: string }): Promise<{ message: string }> => {
+    const apiFetch = useApiFetch()
+    return apiFetch(URL.API.AUTH.RESET_PASSWORD, {
+      method: "POST",
+      body: payload,
     })
   },
 }

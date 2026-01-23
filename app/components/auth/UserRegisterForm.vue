@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue"
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "~/components/ui/form"
 import { Input } from "~/components/ui/input"
 import { Button } from "~/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "~/components/ui/dialog"
 import { userRegisterSchema, type UserRegisterInput } from "~/lib/validations/auth"
 import { useForm } from "vee-validate"
 import { toTypedSchema } from "@vee-validate/zod"
@@ -10,6 +11,7 @@ import { useAuthStore } from "~/stores/auth"
 import { toast } from 'vue-sonner'
 
 const showPassword = ref(false)
+const showRegisterOptions = ref(false)
 const authStore = useAuthStore()
 
 const { handleSubmit } = useForm({
@@ -26,10 +28,13 @@ const onSubmit = handleSubmit(async (values: UserRegisterInput) => {
   })
 
   if (result.success) {
-    toast.success('Registration successful! Redirecting...')
-    // Use a small delay before navigation to ensure toast is shown
+    toast.success('Registration successful! Check your email to verify your account.')
+    // Redirect to check-your-email page with email parameter
     setTimeout(() => {
-      navigateTo("/")
+      navigateTo({
+        path: "/check-your-email",
+        query: { email: values.email, role: 'client' }
+      })
     }, 500)
   } else {
     toast.error(authStore.error?.message || 'Registration failed')
@@ -51,7 +56,6 @@ const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value
 }
 
-// Computed property for loading state
 const isLoading = computed(() => authStore.isLoading)
 </script>
 
@@ -177,16 +181,56 @@ const isLoading = computed(() => authStore.isLoading)
       <span>Continue with Google</span>
     </Button>
 
-    <!-- Lawyer Registration Option -->
+    <!-- Professional Registration Option -->
     <p class="text-slate-600 w-full text-center">
-      Want to register as a lawyer?
+      Are you a legal professional?
       <span
-        @click="navigateTo('/lawyer-register')"
+        @click="showRegisterOptions = true"
         class="text-primary-normal font-semibold cursor-pointer underline"
       >
         Register Here
       </span>
     </p>
+
+    <!-- Register Options Dialog -->
+    <Dialog v-model:open="showRegisterOptions">
+      <DialogContent class="sm:max-w-md bg-white">
+        <DialogHeader>
+          <DialogTitle class="text-xl font-bold text-primary-normal">Register as Professional</DialogTitle>
+          <DialogDescription class="text-gray-600">
+            Choose how you'd like to register on Trilex
+          </DialogDescription>
+        </DialogHeader>
+        <div class="grid gap-4 py-4">
+          <button
+            @click="navigateTo('/lawyer-register'); showRegisterOptions = false"
+            class="flex items-center gap-4 p-4 rounded-lg border-2 border-gray-200 hover:border-primary-normal hover:bg-primary-light/20 transition-all"
+          >
+            <div class="p-3 bg-primary-light rounded-full">
+              <Icon icon="mdi:briefcase-account" class="w-6 h-6 text-primary-normal" />
+            </div>
+            <div class="text-left">
+              <h3 class="font-semibold text-gray-900">Register as Lawyer</h3>
+              <p class="text-sm text-gray-500">Individual legal practitioner</p>
+            </div>
+            <Icon icon="mdi:chevron-right" class="w-5 h-5 text-gray-400 ml-auto" />
+          </button>
+          <button
+            @click="navigateTo('/law-firm-register'); showRegisterOptions = false"
+            class="flex items-center gap-4 p-4 rounded-lg border-2 border-gray-200 hover:border-primary-normal hover:bg-primary-light/20 transition-all"
+          >
+            <div class="p-3 bg-primary-light rounded-full">
+              <Icon icon="mdi:office-building" class="w-6 h-6 text-primary-normal" />
+            </div>
+            <div class="text-left">
+              <h3 class="font-semibold text-gray-900">Register as Law Firm</h3>
+              <p class="text-sm text-gray-500">Legal firm or organization</p>
+            </div>
+            <Icon icon="mdi:chevron-right" class="w-5 h-5 text-gray-400 ml-auto" />
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>
 
