@@ -3,9 +3,11 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { authApi } from '~/composables/api/auth.api'
+import { useErrorHandler } from '~/composables/useErrorHandler'
 
 const route = useRoute()
 const router = useRouter()
+const { parseError } = useErrorHandler()
 
 // States
 const isVerifying = ref(false)
@@ -43,10 +45,23 @@ const verifyEmail = async () => {
       router.push('/login')
     }, 2000)
   } catch (error: any) {
-    verificationError.value = 
-      error?.data?.message || 
-      'Failed to verify email. The link may have expired.'
-    toast.error(verificationError.value || 'Verification failed')
+    const errorData = error?.data || error?.response?.data || error
+    let errorMessage = 'Failed to verify email. The link may have expired.'
+    
+    if (typeof errorData === 'object' && errorData !== null) {
+      if (errorData.error && typeof errorData.error === 'string') {
+        errorMessage = errorData.error
+      } else if (errorData.message && typeof errorData.message === 'string') {
+        errorMessage = errorData.message
+      } else if (errorData.detail && typeof errorData.detail === 'string') {
+        errorMessage = errorData.detail
+      }
+    } else if (typeof errorData === 'string') {
+      errorMessage = errorData
+    }
+    
+    verificationError.value = errorMessage
+    toast.error(errorMessage)
     console.error('Email verification error:', error)
   } finally {
     isVerifying.value = false

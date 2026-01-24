@@ -7,8 +7,10 @@ import { forgotPasswordSchema, type ForgotPasswordInput } from "~/lib/validation
 import { useForm } from "vee-validate"
 import { toTypedSchema } from "@vee-validate/zod";
 import { toast } from "vue-sonner";
+import { useErrorHandler } from "~/composables/useErrorHandler";
 
 const authStore = useAuthStore()
+const { parseError } = useErrorHandler()
 
 const { handleSubmit } = useForm({
   validationSchema: toTypedSchema(forgotPasswordSchema),
@@ -36,11 +38,16 @@ const onSubmit = handleSubmit(async (values: ForgotPasswordInput) => {
         })
       }, 2000)
     } else {
-      toast.error(authStore.error?.message || 'Failed to send OTP')
+      // Handle error from auth store
+      const errorMessage = authStore.error?.message || 'Failed to send OTP'
+      console.error("Forgot password error:", errorMessage);
+      toast.error(errorMessage)
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Forgot password error:", error);
-    toast.error('An unexpected error occurred')
+    const { generalErrors } = parseError(error)
+    const errorMessage = generalErrors.length > 0 ? generalErrors[0] : error?.response?.data?.error || error?.message || 'An unexpected error occurred'
+    toast.error(errorMessage)
   }
 });
 

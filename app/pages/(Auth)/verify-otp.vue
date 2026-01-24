@@ -3,9 +3,11 @@ import { ref, computed, onMounted } from "vue";
 import { OtpInput } from "~/components/ui/otp-input";
 import { Button } from "~/components/ui/button";
 import { toast } from "vue-sonner";
+import { useErrorHandler } from "~/composables/useErrorHandler";
 
 const route = useRoute()
 const authStore = useAuthStore()
+const { parseError } = useErrorHandler()
 
 const userEmail = ref<string | null>(null)
 const resetToken = ref<string | null>(null)
@@ -59,11 +61,25 @@ const handleSubmit = async () => {
         })
       }, 2000)
     } else {
-      toast.error(authStore.error?.message || 'Invalid OTP')
+      const errorMessage = authStore.error?.message || 'Invalid OTP'
+      toast.error(errorMessage)
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("OTP verification error:", error);
-    toast.error('An unexpected error occurred')
+    const errorData = error?.data || error?.response?.data || error
+    let errorMessage = 'An unexpected error occurred'
+    
+    if (typeof errorData === 'object' && errorData !== null) {
+      if (errorData.error && typeof errorData.error === 'string') {
+        errorMessage = errorData.error
+      } else if (errorData.message && typeof errorData.message === 'string') {
+        errorMessage = errorData.message
+      }
+    } else if (typeof errorData === 'string') {
+      errorMessage = errorData
+    }
+    
+    toast.error(errorMessage)
   }
 };
 
@@ -76,7 +92,6 @@ const handleResendOtp = async () => {
     if (res.success) {
       toast.success('OTP resent to your email!')
       resendCountdown.value = 60
-      
       const interval = setInterval(() => {
         resendCountdown.value--
         if (resendCountdown.value <= 0) {
@@ -84,11 +99,25 @@ const handleResendOtp = async () => {
         }
       }, 1000)
     } else {
-      toast.error('Failed to resend OTP')
+      const errorMessage = authStore.error?.message || 'Failed to resend OTP'
+      toast.error(errorMessage)
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Resend OTP error:", error);
-    toast.error('An unexpected error occurred')
+    const errorData = error?.data || error?.response?.data || error
+    let errorMessage = 'An unexpected error occurred'
+    
+    if (typeof errorData === 'object' && errorData !== null) {
+      if (errorData.error && typeof errorData.error === 'string') {
+        errorMessage = errorData.error
+      } else if (errorData.message && typeof errorData.message === 'string') {
+        errorMessage = errorData.message
+      }
+    } else if (typeof errorData === 'string') {
+      errorMessage = errorData
+    }
+    
+    toast.error(errorMessage)
   }
 };
 

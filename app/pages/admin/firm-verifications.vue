@@ -5,7 +5,10 @@ import { Button } from '~/components/ui/button'
 import ReusableTable from '~/components/ReusableTable.vue'
 import VerificationDialog from '~/components/admin/dialogs/VerificationDialog.vue'
 import { firmVerificationApi, type FirmVerification } from '~/composables/api/admin.api'
+import { useErrorHandler } from '~/composables/useErrorHandler'
 import type { ColumnDef } from '@tanstack/vue-table'
+
+const { parseError } = useErrorHandler()
 
 definePageMeta({
   layout: 'admin',
@@ -126,7 +129,9 @@ const fetchVerifications = async () => {
     totalCount.value = response.count || 0
   } catch (error: any) {
     console.error('Failed to fetch verifications:', error)
-    toast.error('Failed to load verifications')
+    const { generalErrors } = parseError(error)
+    const errorMessage = generalErrors.length > 0 ? generalErrors[0] : 'Failed to load verifications'
+    toast.error(errorMessage)
   } finally {
     isLoading.value = false
   }
@@ -159,7 +164,9 @@ const handleDialogApprove = async () => {
     await fetchVerifications()
   } catch (error: any) {
     console.error('Error:', error)
-    toast.error(error?.data?.message || 'Failed to approve')
+    const { generalErrors } = parseError(error)
+    const errorMessage = generalErrors.length > 0 ? generalErrors[0] : 'Failed to approve verification'
+    toast.error(errorMessage)
   } finally {
     isSubmitting.value = false
   }
@@ -177,7 +184,9 @@ const handleDialogReject = async (reason: string) => {
     await fetchVerifications()
   } catch (error: any) {
     console.error('Error:', error)
-    toast.error(error?.data?.message || 'Failed to reject')
+    const { generalErrors } = parseError(error)
+    const errorMessage = generalErrors.length > 0 ? generalErrors[0] : 'Failed to reject verification'
+    toast.error(errorMessage)
   } finally {
     isSubmitting.value = false
   }

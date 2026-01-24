@@ -72,9 +72,31 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Error handler
   const handleError = (err: any): AuthError => {
+    // Extract error message from different Django response formats
+    const errorData = err?.data || err?.response?.data || err
+    
+    let message = 'An error occurred'
+    
+    // Try to extract message from common Django error response formats
+    if (typeof errorData === 'object' && errorData !== null) {
+      if (errorData.error && typeof errorData.error === 'string') {
+        message = errorData.error
+      } else if (errorData.message && typeof errorData.message === 'string') {
+        message = errorData.message
+      } else if (errorData.detail && typeof errorData.detail === 'string') {
+        message = errorData.detail
+      } else if (errorData.non_field_errors && Array.isArray(errorData.non_field_errors)) {
+        message = errorData.non_field_errors[0] || message
+      }
+    } else if (typeof errorData === 'string') {
+      message = errorData
+    } else if (err?.message) {
+      message = err.message
+    }
+
     const authError: AuthError = {
       code: err?.data?.code || 'UNKNOWN_ERROR',
-      message: err?.data?.message || err?.message || 'An error occurred',
+      message,
       statusCode: err?.status || 500,
     }
 
@@ -301,7 +323,7 @@ export const useAuthStore = defineStore('auth', () => {
         userRole.value = response.user.role
       }
 
-      return { success: true, role: response.user?.role || 'law_firm' }
+      return { success: true, role: response.user?.role || 'firm' }
     } catch (err) {
       handleError(err)
       return { success: false }
@@ -309,7 +331,8 @@ export const useAuthStore = defineStore('auth', () => {
       isLoading.value = false
     }
   }
-
+  
+  
   // Logout
   const logout = async () => {
     isLoading.value = true

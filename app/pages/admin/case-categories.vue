@@ -14,7 +14,10 @@ import {
 import ReusableTable from '~/components/ReusableTable.vue'
 import CategoryDialog from '~/components/admin/dialogs/CategoryDialog.vue'
 import { caseCategoryApi, type CaseCategory } from '~/composables/api/admin.api'
+import { useErrorHandler } from '~/composables/useErrorHandler'
 import type { ColumnDef } from '@tanstack/vue-table'
+
+const { parseError } = useErrorHandler()
 
 definePageMeta({
   layout: 'admin',
@@ -96,7 +99,9 @@ const fetchCategories = async () => {
     totalCount.value = response.count || 0
   } catch (error: any) {
     console.error('Failed to fetch categories:', error)
-    toast.error('Failed to load categories')
+    const { generalErrors } = parseError(error)
+    const errorMessage = generalErrors.length > 0 ? generalErrors[0] : 'Failed to load categories'
+    toast.error(errorMessage)
   } finally {
     isLoading.value = false
   }
@@ -132,7 +137,9 @@ const handleDialogSubmit = async (data: { name: string; is_active: boolean }) =>
     await fetchCategories()
   } catch (error: any) {
     console.error('Error:', error)
-    toast.error(error?.data?.message || 'Operation failed')
+    const { generalErrors } = parseError(error)
+    const errorMessage = generalErrors.length > 0 ? generalErrors[0] : 'Operation failed'
+    toast.error(errorMessage)
   } finally {
     isSubmitting.value = false
   }
@@ -156,7 +163,9 @@ const handleDeleteConfirm = async () => {
     await fetchCategories()
   } catch (error: any) {
     console.error('Error:', error)
-    toast.error(error?.data?.message || 'Failed to delete category')
+    const { generalErrors } = parseError(error)
+    const errorMessage = generalErrors.length > 0 ? generalErrors[0] : 'Failed to delete category'
+    toast.error(errorMessage)
   } finally {
     isSubmitting.value = false
   }

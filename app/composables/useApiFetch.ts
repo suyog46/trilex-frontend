@@ -1,5 +1,23 @@
 import { useAuthStore } from '~/stores/auth'
 
+/**
+ * Enhanced error object returned from API
+ * Includes parsed Django error data for easy handling
+ */
+export class ApiError extends Error {
+  status: number
+  data: any
+  statusText: string
+
+  constructor(message: string, status: number, data: any, statusText: string) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+    this.data = data
+    this.statusText = statusText
+  }
+}
+
 export const useApiFetch = () => {
   const config = useRuntimeConfig()
   const authStore = useAuthStore()
@@ -36,10 +54,24 @@ export const useApiFetch = () => {
       }
     },
     onResponseError({ response }) {
-      console.error('❌ API Error:', response.status, response.statusText)
+      console.error('❌ API Error:', response.status, response.statusText, response._data)
+      
+      // Handle different HTTP status codes
       if (response.status === 401) {
         authStore.logout()
       }
+      
+      // Parse and format error response for consistency
+      const errorData = response._data || {}
+      const errorMessage = errorData.detail || errorData.message || response.statusText || 'Unknown error'
+      
+      // Throw custom ApiError with parsed data
+      throw new ApiError(
+        errorMessage,
+        response.status,
+        errorData,
+        response.statusText
+      )
     },
   })
 

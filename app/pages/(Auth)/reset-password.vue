@@ -7,9 +7,11 @@ import { resetPasswordSchema, type ResetPasswordInput } from "~/lib/validations/
 import { useForm } from "vee-validate"
 import { toTypedSchema } from "@vee-validate/zod";
 import { toast } from "vue-sonner";
+import { useErrorHandler } from "~/composables/useErrorHandler";
 
 const route = useRoute()
 const authStore = useAuthStore()
+const { parseError } = useErrorHandler()
 
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
@@ -24,7 +26,6 @@ const { handleSubmit } = useForm({
 const isLoading = computed(() => authStore.isLoading || isResettingPassword.value)
 
 onMounted(() => {
-  // Get token from URL query params
   const token = route.query.token as string
   
   if (!token) {
@@ -62,11 +63,14 @@ const onSubmit = handleSubmit(async (values: ResetPasswordInput) => {
         navigateTo('/login')
       }, 2000)
     } else {
-      toast.error(authStore.error?.message || 'Failed to reset password')
+      const errorMessage = authStore.error?.message || 'Failed to reset password'
+      toast.error(errorMessage)
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Password reset error:", error);
-    toast.error('An unexpected error occurred')
+    const { generalErrors } = parseError(error)
+    const errorMessage = generalErrors.length > 0 ? generalErrors[0] : 'An unexpected error occurred'
+    toast.error(errorMessage || 'An unexpected error occurred')
   } finally {
     isResettingPassword.value = false
   }

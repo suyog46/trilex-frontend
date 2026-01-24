@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { useMediaUpload } from '~/composables/api/media.api'
+import { useErrorHandler } from '~/composables/useErrorHandler'
 import { toast } from 'vue-sonner'
 import { Input } from '~/components/ui/input'
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '~/components/ui/form'
@@ -20,6 +21,7 @@ const props = defineProps<{
 const emit = defineEmits(['submitted'])
 const authStore = useAuthStore()
 const { uploadFile } = useMediaUpload()
+const { handleFormErrors } = useErrorHandler()
 
 const currentStep = ref(1)
 const steps = [
@@ -51,9 +53,39 @@ const schema = z.object({
   idType: z.string().min(1, 'ID type is required'),
 })
 
-const { handleSubmit, setFieldValue } = useForm({
+const formContext = useForm({
   validationSchema: toTypedSchema(schema),
 })
+const { handleSubmit, setFieldValue, setFieldError, errors, validateField } = formContext
+
+// Computed properties to check if each step is valid
+const step1Fields = ['fullName', 'dateOfBirth']
+const step2Fields = ['idType']
+
+const canProceedStep1 = computed(() => {
+  const hasErrors = step1Fields.some(field => errors.value[field as keyof typeof errors.value])
+  console.log('Step 1 Errors Object:', errors.value)
+  console.log('Step 1 Has Errors:', hasErrors)
+  return !hasErrors
+})
+
+const canProceedStep2 = computed(() => {
+  const hasErrors = step2Fields.some(field => errors.value[field as keyof typeof errors.value])
+  console.log('Step 2 Has Errors:', hasErrors)
+  return !hasErrors
+})
+
+// Validate step before proceeding
+const validateStep = async (stepNumber: number) => {
+  const fieldsToValidate = stepNumber === 1 ? step1Fields : step2Fields
+  console.log(`Validating step ${stepNumber} fields:`, fieldsToValidate)
+  
+  for (const field of fieldsToValidate) {
+    await validateField(field as 'fullName' | 'dateOfBirth' | 'idType')
+  }
+  
+  console.log('Errors after validation:', errors.value)
+}
 
 // Prefill logic
 onMounted(async () => {
@@ -183,15 +215,43 @@ const onSubmit = handleSubmit(async (values) => {
         } else {
             toast.error('Failed to submit')
         }
-    } catch (e: any) {
-        toast.error(e.message || 'Error occurred')
+    } catch (error: any) {
+        // Use error handler to parse Django errors
+        const generalErrors = handleFormErrors(
+            error,
+            formContext,
+            (generalError) => {
+                toast.error(generalError)
+            }
+        )
+        
+        // If no general errors, show generic message
+        if (generalErrors.length === 0) {
+            toast.error(error?.message || 'Failed to submit verification')
+        }
     } finally {
         isSubmitting.value = false
     }
 })
 
-const nextStep = () => {
-    if (currentStep.value < 3) currentStep.value++
+const nextStep = async () => {
+  if (currentStep.value < 3) {
+    // Validate current step fields
+    await validateStep(currentStep.value)
+    
+    // Check if there are any errors
+    const fieldsToCheck = currentStep.value === 1 ? step1Fields : step2Fields
+    const hasErrors = fieldsToCheck.some(field => errors.value[field as keyof typeof errors.value])
+    
+    if (hasErrors) {
+      console.log('Cannot proceed - validation errors present:', errors.value)
+      toast.error('Please fix all errors before proceeding')
+      return
+    }
+    
+    console.log('No errors - proceeding to next step')
+    currentStep.value++
+  }
 }
 
 const prevStep = () => {
@@ -230,7 +290,7 @@ const activeTab = computed({
         <p class="text-sm text-gray-600 mb-6">Enter your basic details</p>
       </div>
 
-       <form @submit.prevent="currentStep = 2" id="step1-form">
+       <form @submit.prevent="nextStep" id="step1-form">
         <FormField v-slot="{ componentField }" name="fullName">
             <FormItem>
             <FormLabel class="text-gray-700 font-semibold">Full Name <span class="text-red-500">*</span></FormLabel>

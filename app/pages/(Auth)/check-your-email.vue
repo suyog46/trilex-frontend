@@ -3,6 +3,9 @@ import { computed, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { authApi } from '~/composables/api/auth.api'
+import { useErrorHandler } from '~/composables/useErrorHandler'
+
+const { parseError } = useErrorHandler()
 
 const route = useRoute()
 const router = useRouter()
@@ -48,7 +51,7 @@ const formattedExpiration = computed(() => {
 onMounted(() => {
   const interval = setInterval(() => {
     if (expirationMinutes.value > 0) {
-      expirationMinutes.value--
+      expirationMinutes.value-- 
     }
   }, 60000) 
 
@@ -73,7 +76,6 @@ const handleResendEmail = async () => {
     await authApi.resendVerificationLink({ email: userEmail.value })
     toast.success('Verification link sent! Check your email.')
     
-    // Set cooldown (60 seconds)
     resendCooldown.value = 60
     const cooldownInterval = setInterval(() => {
       resendCooldown.value--
@@ -82,12 +84,13 @@ const handleResendEmail = async () => {
       }
     }, 1000)
   } catch (error: any) {
-    const errorMessage = error?.data?.message || 'Failed to resend verification link'
+    const { generalErrors } = parseError(error)
+    const errorMessage = generalErrors.length > 0 ? generalErrors[0] : 'Failed to resend verification link'
     console.error('Resend verification error:', error)
     
     // Only show error toast if manually triggered (not auto-resend on page load)
     if (!isFromLogin.value) {
-      toast.error(errorMessage)
+      toast.error(errorMessage || 'Failed to resend verification link')
     } else {
       // For auto-resend, just log and don't show error to avoid alerting user
       console.warn('Auto-resend failed:', errorMessage)

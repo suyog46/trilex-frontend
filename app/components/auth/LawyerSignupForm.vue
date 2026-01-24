@@ -299,6 +299,23 @@ const handleFirmLicenseChange = async (event: Event) => {
 // Handle form submission
 const onSubmit = handleSubmit(async (formValues: any) => {
   try {
+    // Validate using Zod schema
+    const schema = props.mode === 'lawyer' ? lawyerSignupSchema : lawFirmSignupSchema
+    const validationResult = schema.safeParse(formValues)
+    
+    if (!validationResult.success) {
+      // Collect all validation errors
+      const errors = validationResult.error.errors
+      const errorMessages = errors.map(err => {
+        const field = err.path.join('.')
+        return `${field}: ${err.message}`
+      })
+      
+      const toast_message = `Please fix the following errors:\n${errorMessages.join('\n')}`
+      toast.error(toast_message)
+      return
+    }
+
     // Validate license photo is uploaded (for lawyer mode)
     if (props.mode === 'lawyer' && !licensePhotoId.value) {
       toast.error('Please upload a license photo')
@@ -309,6 +326,13 @@ const onSubmit = handleSubmit(async (formValues: any) => {
     // Validate firm license is uploaded (for firm mode)
     if (props.mode === 'firm' && !firmLicenseId.value) {
       toast.error('Please upload a firm license')
+      activeStep.value = "step3"
+      return
+    }
+
+    // Validate services are selected
+    if (!formValues.services || formValues.services.length === 0) {
+      toast.error('Please select at least one service')
       activeStep.value = "step3"
       return
     }
@@ -369,10 +393,24 @@ const onSubmit = handleSubmit(async (formValues: any) => {
         })
       }, 500)
     } else {
-      toast.error(authStore.error?.message || 'Registration failed')
+      const errorMessage = authStore.error?.message || 'Registration failed'
+      toast.error(errorMessage)
     }
   } catch (error: any) {
-    toast.error( 'An error occurred during registration')
+    const errorData = error?.data || error?.response?.data || error
+    let errorMessage = 'An error occurred during registration'
+    
+    if (typeof errorData === 'object' && errorData !== null) {
+      if (errorData.error && typeof errorData.error === 'string') {
+        errorMessage = errorData.error
+      } else if (errorData.message && typeof errorData.message === 'string') {
+        errorMessage = errorData.message
+      }
+    } else if (typeof errorData === 'string') {
+      errorMessage = errorData
+    }
+    
+    toast.error(errorMessage)
     console.error('Registration error:', error)
   }
 })
@@ -388,22 +426,36 @@ const toggleConfirmPasswordVisibility = () => {
 
 // Navigate to next step
 const goToNextStep = async () => {
-  // Validate current step before proceeding
+  // Validate current step before proceeding using Zod schema
+  const schema = props.mode === 'lawyer' ? lawyerSignupSchema : lawFirmSignupSchema
+  const validationResult = schema.safeParse(values)
+  
+  // Define which fields to check for current step
   const stepFields = activeStep.value === "step1" 
     ? ["email", "password", "confirmPassword"]
     : activeStep.value === "step2"
     ? ["province", "district", "municipality", "ward"]
+    : activeStep.value === "step3"
+    ? ["services", "fullName", "dateOfBirth", "barId", "gender", "firmName", "ownerName", "firmId"]
     : []
 
-  // Basic validation - check if fields have values
-  const hasErrors = stepFields.some(field => {
-    const value = (values as Record<string, any>)[field]
-    return !value || value === 0 || value === ""
-  })
-  
-  if (hasErrors) {
-    toast.error("Please fill all required fields")
-    return
+  // Filter validation errors to only show errors for current step
+  if (!validationResult.success) {
+    const stepErrors = validationResult.error.errors.filter(err => {
+      const field = err.path[0] as string
+      return stepFields.includes(field)
+    })
+
+    if (stepErrors.length > 0) {
+      const errorMessages = stepErrors.map(err => {
+        const field = err.path.join('.')
+        return `${field}: ${err.message}`
+      })
+      
+      const toast_message = `Please fix the following errors:\n${errorMessages.join('\n')}`
+      toast.error(toast_message)
+      return
+    }
   }
 
   if (activeStep.value === "step1") {

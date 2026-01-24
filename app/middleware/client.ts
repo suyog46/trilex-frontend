@@ -20,10 +20,11 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     return navigateTo('/login')
   }
 
-  // Check if user is a client
+  // STRICT CHECK: Only allow users with role='client'
   if (authStore.user?.role !== 'client') {
-    console.log('❌ Client Middleware: User is not a client, redirecting to dashboard')
-    return navigateTo('/dashboard')
+    console.log('❌ Client Middleware: User role is not "client". Current role:', authStore.user?.role)
+    toast.error('Access denied. Only clients can access this page.')
+    return navigateTo('/')
   }
 
   console.log('✅ Client Middleware: User is authenticated client, proceeding...')
@@ -41,7 +42,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   // Routes that don't require verification
   const unprotectedRoutes = [
-    '/client/dashboard',
+    // '/client/dashboard',
     '/client/verification-status',
     '/client/profile',
     '/client/help',
