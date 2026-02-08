@@ -28,6 +28,17 @@ interface Props {
   totalCount?: number
   // Row click handler
   onRowClick?: (row: TData) => void
+  // Action column props
+  canEdit?: boolean
+  canDelete?: boolean
+  canViewDetail?: boolean
+  canAccept?: boolean
+  canReject?: boolean
+  onEdit?: (row: TData) => void
+  onDelete?: (row: TData) => void
+  onViewDetail?: (row: TData) => void
+  onAccept?: (row: TData) => void
+  onReject?: (row: TData) => void
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -35,6 +46,11 @@ const props = withDefaults(defineProps<Props>(), {
   currentPage: 1,
   pageSize: 5,
   totalCount: 0,
+  canEdit: false,
+  canDelete: false,
+  canViewDetail: false,
+  canAccept: false,
+  canReject: false,
 })
 
 const emit = defineEmits<{
@@ -42,6 +58,11 @@ const emit = defineEmits<{
   'page-size-change': [pageSize: number]
   'search': [query: string]
   'row-click': [row: TData]
+  'edit': [row: TData]
+  'delete': [row: TData]
+  'view-detail': [row: TData]
+  'accept': [row: TData]
+  'reject': [row: TData]
 }>()
 
 // Handle row click
@@ -51,6 +72,47 @@ const handleRowClick = (row: TData) => {
   }
   emit('row-click', row)
 }
+
+// Handle action clicks
+const handleEdit = (row: TData) => {
+  if (props.onEdit) {
+    props.onEdit(row)
+  }
+  emit('edit', row)
+}
+
+const handleDelete = (row: TData) => {
+  if (props.onDelete) {
+    props.onDelete(row)
+  }
+  emit('delete', row)
+}
+
+const handleViewDetail = (row: TData) => {
+  if (props.onViewDetail) {
+    props.onViewDetail(row)
+  }
+  emit('view-detail', row)
+}
+
+const handleAccept = (row: TData) => {
+  if (props.onAccept) {
+    props.onAccept(row)
+  }
+  emit('accept', row)
+}
+
+const handleReject = (row: TData) => {
+  if (props.onReject) {
+    props.onReject(row)
+  }
+  emit('reject', row)
+}
+
+// Check if any actions are enabled
+const hasActions = computed(() => {
+  return props.canEdit || props.canDelete || props.canViewDetail || props.canAccept || props.canReject
+})
 
 const searchQuery = ref('')
 
@@ -145,6 +207,8 @@ const goToLastPage = () => {
                 :props="header.getContext()"
               />
             </TableHead>
+            <!-- Actions Header -->
+            <TableHead v-if="hasActions" class="text-primary-normal text-lg w-auto">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -168,11 +232,56 @@ const goToLastPage = () => {
                   :props="cell.getContext()"
                 />
               </TableCell>
+              <!-- Action Cells -->
+              <TableCell v-if="hasActions" class="text-gray-500 text-md py-4 w-auto">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <button
+                    v-if="canViewDetail"
+                    @click.stop="handleViewDetail(row.original)"
+                    class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                    title="View Details"
+                  >
+                    <Icon icon="mdi:eye" class="w-5 h-5" />
+                  </button>
+                  <button
+                    v-if="canAccept"
+                    @click.stop="handleAccept(row.original)"
+                    class="p-1.5 text-green-600 hover:bg-green-50 rounded-md transition-colors"
+                    title="Accept"
+                  >
+                    <Icon icon="mdi:check-circle" class="w-5 h-5" />
+                  </button>
+                  <button
+                    v-if="canReject"
+                    @click.stop="handleReject(row.original)"
+                    class="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    title="Reject"
+                  >
+                    <Icon icon="mdi:close-circle" class="w-5 h-5" />
+                  </button>
+                  <button
+                    v-if="canEdit"
+                    @click.stop="handleEdit(row.original)"
+                    class="p-1.5 text-amber-600 hover:bg-amber-50 rounded-md transition-colors"
+                    title="Edit"
+                  >
+                    <Icon icon="mdi:pencil" class="w-5 h-5" />
+                  </button>
+                  <button
+                    v-if="canDelete"
+                    @click.stop="handleDelete(row.original)"
+                    class="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    title="Delete"
+                  >
+                    <Icon icon="mdi:trash-can" class="w-5 h-5" />
+                  </button>
+                </div>
+              </TableCell>
             </TableRow>
           </template>
           <template v-else>
             <TableRow>
-              <TableCell :colspan="columns.length" class="h-24 text-center">
+              <TableCell :colspan="columns.length + (hasActions ? 1 : 0)" class="h-24 text-center">
                 No results.
               </TableCell>
             </TableRow>

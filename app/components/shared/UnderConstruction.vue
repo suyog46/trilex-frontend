@@ -14,9 +14,9 @@ const dashboardPath = computed(() => {
   const role = authStore.user?.role
   switch (role) {
     case 'lawyer':
-      return '/lawyer/dashboard'
+      return '/dashboard'
     case 'firm':
-      return '/law-firm/dashboard'
+      return '/dashboard'
     case 'admin':
       return '/admin/dashboard'
     case 'client':

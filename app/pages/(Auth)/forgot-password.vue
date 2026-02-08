@@ -10,7 +10,7 @@ import { toast } from "vue-sonner";
 import { useErrorHandler } from "~/composables/useErrorHandler";
 
 const authStore = useAuthStore()
-const { parseError } = useErrorHandler()
+// const { parseError } = useErrorHandler()
 
 const { handleSubmit } = useForm({
   validationSchema: toTypedSchema(forgotPasswordSchema),
@@ -24,36 +24,39 @@ const onSubmit = handleSubmit(async (values: ForgotPasswordInput) => {
   try {
     console.log("Forgot password submitted with email:", values.email);
     const res = await authStore.forgotPassword(values);
-    
+    console.log("Forgot password response:", res);
     if (res.success) {
       toast.success('OTP sent to your email!')
       userEmail.value = values.email
       emailSent.value = true
-      
-      // Redirect to OTP verification page after 2 seconds
-      setTimeout(() => {
-        navigateTo({
-          path: '/verify-otp',
-          query: { email: values.email }
-        })
-      }, 2000)
-    } else {
+      console.log("Forgot password successful, OTP sent to:", values.email);
+      // setTimeout(() => {
+        navigateTo(`/verify-otp?email=${encodeURIComponent(values.email)}`)
+      // }, 2000)
+    } 
+    else {
       // Handle error from auth store
+      console.error("Forgot password error 1:", authStore.error);
       const errorMessage = authStore.error?.message || 'Failed to send OTP'
       console.error("Forgot password error:", errorMessage);
       toast.error(errorMessage)
     }
   } catch (error: any) {
     console.error("Forgot password error:", error);
-    const { generalErrors } = parseError(error)
-    const errorMessage = generalErrors.length > 0 ? generalErrors[0] : error?.response?.data?.error || error?.message || 'An unexpected error occurred'
-    toast.error(errorMessage)
+    // const { generalErrors } = parseError(error)
+    // const errorMessage = generalErrors.length > 0 ? generalErrors[0] : error?.response?.data?.error || error?.message || 'An unexpected error occurred'
+    // toast.error(errorMessage)
+    toast.error('Failed to send OTP. Please try again.')
   }
 });
 
 const handleBackToLogin = () => {
   navigateTo('/login')
 }
+const handleToOTP = () => {
+  navigateTo(`/verify-otp?email=${encodeURIComponent(userEmail.value)}`)
+}
+
 </script>
 
 <template>
@@ -77,7 +80,7 @@ const handleBackToLogin = () => {
         </p>
         
         <Button
-          @click="handleBackToLogin"
+          @click="handleToOTP"
           class="w-full px-4 py-3 font-semibold text-white text-lg bg-primary-normal hover:bg-primary-normal/90 rounded-md cursor-pointer"
         >
           Enter OTP

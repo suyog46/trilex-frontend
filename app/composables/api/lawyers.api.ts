@@ -2,6 +2,7 @@
 export interface LawyerUser {
   email: string
   role: string
+  id: string
 }
 
 export interface Province {

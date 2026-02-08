@@ -16,20 +16,19 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   // Check if user is authenticated
   if (!authStore.isAuthenticated) {
-    console.log('❌ Client Middleware: User not authenticated, redirecting to login')
+    console.log(' Client Middleware: User not authenticated, redirecting to login')
     return navigateTo('/login')
   }
 
   // STRICT CHECK: Only allow users with role='client'
   if (authStore.user?.role !== 'client') {
-    console.log('❌ Client Middleware: User role is not "client". Current role:', authStore.user?.role)
+    console.log(' Client Middleware: User role is not "client". Current role:', authStore.user?.role)
     toast.error('Access denied. Only clients can access this page.')
     return navigateTo('/')
   }
 
-  console.log('✅ Client Middleware: User is authenticated client, proceeding...')
+  console.log(' Client Middleware: User is authenticated client, proceeding...')
 
-  // Fetch verification status if not already fetched
   if (!authStore.clientVerificationStatus) {
     try {
       await authStore.getClientVerificationStatus()

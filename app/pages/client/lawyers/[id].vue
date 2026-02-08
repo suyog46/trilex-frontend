@@ -49,7 +49,9 @@ const handleBooking = () => {
 }
 
 const handleBookingConfirm = () => {
-  toast.success('Booking request noted! We will implement this feature soon.')
+  // Booking was successful - the dialog will handle the toast
+  // Optionally navigate to bookings page
+  navigateTo('/client/bookings')
 }
 
 onMounted(() => {
@@ -200,6 +202,7 @@ onMounted(() => {
       v-model:open="showBookingDialog"
       type="lawyer"
       :name="lawyer?.verification?.full_name || 'Lawyer'"
+      :lawyer-id="lawyer?.user?.id"
       @confirm="handleBookingConfirm"
     />
   </div>

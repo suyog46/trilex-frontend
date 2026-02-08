@@ -59,5 +59,13 @@ export const URL = {
     MEDIA: {
       UPLOAD: '/api/media/upload/',
     },
+    BOOKINGS: {
+      CREATE: '/api/bookings/',
+      SENT: '/api/bookings/sent/',
+      RECEIVED: '/api/bookings/received/',
+      DETAIL: (id: string) => `/api/bookings/${id}/`,
+      ACCEPT: (id: string) => `/api/bookings/${id}/accept/`,
+      REJECT: (id: string) => `/api/bookings/${id}/reject/`,
+    },
   },
 }
