@@ -11,8 +11,6 @@ import LawyerSignupForm from '~/components/auth/LawyerSignupForm.vue'
    ">
 
            <LawyerSignupForm mode="firm" />
-
-
     <div class=" h-[60vh] flex justify-end items-center  ">
       <NuxtImg
         src="/Images/landingImage.jpg"

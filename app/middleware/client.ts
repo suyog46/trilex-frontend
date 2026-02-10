@@ -29,6 +29,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   console.log(' Client Middleware: User is authenticated client, proceeding...')
 
+  // Fetch verification status if not already fetched
   if (!authStore.clientVerificationStatus) {
     try {
       await authStore.getClientVerificationStatus()

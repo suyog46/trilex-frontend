@@ -168,7 +168,6 @@
             </Carousel>
           </div>
           
-          <!-- Empty State -->
           <div 
             v-else 
             class="text-center py-16 bg-primary-light/20 rounded-2xl border border-primary-light-active/50"

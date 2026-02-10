@@ -22,6 +22,7 @@ interface Props {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   searchPlaceholder?: string
+  isLoading?: boolean
   // Server-side pagination props
   currentPage?: number
   pageSize?: number
@@ -34,15 +35,20 @@ interface Props {
   canViewDetail?: boolean
   canAccept?: boolean
   canReject?: boolean
+  canSuspend?: boolean
+  showActionDots?: boolean
   onEdit?: (row: TData) => void
   onDelete?: (row: TData) => void
   onViewDetail?: (row: TData) => void
   onAccept?: (row: TData) => void
   onReject?: (row: TData) => void
+  onSuspend?: (row: TData) => void
+  onActionDotClick?: (action: string, row: TData) => void
 }
 
 const props = withDefaults(defineProps<Props>(), {
   searchPlaceholder: 'Search...',
+  isLoading: false,
   currentPage: 1,
   pageSize: 5,
   totalCount: 0,
@@ -51,6 +57,8 @@ const props = withDefaults(defineProps<Props>(), {
   canViewDetail: false,
   canAccept: false,
   canReject: false,
+  canSuspend: false,
+  showActionDots: false,
 })
 
 const emit = defineEmits<{
@@ -63,6 +71,8 @@ const emit = defineEmits<{
   'view-detail': [row: TData]
   'accept': [row: TData]
   'reject': [row: TData]
+  'suspend': [row: TData]
+  'action-dot-click': [action: string, row: TData]
 }>()
 
 // Handle row click
@@ -109,12 +119,29 @@ const handleReject = (row: TData) => {
   emit('reject', row)
 }
 
+const handleSuspend = (row: TData) => {
+  if (props.onSuspend) {
+    props.onSuspend(row)
+  }
+  emit('suspend', row)
+}
+
+const handleActionDotClick = (action: string, row: TData) => {
+  if (props.onActionDotClick) {
+    props.onActionDotClick(action, row)
+  }
+  emit('action-dot-click', action, row)
+}
+
 // Check if any actions are enabled
 const hasActions = computed(() => {
-  return props.canEdit || props.canDelete || props.canViewDetail || props.canAccept || props.canReject
+  return props.canEdit || props.canDelete || props.canViewDetail || props.canAccept || props.canReject || props.canSuspend || props.showActionDots
 })
 
 const searchQuery = ref('')
+
+// Track which row has dropdown open
+const openDropdownRowId = ref<string | null>(null)
 
 // Calculate total pages
 const totalPages = computed(() => {
@@ -185,12 +212,21 @@ const goToLastPage = () => {
         :placeholder="searchPlaceholder"
         :model-value="searchQuery"
         class="max-w-sm"
+        :disabled="isLoading"
         @input="handleSearchInput"
       />
     </div>
 
+    <!-- Loading State -->
+    <div v-if="isLoading" class="flex items-center justify-center py-12">
+      <div class="flex flex-col items-center gap-4">
+        <Icon icon="mdi:loading" class="w-12 h-12 text-primary-normal animate-spin" />
+        <p class="text-gray-500">Loading data...</p>
+      </div>
+    </div>
+
     <!-- Table -->
-    <div class="rounded-md ">
+    <div v-else class="rounded-md ">
       <Table>
         <TableHeader>
           <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
@@ -233,7 +269,7 @@ const goToLastPage = () => {
                 />
               </TableCell>
               <!-- Action Cells -->
-              <TableCell v-if="hasActions" class="text-gray-500 text-md py-4 w-auto">
+              <TableCell v-if="hasActions" class="text-gray-500 text-md py-4 w-auto relative">
                 <div class="flex items-center gap-2 flex-wrap">
                   <button
                     v-if="canViewDetail"
@@ -275,6 +311,13 @@ const goToLastPage = () => {
                   >
                     <Icon icon="mdi:trash-can" class="w-5 h-5" />
                   </button>
+                  <button
+                    v-if="canSuspend"
+                    @click.stop="handleSuspend(row.original)"
+                    class="px-3 py-1 text-orange-600 border border-orange-600 hover:bg-orange-50 rounded-md transition-colors font-medium text-sm"
+                  >
+                    Suspend
+                  </button>
                 </div>
               </TableCell>
             </TableRow>
@@ -291,7 +334,7 @@ const goToLastPage = () => {
     </div>
 
     <!-- Pagination -->
-    <div class="flex items-center justify-between px-2">
+    <div v-if="!isLoading" class="flex items-center justify-between px-2">
       <div class="flex-1 text-sm text-muted-foreground">
         {{ totalCount }} row(s) total.
       </div>

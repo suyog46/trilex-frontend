@@ -80,11 +80,12 @@ const links = computed(() => {
       icon: "mdi:file-document-outline",
       isDropdown: false,
       link: "/documents"
-    }
+    },
+     
   ]
 
   // Add firm-specific menu items
-  if (authStore.user?.role === 'law_firm') {
+  if (authStore.user?.role === 'firm') {
     baseLinks.push({
       title: "User Management",
       icon: "mdi:account-multiple-outline",
@@ -92,6 +93,17 @@ const links = computed(() => {
       link: "/user-management"
     })
   }
+   if (authStore.user?.role === 'lawyer') {
+    baseLinks.push(
+    {
+      title: "Firm Requests",
+      icon: "material-symbols-light:dashboard-outline-rounded",
+      isDropdown: false,
+      link: "/firm-request"
+    },
+  )
+  }
+
 
   // Add settings at the end
   baseLinks.push({

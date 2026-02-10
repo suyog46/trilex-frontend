@@ -87,6 +87,61 @@ export interface FirmListParams {
   page_size?: number
 }
 
+export interface LawyerUser {
+  id: string
+  email: string
+  role: string
+}
+
+export interface LawyerVerification {
+  full_name: string
+  license_photo: {
+    id: string
+    url: string
+  }
+}
+
+export interface LawyerProfile {
+  services?: Service[]
+}
+
+export interface LawyerData {
+  id: string
+  user: LawyerUser
+  phone_number?: string
+  address?: FirmAddress
+  services?: Service[]
+  verification: LawyerVerification
+}
+
+export interface FirmMember {
+  id: string
+  joined_at: string
+  lawyer: LawyerData
+}
+
+export interface FirmMembersResponse {
+  count: number
+  next: string | null
+  previous: string | null
+  results: FirmMember[]
+}
+
+export interface FirmInvitation {
+  id: string
+  status: 'pending' | 'accepted' | 'rejected'
+  invited_at: string
+  responded_at: string | null
+  lawyer: LawyerData
+}
+
+export interface FirmInvitationsResponse {
+  count: number
+  next: string | null
+  previous: string | null
+  results: FirmInvitation[]
+}
+
 export const firmsApi = {
   /**
    * Get all firms with pagination
@@ -110,5 +165,57 @@ export const firmsApi = {
   getFirmById: (firmId: string): Promise<Firm> => {
     const apiFetch = useApiFetch()
     return apiFetch(`/api/firms/${firmId}/`)
+  },
+
+  /**
+   * Get firm members
+   * GET /api/firms/me/members/
+   */
+  getFirmMembers: (params?: { page?: number; page_size?: number }): Promise<FirmMembersResponse> => {
+    const apiFetch = useApiFetch()
+    const queryParams = new URLSearchParams()
+    
+    if (params?.page) queryParams.append('page', params.page.toString())
+    if (params?.page_size) queryParams.append('page_size', params.page_size.toString())
+    
+    const url = queryParams.toString() ? `/api/firms/me/members/?${queryParams.toString()}` : '/api/firms/me/members/'
+    return apiFetch(url)
+  },
+
+  /**
+   * Add lawyer to firm
+   * POST /api/firms/me/invite-lawyer/{lawyer_id}/
+   */
+  addMember: (lawyerId: string): Promise<FirmMember> => {
+    const apiFetch = useApiFetch()
+    return apiFetch(`/api/firms/me/invite-lawyer/${lawyerId}/`, {
+      method: 'POST',
+    })
+  },
+
+  /**
+   * Remove lawyer from firm
+   * DELETE /api/firms/me/members/{member_id}/
+   */
+  removeMember: (memberId: string): Promise<void> => {
+    const apiFetch = useApiFetch()
+    return apiFetch(`/api/firms/me/members/${memberId}/`, {
+      method: 'DELETE',
+    })
+  },
+
+  /**
+   * Get firm invitations
+   * GET /api/firms/me/invitations/
+   */
+  getFirmInvitations: (params?: { page?: number; page_size?: number }): Promise<FirmInvitationsResponse> => {
+    const apiFetch = useApiFetch()
+    const queryParams = new URLSearchParams()
+    
+    if (params?.page) queryParams.append('page', params.page.toString())
+    if (params?.page_size) queryParams.append('page_size', params.page_size.toString())
+    
+    const url = queryParams.toString() ? `/api/firms/me/invitations/?${queryParams.toString()}` : '/api/firms/me/invitations/'
+    return apiFetch(url)
   },
 }

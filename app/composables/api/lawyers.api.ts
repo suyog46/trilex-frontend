@@ -84,11 +84,50 @@ export interface PaginatedResponse<T> {
 export interface LawyerListParams {
   page?: number
   page_size?: number
+  search?: string
+  province?: number
+  district?: number
+  services?: string
+}
+
+export interface FirmLicense {
+  id: string
+  url: string
+}
+
+export interface FirmVerification {
+  id: string
+  firm_name: string
+  firm_license: FirmLicense
+}
+
+export interface FirmData {
+  id: string
+  user: LawyerUser
+  phone_number?: string
+  address?: string
+  services?: Service[]
+  verification: FirmVerification
+}
+
+export interface LawyerFirmInvitation {
+  id: string
+  status: 'pending' | 'accepted' | 'rejected'
+  invited_at: string
+  responded_at: string | null
+  firm: FirmData
+}
+
+export interface LawyerFirmInvitationsResponse {
+  count: number
+  next: string | null
+  previous: string | null
+  results: LawyerFirmInvitation[]
 }
 
 export const lawyersApi = {
   /**
-   * Get all lawyers with pagination
+   * Get all lawyers with pagination and filters
    * GET /api/lawyers/
    */
   getLawyers: (params?: LawyerListParams): Promise<PaginatedResponse<Lawyer>> => {
@@ -97,6 +136,10 @@ export const lawyersApi = {
     
     if (params?.page) queryParams.append('page', params.page.toString())
     if (params?.page_size) queryParams.append('page_size', params.page_size.toString())
+    if (params?.search) queryParams.append('search', params.search)
+    if (params?.province) queryParams.append('province', params.province.toString())
+    if (params?.district) queryParams.append('district', params.district.toString())
+    if (params?.services) queryParams.append('services', params.services)
     
     const url = queryParams.toString() ? `/api/lawyers/?${queryParams.toString()}` : '/api/lawyers/'
     return apiFetch(url)
@@ -109,5 +152,43 @@ export const lawyersApi = {
   getLawyerById: (lawyerId: string): Promise<Lawyer> => {
     const apiFetch = useApiFetch()
     return apiFetch(`/api/lawyers/${lawyerId}/`)
+  },
+
+  /**
+   * Suspend a lawyer
+   * PATCH /api/lawyers/{lawyer_id}/suspend/
+   */
+  suspendLawyer: (lawyerId: string): Promise<any> => {
+    const apiFetch = useApiFetch()
+    return apiFetch(`/api/lawyers/${lawyerId}/suspend/`, {
+      method: 'PATCH',
+    })
+  },
+
+  /**
+   * Get lawyer firm invitations
+   * GET /api/lawyers/me/invitations/
+   */
+  getLawyerFirmInvitations: (params?: { page?: number; page_size?: number }): Promise<LawyerFirmInvitationsResponse> => {
+    const apiFetch = useApiFetch()
+    const queryParams = new URLSearchParams()
+    
+    if (params?.page) queryParams.append('page', params.page.toString())
+    if (params?.page_size) queryParams.append('page_size', params.page_size.toString())
+    
+    const url = queryParams.toString() ? `/api/lawyers/me/invitations/?${queryParams.toString()}` : '/api/lawyers/me/invitations/'
+    return apiFetch(url)
+  },
+
+  /**
+   * Respond to firm invitation
+   * POST /api/lawyers/me/invitations/{invitation_id}/{action}/
+   * action: 'accept' or 'reject'
+   */
+  respondToFirmInvitation: (invitationId: string, action: 'accept' | 'reject'): Promise<any> => {
+    const apiFetch = useApiFetch()
+    return apiFetch(`/api/lawyers/me/invitations/${invitationId}/${action}/`, {
+      method: 'POST',
+    })
   },
 }

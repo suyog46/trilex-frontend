@@ -11,7 +11,6 @@ definePageMeta({
   layout: "lawyer",
 })
 
-// View mode: 'table' or 'grid'
 const viewMode = ref<'table' | 'grid'>('table')
 
 // Filter modal state
