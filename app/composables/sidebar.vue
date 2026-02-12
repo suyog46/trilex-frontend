@@ -50,17 +50,9 @@ const links = computed(() => {
     {
       title: "Booking",
       icon: "icon-park-outline:folder",
-      isDropdown: true,
-      dropdown: [
-        {
-          title: "Pending Requests",
-          link: "/booking/pending"
-        },
-        {
-          title: "Ongoing Requests",
-          link: "/booking/ongoing"
-        }
-      ]
+      isDropdown: false,
+      link: "/booking"
+
     },
     {
       title: "Cases",
@@ -91,7 +83,13 @@ const links = computed(() => {
       isDropdown: false,
       link: "/documents"
     },
-     
+    {
+      title: "Messages",
+      icon: "mdi:message",
+      isDropdown: false,
+      link: "/messages"
+    },
+
   ]
 
   if (authStore.user?.role === 'firm') {
@@ -100,7 +98,10 @@ const links = computed(() => {
       icon: "mdi:account-multiple-outline",
       isDropdown: false,
       link: "/user-management"
-    })
+    }
+
+  )
+
   }
    if (authStore.user?.role === 'lawyer') {
     baseLinks.push(
@@ -110,16 +111,17 @@ const links = computed(() => {
       isDropdown: false,
       link: "/firm-request"
     },
+
   )
   }
 
 
-  baseLinks.push({
-    title: "Settings",
-    icon: "mdi:cog-outline",
-    isDropdown: false,
-    link: "/settings"
-  })
+  // baseLinks.push({
+  //   title: "Settings",
+  //   icon: "mdi:cog-outline",
+  //   isDropdown: false,
+  //   link: "/settings"
+  // })
 
   return baseLinks
 })

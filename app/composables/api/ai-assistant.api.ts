@@ -3,6 +3,7 @@ import { URL } from '~/lib/constants/url'
 export interface ChatMessage {
   sender: 'user' | 'ai'
   message: string
+  answer?: string // Alternative field for answer (used in not_legal query_type)
   query_type: string | null
   recommendations: Recommendations | null
   created_at: string

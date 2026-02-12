@@ -3,7 +3,6 @@ import { ref, onMounted } from 'vue'
 import { bookingsApi, type BookingResponse } from '~/composables/api/bookings.api'
 import ReceivedBookingsTable from '~/components/tables/ReceivedBookingsTable/ReceivedBookingsTable.vue'
 import columns from '~/components/tables/ReceivedBookingsTable/columns'
-import SimpleTabs from '~/components/ui/tabs/SimpleTabs.vue'
 import { toast } from 'vue-sonner'
 
 definePageMeta({
@@ -18,10 +17,10 @@ const searchQuery = ref('')
 const selectedStatus = ref<'pending' | 'accepted' | 'rejected'>('pending')
 const isLoading = ref(false)
 
-const statusTabs = [
-  { key: 'pending', label: 'Pending' },
-  { key: 'accepted', label: 'Accepted' },
-  { key: 'rejected', label: 'Rejected' },
+const statusOptions = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'accepted', label: 'Accepted' },
+  { value: 'rejected', label: 'Rejected' },
 ]
 
 const fetchBookings = async () => {
@@ -82,35 +81,33 @@ onMounted(() => {
 
 <template>
   <div class="flex flex-col gap-6">
-    <div>
-      <h1 class="text-3xl font-bold text-gray-900">Booking Requests</h1>
-      <p class="text-gray-600 mt-1">Manage incoming booking requests from clients</p>
-    </div>
-
-    <div class="bg-white rounded-lg">
-      <SimpleTabs
-        v-model="selectedStatus"
-        :tabs="statusTabs"
-        @update:model-value="handleStatusChange"
-      />
-    </div>
-
-    <div v-if="isLoading" class="flex justify-center items-center py-20">
-      <div class="text-center">
-        <Icon icon="mdi:loading" class="w-12 h-12 text-primary-normal animate-spin mx-auto mb-4" />
-        <p class="text-gray-600">Loading bookings...</p>
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Booking Requests</h1>
+        <p class="text-gray-600 mt-1">Manage incoming booking requests from clients</p>
       </div>
     </div>
 
-    <div v-else-if="data.length === 0" class="text-center py-20">
-      <Icon icon="mdi:inbox" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
-      <h3 class="text-xl font-semibold text-gray-700 mb-2">No Bookings Found</h3>
-      <p class="text-gray-500">
-        You don't have any {{ selectedStatus }} booking requests.
-      </p>
+    <!-- Status Filter Buttons -->
+    <div class="flex flex-wrap gap-2">
+      <button
+        v-for="option in statusOptions"
+        :key="option.value"
+        @click="handleStatusChange(option.value)"
+        :class="[
+          'px-4 py-2 rounded-lg font-medium transition-colors',
+          selectedStatus === option.value
+            ? 'bg-primary-normal text-white'
+            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+        ]"
+      >
+        {{ option.label }}
+      </button>
     </div>
 
-    <div v-else class="bg-white rounded-lg p-6">
+    <!-- Table with Skeleton Loading -->
+    <div class="bg-white rounded-lg p-6">
       <ReceivedBookingsTable
         :data="data"
         :columns="columns"

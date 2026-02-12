@@ -26,7 +26,7 @@ export const URL = {
       LAWYER_REGISTER: '/auth/register/lawyer',
       VERIFY_LINK: '/api/auth/verify-link/',
       RESEND_VERIFICATION_LINK: '/api/auth/resend-verification-link/',
-      ME: '/api/auth/me',
+      ME: '/api/clients/me',
       REFRESH: '/auth/refresh',
       LOGOUT: '/api/auth/logout/',
       FORGOT_PASSWORD: '/api/auth/forgot-password/',

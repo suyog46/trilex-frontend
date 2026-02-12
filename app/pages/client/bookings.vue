@@ -108,16 +108,24 @@ onMounted(() => {
       </button>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="isLoading" class="flex justify-center items-center py-20">
-      <div class="text-center">
-        <Icon icon="mdi:loading" class="w-12 h-12 text-primary-normal animate-spin mx-auto mb-4" />
-        <p class="text-gray-600">Loading bookings...</p>
-      </div>
-    </div>
+    <!-- Bookings Table -->
+    <BookingsTable
+      :data="data"
+      :columns="columns"
+      :current-page="currentPage"
+      :page-size="pageSize"
+      :total-count="totalCount"
+      :is-loading="isLoading"
+      @page-change="handlePageChange"
+      @page-size-change="handlePageSizeChange"
+      @search="handleSearch"
+    />
 
     <!-- Empty State -->
-    <div v-else-if="data.length === 0" class="text-center py-20">
+    <div 
+      v-if="!isLoading && data.length === 0"
+      class="text-center py-20"
+    >
       <Icon icon="mdi:calendar-blank" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
       <h3 class="text-xl font-semibold text-gray-700 mb-2">No Bookings Found</h3>
       <p class="text-gray-500 mb-6">
@@ -134,20 +142,6 @@ onMounted(() => {
         <Icon icon="mdi:magnify" class="w-5 h-5" />
         Browse Lawyers
       </NuxtLink>
-    </div>
-
-    <!-- Bookings Table -->
-    <div v-else>
-      <BookingsTable
-        :data="data"
-        :columns="columns"
-        :current-page="currentPage"
-        :page-size="pageSize"
-        :total-count="totalCount"
-        @page-change="handlePageChange"
-        @page-size-change="handlePageSizeChange"
-        @search="handleSearch"
-      />
     </div>
   </div>
 </template>

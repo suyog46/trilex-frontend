@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import DraftCasesTable from '~/components/tables/DraftCasesTable/DraftCasesTable.vue'
 import ReusableCard from '~/components/ReusableCard.vue'
 import { createDraftCaseColumns } from '~/components/tables/DraftCasesTable/columns'
@@ -9,12 +9,18 @@ import { casesApi, type CaseListItem } from '~/composables/api/cases.api'
 import { toast } from 'vue-sonner'
 import AssignLawyerDialog from '~/components/dialogs/AssignLawyerDialog.vue'
 import SimpleTabs from '~/components/ui/tabs/SimpleTabs.vue'
+import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({
   layout: "lawyer",
 })
 
+const authStore = useAuthStore()
+
 const viewMode = ref<'table' | 'grid'>('table')
+
+// Check if user is a lawyer
+const isLawyer = computed(() => authStore.user?.role === 'lawyer')
 
 // Case scope tab state
 const caseScope = ref<'personal' | 'firm'>('personal')
@@ -205,13 +211,13 @@ fetchData(currentPage.value, pageSize.value, searchQuery.value, activeFilters.va
       </h1>
     </div>
 
-    <!-- Case Scope Tabs -->
-    <SimpleTabs v-model="caseScope" :tabs="scopeTabs" />
+    <!-- Case Scope Tabs (Only for Lawyers) -->
+    <SimpleTabs v-if="isLawyer" v-model="caseScope" :tabs="scopeTabs" />
 
-    <div class="flex justify-between items-center">
+    <div class="flex justify-end items-center">
       <div class="flex items-center gap-4">
         <!-- View Toggle -->
-        <div class="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+        <!-- <div class="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
           <button
             @click="toggleView('table')"
             class="p-2 rounded-lg transition-colors"
@@ -226,17 +232,17 @@ fetchData(currentPage.value, pageSize.value, searchQuery.value, activeFilters.va
           >
             <Icon icon="mdi:grid" class="w-5 h-5" :class="viewMode === 'grid' ? 'text-primary-normal' : 'text-gray-600'" />
           </button>
-        </div>
+        </div> -->
 
         <!-- Filter Button -->
         <button 
           @click="showFilterModal = true"
-          class="flex items-center gap-2 px-4 py-2 border border-primary-normal rounded-lg hover:bg-primary-normal hover:text-white transition-colors"
+          class="group flex items-center gap-2 px-4 py-2 border border-primary-normal rounded-lg hover:bg-primary-normal hover:text-white transition-colors"
         >
-          <p class="text-primary-normal">
+          <p class="text-primary-normal group-hover:text-white transition-colors">
             Filter
           </p>
-          <Icon icon="mage:filter" class="w-5 h-5 text-primary-normal" />
+          <Icon icon="mage:filter" class="w-5 h-5 text-primary-normal group-hover:text-white" />
         </button>
       </div>
     </div>

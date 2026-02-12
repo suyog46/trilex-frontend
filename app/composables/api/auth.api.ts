@@ -61,7 +61,7 @@ export const authApi = {
    * Register as law firm with address and services
    * Endpoint: POST /api/lawyers/signup/
    */
-  registerLawFirmSignup: (payload: LawyerSignupInput): Promise<AuthResponse> => {
+  registerLawFirmSignup: (payload: LawFirmSignupInput): Promise<AuthResponse> => {
     const apiFetch = useApiFetch()
     return apiFetch(URL.API.AUTH.LAW_FIRM_SIGNUP, {
       method: "POST",
@@ -100,9 +100,10 @@ export const authApi = {
   },
 
   /**
-   * Get current user info
+   * Get current user info with verification details
+   * Returns full user data including verification status
    */
-  me: (): Promise<User> => {
+  me: (): Promise<any> => {
     const apiFetch = useApiFetch()
     return apiFetch(URL.API.AUTH.ME)
   },

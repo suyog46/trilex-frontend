@@ -1,7 +1,11 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '~/components/ui/dialog'
 import { Button } from '~/components/ui/button'
 import type { BookingResponse } from '~/composables/api/bookings.api'
+import { chatApi } from '~/composables/api/chat.api'
+import { toast } from 'vue-sonner'
 
 const props = defineProps<{
   open: boolean
@@ -11,6 +15,9 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:open', value: boolean): void
 }>()
+
+const router = useRouter()
+const isProcessing = ref(false)
 
 const closeDialog = () => {
   emit('update:open', false)
@@ -27,7 +34,7 @@ const formatCourtType = (courtType: string): string => {
   return labelMap[courtType] || courtType
 }
 
-// Helper to format status with color
+// Helper to get status color
 const getStatusColor = (status: string): string => {
   switch (status) {
     case 'pending':
@@ -40,6 +47,25 @@ const getStatusColor = (status: string): string => {
       return 'bg-gray-100 text-gray-800 border-gray-200'
   }
 }
+
+// Handle opening chat
+const handleOpenChat = async () => {
+  if (!props.booking) return
+  isProcessing.value = true
+  try {
+    await chatApi.createRoom(props.booking.id)
+    toast.success('Chat room created successfully!')
+    router.push('/client/messages')
+    closeDialog()
+  } catch (error: any) {
+    console.error('Error creating chat room:', error)
+    const errorMsg = error?.data?.detail || error?.message || 'Failed to create chat room'
+    toast.error(errorMsg)
+  } finally {
+    isProcessing.value = false
+  }
+}
+
 </script>
 
 <template>
@@ -161,11 +187,13 @@ const getStatusColor = (status: string): string => {
           Close
         </Button>
         <Button
+          v-if="booking?.status === 'accepted'"
           class="flex-1 bg-primary-normal hover:bg-primary-normal-hover text-white"
-          @click="closeDialog"
+          :disabled="isProcessing"
+          @click="handleOpenChat"
         >
-          <Icon icon="mdi:check" class="w-5 h-5 mr-2" />
-          Done
+          <Icon icon="mdi:message" class="w-5 h-5 mr-2" />
+          Chat
         </Button>
       </div>
     </DialogContent>

@@ -2,35 +2,25 @@
 import { Icon } from '@iconify/vue'
 import { ref, watch, computed } from 'vue'
 import DraftCasesTable from '~/components/tables/DraftCasesTable/DraftCasesTable.vue'
-import ReusableCard from '~/components/ReusableCard.vue'
 import { createDraftCaseColumns } from '~/components/tables/DraftCasesTable/columns'
 import { casesApi, type CaseListItem } from '~/composables/api/cases.api'
 import { toast } from 'vue-sonner'
-import AssignLawyerDialog from '~/components/dialogs/AssignLawyerDialog.vue'
 import SimpleTabs from '~/components/ui/tabs/SimpleTabs.vue'
-import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({
-  layout: "lawyer",
+  layout: 'client',
+  middleware: ['auth', 'client'],
 })
 
-const authStore = useAuthStore()
-
-const viewMode = ref<'table' | 'grid'>('table')
-
-// Check if user is a lawyer
-const isLawyer = computed(() => authStore.user?.role === 'lawyer')
-
-const caseScope = ref<'personal' | 'firm'>('personal')
-const scopeTabs = [
-  { key: 'personal', label: 'Personal' },
-  { key: 'firm', label: 'Related Law Firm' },
+const caseStatus = ref<'all' | 'pending' | 'in-progress' | 'completed'>('all')
+const statusTabs = [
+  { key: 'all', label: 'All Cases' },
+  { key: 'pending', label: 'Pending' },
+  { key: 'in-progress', label: 'In Progress' },
+  { key: 'completed', label: 'Completed' },
 ]
 
 const showFilterModal = ref(false)
-
-const showAssignLawyerDialog = ref(false)
-const selectedCase = ref<CaseListItem | null>(null)
 
 const activeFilters = ref<Record<string, string>>({
   case_category: '',
@@ -53,8 +43,11 @@ const fetchData = async (page: number, size: number, search: string, filters: Re
     const params: any = {
       page,
       page_size: size,
-      status: 'completed',
-      case_scope: caseScope.value,
+    }
+    
+    // Add status filter if not 'all'
+    if (caseStatus.value !== 'all') {
+      params.status = caseStatus.value
     }
     
     if (search) params.search = search
@@ -108,46 +101,14 @@ const resetFilters = () => {
   applyFilters()
 }
 
-const handleAction = (action: string, caseData: any) => {
-  console.log('Action:', action, caseData)
-  
-  switch (action) {
-    case 'edit':
-      navigateTo(`/lawyer/cases/edit/${caseData.id}`)
-      break
-    case 'assign':
-      selectedCase.value = caseData
-      showAssignLawyerDialog.value = true
-      break
-  }
-}
-
-const handleLawyerAssigned = () => {
-  fetchData(currentPage.value, pageSize.value, searchQuery.value, activeFilters.value)
-}
-
 const handleRowClick = (row: any) => {
   console.log('Row clicked:', row)
-  navigateTo(`/cases/case-detail/${row.id}`)
+  navigateTo(`/client/cases/${row.id}`)
 }
 
-const handleCardAction = (action: string, item: any) => {
-  const caseData = data.value.find(c => c.id === item.id)
-  if (caseData) {
-    handleAction(action, caseData)
-  }
-}
-
-const toggleView = (mode: 'table' | 'grid') => {
-  viewMode.value = mode
-}
-
+// View-only columns - no actions for client
 const columns = computed(() => {
-  const options = caseScope.value === 'firm'
-    ? { hideActions: true } 
-    : { showAssignLawyer: false } 
-  
-  return createDraftCaseColumns(handleAction, options)
+  return createDraftCaseColumns(() => {}, { hideActions: true })
 })
 
 const transformedData = computed(() => {
@@ -162,16 +123,7 @@ const transformedData = computed(() => {
   }))
 })
 
-const transformedColumns = [
-  { key: 'caseName', label: 'Case Name' },
-  { key: 'courtType', label: 'Court Type' },
-  { key: 'clientName', label: 'Client Name' },
-  { key: 'warisName', label: 'Waris Name' },
-  { key: 'files', label: 'Files' },
-  { key: 'tarikDate', label: 'Tarik Date' },
-]
-
-watch(caseScope, () => {
+watch(caseStatus, () => {
   currentPage.value = 1
   fetchData(1, pageSize.value, searchQuery.value, activeFilters.value)
 })
@@ -183,46 +135,25 @@ fetchData(currentPage.value, pageSize.value, searchQuery.value, activeFilters.va
   <div class="flex flex-col gap-6">
     <div class="flex justify-between items-center">
       <h1 class="text-2xl font-bold text-primary-normal">
-        Completed Cases
+        My Cases
       </h1>
     </div>
 
-    <!-- Case Scope Tabs (Only for Lawyers) -->
-    <SimpleTabs v-if="isLawyer" v-model="caseScope" :tabs="scopeTabs" />
+    <SimpleTabs v-model="caseStatus" :tabs="statusTabs" />
 
-    <div class="flex justify-end items-center">
+    <div class="flex justify-between items-center">
       <div class="flex items-center gap-4">
-        <!-- <div class="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
-          <button
-            @click="toggleView('table')"
-            class="p-2 rounded-lg transition-colors"
-            :class="viewMode === 'table' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'"
-          >
-            <Icon icon="mdi:table" class="w-5 h-5" :class="viewMode === 'table' ? 'text-primary-normal' : 'text-gray-600'" />
-          </button>
-          <button
-            @click="toggleView('grid')"
-            class="p-2 rounded-lg transition-colors"
-            :class="viewMode === 'grid' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'"
-          >
-            <Icon icon="mdi:grid" class="w-5 h-5" :class="viewMode === 'grid' ? 'text-primary-normal' : 'text-gray-600'" />
-          </button>
-        </div> -->
-
         <button 
           @click="showFilterModal = true"
-          class="group flex items-center gap-2 px-4 py-2 border border-primary-normal rounded-lg hover:bg-primary-normal hover:text-white transition-colors"
+          class="flex items-center gap-2 px-4 py-2 border border-primary-normal rounded-lg hover:bg-primary-normal hover:text-white transition-colors"
         >
-          <p class="text-primary-normal group-hover:text-white transition-colors">
-            Filter
-          </p>
-          <Icon icon="mage:filter" class="w-5 h-5 text-primary-normal group-hover:text-white transition-colors" />
+          <span class="text-sm font-medium">Filter</span>
+          <Icon icon="mage:filter" class="w-5 h-5" />
         </button>
       </div>
     </div>
 
     <DraftCasesTable 
-      v-if="viewMode === 'table'"
       :data="transformedData"
       :columns="columns"
       :current-page="currentPage"
@@ -236,20 +167,7 @@ fetchData(currentPage.value, pageSize.value, searchQuery.value, activeFilters.va
       @row-click="handleRowClick"
     />
 
-    <ReusableCard
-      v-else
-      :data="transformedData"
-      :columns="transformedColumns"
-      :current-page="currentPage"
-      :page-size="pageSize"
-      :total-count="totalCount"
-      search-placeholder="Search cases..."
-      @page-change="handlePageChange"
-      @page-size-change="handlePageSizeChange"
-      @search="handleSearch"
-      @action-click="handleCardAction"
-    />
-
+    <!-- Filter Modal -->
     <div
       v-if="showFilterModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
@@ -267,6 +185,20 @@ fetchData(currentPage.value, pageSize.value, searchQuery.value, activeFilters.va
         </div>
 
         <div class="space-y-4">
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700">Case Category</label>
+            <select
+              v-model="activeFilters.case_category"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-normal"
+            >
+              <option value="">All Categories</option>
+              <option value="civil">Civil</option>
+              <option value="criminal">Criminal</option>
+              <option value="family">Family</option>
+              <option value="corporate">Corporate</option>
+            </select>
+          </div>
+
           <div class="space-y-2">
             <label class="block text-sm font-medium text-gray-700">Court Type</label>
             <select
@@ -316,13 +248,19 @@ fetchData(currentPage.value, pageSize.value, searchQuery.value, activeFilters.va
       </div>
     </div>
 
-    <AssignLawyerDialog
-      v-if="selectedCase"
-      :open="showAssignLawyerDialog"
-      :case-id="selectedCase.id"
-      :case-title="selectedCase.title"
-      @update:open="showAssignLawyerDialog = $event"
-      @assigned="handleLawyerAssigned"
-    />
+    <!-- Empty State -->
+    <div 
+      v-if="!isLoading && data.length === 0"
+      class="flex flex-col items-center justify-center py-12 text-center"
+    >
+      <Icon icon="mdi:briefcase-outline" class="w-16 h-16 text-gray-400 mb-4" />
+      <h3 class="text-lg font-semibold text-gray-900 mb-2">No Cases Found</h3>
+      <p class="text-sm text-gray-600">
+        {{ searchQuery || Object.values(activeFilters).some(v => v) 
+          ? 'Try adjusting your filters or search query' 
+          : "You don't have any cases yet" 
+        }}
+      </p>
+    </div>
   </div>
 </template>

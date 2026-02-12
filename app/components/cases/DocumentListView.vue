@@ -4,7 +4,7 @@ import type { DocumentItem } from '~/composables/api/cases.api'
 
 const props = defineProps<{
   documents: DocumentItem[]
-  folderType: 'client' | 'internal'
+  folderType: 'client' | 'internal' | 'firm'
   isLoading?: boolean
 }>()
 
@@ -65,10 +65,10 @@ const downloadDocument = (doc: DocumentItem) => {
         </button>
         <div>
           <h3 class="text-lg font-semibold text-gray-900">
-            {{ folderType === 'client' ? 'Client Files' : 'My Files' }}
+            {{ folderType === 'client' ? 'Client Files' : folderType === 'firm' ? 'Other Lawyers Folder' : 'My Files' }}
           </h3>
           <p class="text-sm text-gray-600">
-            {{ folderType === 'client' ? 'Documents shared with client' : 'Internal documents' }}
+            {{ folderType === 'client' ? 'Documents shared with client' : folderType === 'firm' ? 'Documents shared with other lawyers in the firm' : 'Internal documents' }}
           </p>
         </div>
       </div>

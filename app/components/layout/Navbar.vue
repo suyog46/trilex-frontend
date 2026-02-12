@@ -1,3 +1,97 @@
+
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { Icon } from '@iconify/vue'
+import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
+
+const isSticky = ref(false)
+let unsubscribe: (() => void) | null = null
+const authStore = useAuthStore()
+
+// Use computed properties for reactivity instead of destructuring
+const isAuthenticated = computed(() => {
+  const result = authStore.isAuthenticated
+  if (result) {
+    console.log('Navbar: User IS authenticated')
+  } else {
+    console.log('❌ Navbar: User NOT authenticated')
+  }
+  return result
+})
+const user = computed(() => authStore.user)
+console.log("user is ", user.value)
+
+// Verification status computed property - use user.verification from /me endpoint
+const verificationStatus = computed(() => {
+  return user.value?.verification?.status || null
+})
+
+// Check if user is verified
+const isVerified = computed(() => {
+  return user.value?.verification?.status === 'VERIFIED'
+})
+
+// Verification page path based on role
+const verificationPagePath = computed(() => {
+  if (user.value?.role === 'lawyer') {
+    return '/lawyer/verification-status'
+  } else if (user.value?.role === 'firm') {
+    return '/firm/verification-status'
+  } else if (user.value?.role === 'client') {
+    return '/client/verification-status'
+  }
+  return '/dashboard'
+})
+
+const navLinks = [
+  { title: 'Find Lawyer', path: '/client/lawyers' },
+  { title: 'Find Law Firm', path: '/client/firms' },
+  { title: 'About Us', path: '/about-us' },
+  { title: 'Case Enquiry', path: '/case-enquiry' },
+]
+
+const userMenuItems = [
+  { label: 'Wishlist', path: '/wishlist' },
+  { label: 'Recent History', path: '/recent-history' },
+  { label: 'My Cases', path: '/my-cases' },
+  { label: 'Settings', path: '/settings' },
+  { label: 'Help Center', path: '/help-center' },
+]
+
+const handleLogout = async () => {
+  await authStore.logout()
+  navigateTo('/login')
+}
+
+const getDashboardPath = () => {
+  if (user.value?.role === 'lawyer') {
+    return '/lawyer/dashboard'
+  } else if (user.value?.role === 'law_firm') {
+    return '/firm/dashboard'
+  } else if (user.value?.role === 'client') {
+    return '/client/dashboard'
+  }
+  return '/dashboard'
+}
+
+onMounted(() => {
+  const handleScroll = () => {
+    isSticky.value = window.scrollY > 80
+  }
+
+  window.addEventListener('scroll', handleScroll)
+
+  unsubscribe = () => {
+    window.removeEventListener('scroll', handleScroll)
+  }
+})
+
+onUnmounted(() => {
+  if (unsubscribe) {
+    unsubscribe()
+  }
+})
+</script>
 <template>
   <div>
     <Disclosure as="nav">
@@ -61,8 +155,7 @@
 
               <!-- Notification Button (Hidden on mobile) -->
               <button
-               v-if="isAuthenticated && verificationStatus"
-
+                v-if="isAuthenticated"
                 class="hidden sm:flex items-center justify-center p-2 rounded-lg transition-colors relative"
                 :class="isSticky ? 'hover:bg-primary-normal-hover' : 'hover:bg-primary-light-active'"
                 aria-label="Notifications"
@@ -100,13 +193,12 @@
                     >
                     
                       <Icon icon="mdi:account" class="w-5 h-5 text-primary-normal" />
+                      <!-- Show verified checkmark only if user has verification status VERIFIED -->
                       <Icon 
-                  :icon="verificationStatus === 'VERIFIED' ? 'mdi:check-circle' : 'mdi:alert-circle'" 
-                  :class="[
-                    'absolute w-5 h-5 -bottom-1 -right-2',
-                    verificationStatus === 'VERIFIED' ? 'text-green-500' : 'text-yellow-500',
-                    isSticky ? '' : ''
-                  ]" />
+                        v-if="isVerified"
+                        icon="mdi:check-circle" 
+                        class="absolute w-5 h-5 -bottom-1 -right-2 text-green-500"
+                      />
                     </MenuButton>
 
                     <MenuItems class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none z-50 overflow-hidden data-[closed]:hidden data-[open]:block">
@@ -250,108 +342,3 @@
     </Disclosure>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { Icon } from '@iconify/vue'
-import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
-
-const isSticky = ref(false)
-let unsubscribe: (() => void) | null = null
-const authStore = useAuthStore()
-
-// Use computed properties for reactivity instead of destructuring
-const isAuthenticated = computed(() => {
-  const result = authStore.isAuthenticated
-  if (result) {
-    console.log('Navbar: User IS authenticated')
-  } else {
-    console.log('❌ Navbar: User NOT authenticated')
-  }
-  return result
-})
-const user = computed(() => authStore.user)
-
-// Verification status computed property
-const verificationStatus = computed(() => {
-  if (user.value?.role === 'lawyer') {
-    return authStore.lawyerVerificationStatus?.status
-  } else if (user.value?.role === 'firm') {
-    return authStore.firmVerificationStatus?.status
-  } else if (user.value?.role === 'client') {
-    return authStore.clientVerificationStatus?.status
-  }
-  return null
-})
-
-const verificationStatusTitle = computed(() => {
-  if (verificationStatus.value === 'VERIFIED') {
-    return 'Verification Completed'
-  } else if (verificationStatus.value === 'PENDING') {
-    return 'Verification Under Review'
-  } else if (verificationStatus.value === 'REJECTED') {
-    return 'Verification Rejected - Action Required'
-  }
-  return 'Verification Required'
-})
-
-const verificationPagePath = computed(() => {
-  if (user.value?.role === 'lawyer') {
-    return '/lawyer/verification-status'
-  } else if (user.value?.role === 'firm') {
-    return '/firm/verification-status'
-  } else if (user.value?.role === 'client') {
-    return '/client/verification-status'
-  }
-  return '/dashboard'
-})
-
-const navLinks = [
-  { title: 'Find Lawyer', path: '/client/lawyers' },
-  { title: 'Find Law Firm', path: '/client/firms' },
-  { title: 'About Us', path: '/about-us' },
-  { title: 'Case Enquiry', path: '/case-enquiry' },
-]
-
-const userMenuItems = [
-  { label: 'Wishlist', path: '/wishlist' },
-  { label: 'Recent History', path: '/recent-history' },
-  { label: 'My Cases', path: '/my-cases' },
-  { label: 'Settings', path: '/settings' },
-  { label: 'Help Center', path: '/help-center' },
-]
-
-const handleLogout = async () => {
-  await authStore.logout()
-  navigateTo('/login')
-}
-
-const getDashboardPath = () => {
-  if (user.value?.role === 'lawyer') {
-    return '/lawyer/dashboard'
-  } else if (user.value?.role === 'law_firm') {
-    return '/firm/dashboard'
-  } else if (user.value?.role === 'client') {
-    return '/client/dashboard'
-  }
-  return '/dashboard'
-}
-
-onMounted(() => {
-  const handleScroll = () => {
-    isSticky.value = window.scrollY > 80
-  }
-
-  window.addEventListener('scroll', handleScroll)
-
-  unsubscribe = () => {
-    window.removeEventListener('scroll', handleScroll)
-  }
-})
-
-onUnmounted(() => {
-  if (unsubscribe) {
-    unsubscribe()
-  }
-})
-</script>

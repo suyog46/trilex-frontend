@@ -2,10 +2,11 @@
 import DocumentsView from '~/components/cases/DocumentsView.vue'
 
 definePageMeta({
-  layout: "lawyer",
+  layout: 'client',
+  middleware: ['auth', 'client'],
 })
 </script>
 
 <template>
-  <DocumentsView scope="lawyer" />
+  <DocumentsView scope="client" />
 </template>

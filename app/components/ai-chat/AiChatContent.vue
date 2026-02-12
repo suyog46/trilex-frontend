@@ -73,10 +73,23 @@ const hasRecommendations = (message: ChatMessage) => {
             <Icon icon="mdi:robot" class="w-5 h-5" />
           </div>
           <div class="flex-1">
-            <div v-if="message.query_type === null || message.query_type === 'normal' || message.query_type === 'general'" class="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
+            <!-- Not Legal Query Type -->
+            <div v-if="message.query_type === 'not_legal'" class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 shadow-sm">
+              <div class="flex items-start gap-3">
+                <Icon icon="mdi:alert-circle-outline" class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                <div class="flex-1">
+                  <p class="text-sm font-medium text-amber-900 mb-1">Not a Legal Question</p>
+                  <p class="text-sm text-amber-800 whitespace-pre-wrap">{{ message.message || message.answer }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Normal/General Query Type -->
+            <div v-else-if="message.query_type === null || message.query_type === 'normal' || message.query_type === 'general'" class="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
               <p class="text-sm text-gray-800 whitespace-pre-wrap">{{ message.message }}</p>
             </div>
 
+            <!-- Recommendation Query Type -->
             <div v-else-if="message.query_type === 'recommendation'">
               <div v-if="hasRecommendations(message)" class="space-y-4">
                 <!-- Category Header -->

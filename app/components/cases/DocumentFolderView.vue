@@ -4,32 +4,49 @@ import { computed } from 'vue'
 const props = defineProps<{
   clientFilesCount: number
   internalFilesCount: number
+  firmFilesCount?: number
+  showFirmFolder?: boolean
 }>()
 
 const emit = defineEmits<{
-  'open-folder': [folder: 'client' | 'internal']
+  'open-folder': [folder: 'client' | 'internal' | 'firm']
 }>()
 
-const folders = computed(() => [
-  {
-    id: 'client',
-    name: 'Client Files',
-    description: 'Documents shared with the client',
-    icon: 'mdi:account-file',
-    color: 'blue',
-    count: props.clientFilesCount,
-  },
-  {
-    id: 'internal',
-    name: 'My Files',
-    description: 'Internal documents (not shared with client)',
-    icon: 'mdi:file-lock',
-    color: 'green',
-    count: props.internalFilesCount,
-  },
-])
+const folders = computed(() => {
+  const baseFolders = [
+    {
+      id: 'client',
+      name: 'Client Files',
+      description: 'Documents shared with the client',
+      icon: 'mdi:account-file',
+      color: 'blue',
+      count: props.clientFilesCount,
+    },
+    {
+      id: 'internal',
+      name: 'My Files',
+      description: 'Internal documents (not shared with client)',
+      icon: 'mdi:file-lock',
+      color: 'green',
+      count: props.internalFilesCount,
+    },
+  ]
 
-const openFolder = (folderId: 'client' | 'internal') => {
+  if (props.showFirmFolder) {
+    baseFolders.push({
+      id: 'firm',
+      name: 'Other Lawyers Folder',
+      description: 'Documents shared with other lawyers in the firm',
+      icon: 'mdi:account-group',
+      color: 'purple',
+      count: props.firmFilesCount || 0,
+    })
+  }
+
+  return baseFolders
+})
+
+const openFolder = (folderId: 'client' | 'internal' | 'firm') => {
   emit('open-folder', folderId)
 }
 </script>
@@ -41,12 +58,12 @@ const openFolder = (folderId: 'client' | 'internal') => {
       <p class="text-sm text-gray-600">Organize and manage your case documents in folders</p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div
         v-for="folder in folders"
         :key="folder.id"
         class="group relative bg-white border-2 border-gray-200 rounded-xl p-6 cursor-pointer transition-all duration-200 hover:border-primary-normal hover:shadow-lg"
-        @click="openFolder(folder.id as 'client' | 'internal')"
+        @click="openFolder(folder.id as 'client' | 'internal' | 'firm')"
       >
         <!-- Folder Icon -->
         <div class="flex items-start gap-4">

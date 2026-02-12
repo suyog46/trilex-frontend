@@ -53,7 +53,7 @@ const internalDocuments = ref<Array<{
   uploadedId: string
 }>>([])
 
-const activeDocumentFolder = ref<'client' | 'internal' | null>(null)
+const activeDocumentFolder = ref<'client' | 'firm' | 'internal' | null>(null)
 
 const caseDates = ref<Array<{
   id: string
@@ -138,7 +138,7 @@ const removeLinkedClient = () => {
   toast.info('Registered client unlinked')
 }
 
-const openDocumentFolder = (folder: 'client' | 'internal') => {
+const openDocumentFolder = (folder: 'client' | 'firm' | 'internal') => {
   activeDocumentFolder.value = folder
 }
 
@@ -147,7 +147,7 @@ const closeDocumentFolder = () => {
 }
 
 const updateDocumentTitle = (id: string, title: string) => {
-  const docs = activeDocumentFolder.value === 'client' ? clientDocuments.value : internalDocuments.value
+  const docs = activeDocumentFolder.value === 'client' ? clientDocuments.value : activeDocumentFolder.value === 'firm' ? [] : internalDocuments.value
   const doc = docs.find(d => d.id === id)
   if (doc) {
     doc.title = title
@@ -155,14 +155,14 @@ const updateDocumentTitle = (id: string, title: string) => {
 }
 
 const updateDocumentDescription = (id: string, description: string) => {
-  const docs = activeDocumentFolder.value === 'client' ? clientDocuments.value : internalDocuments.value
+  const docs = activeDocumentFolder.value === 'client' ? clientDocuments.value : activeDocumentFolder.value === 'firm' ? [] : internalDocuments.value
   const doc = docs.find(d => d.id === id)
   if (doc) {
     doc.description = description
   }
 }
 
-const handleDocumentUpload = async (event: Event, scope: 'client' | 'internal') => {
+const handleDocumentUpload = async (event: Event, scope: 'client' | 'firm' | 'internal') => {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
 
@@ -196,7 +196,7 @@ const handleDocumentUpload = async (event: Event, scope: 'client' | 'internal') 
 
     if (scope === 'client') {
       clientDocuments.value.push(document)
-    } else {
+    } else if (scope === 'internal') {
       internalDocuments.value.push(document)
     }
   }
@@ -204,7 +204,7 @@ const handleDocumentUpload = async (event: Event, scope: 'client' | 'internal') 
 
   const uploadedId = await uploadFile(file)
   if (uploadedId) {
-    const docs = scope === 'client' ? clientDocuments.value : internalDocuments.value
+    const docs = scope === 'client' ? clientDocuments.value : scope === 'internal' ? internalDocuments.value : []
     const doc = docs[docs.length - 1]
     if (doc) {
       doc.uploadedId = uploadedId
@@ -214,7 +214,7 @@ const handleDocumentUpload = async (event: Event, scope: 'client' | 'internal') 
     toast.error('Failed to upload document')
     if (scope === 'client') {
       clientDocuments.value.pop()
-    } else {
+    } else if (scope === 'internal') {
       internalDocuments.value.pop()
     }
   }
@@ -222,10 +222,10 @@ const handleDocumentUpload = async (event: Event, scope: 'client' | 'internal') 
   input.value = ''
 }
 
-const removeDocument = (id: string, scope: 'client' | 'internal') => {
+const removeDocument = (id: string, scope: 'client' | 'firm' | 'internal') => {
   if (scope === 'client') {
     clientDocuments.value = clientDocuments.value.filter(doc => doc.id !== id)
-  } else {
+  } else if (scope === 'internal') {
     internalDocuments.value = internalDocuments.value.filter(doc => doc.id !== id)
   }
   toast.success('Document removed')
@@ -641,7 +641,7 @@ const goToPreviousStep = () => {
               />
 
               <DocumentUploadView
-                v-else
+                v-else-if="activeDocumentFolder === 'client' || activeDocumentFolder === 'internal'"
                 :folder-type="activeDocumentFolder"
                 :documents="activeDocumentFolder === 'client' ? clientDocuments : internalDocuments"
                 :is-uploading="isUploadingMedia"

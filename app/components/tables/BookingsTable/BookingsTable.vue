@@ -10,6 +10,7 @@ interface Props {
   currentPage: number
   pageSize: number
   totalCount: number
+  isLoading?: boolean
 }
 
 const props = defineProps<Props>()
@@ -54,6 +55,7 @@ const handleViewDetail = (booking: BookingResponse) => {
       :current-page="currentPage"
       :page-size="pageSize"
       :total-count="totalCount"
+      :is-loading="isLoading"
       search-placeholder="Search by lawyer/firm name..."
       :can-view-detail="true"
       :can-edit="false"

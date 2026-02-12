@@ -69,6 +69,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isLawyer = computed(() => user.value?.role === 'lawyer')
   const isAdmin = computed(() => user.value?.role === 'admin')
+  const userId = computed(() => user.value?.id || null)
 
   // Error handler
   const handleError = (err: any): AuthError => {
@@ -126,15 +127,32 @@ export const useAuthStore = defineStore('auth', () => {
       
       if (tokenValue && tokenValue.length > 0) {
         console.log('initializeAuth: Token found, user IS authenticated')
-        // Restore user object with stored role
-        if (role) {
+        
+        // Try to fetch full user details from /me endpoint
+        try {
+          const userDetails = await authApi.me()
           user.value = {
-            id: extractUserIdFromToken(tokenValue) || '',
-            role: role as any,
-            email: '', // Email will be populated on next request or remain empty
-            isEmailVerified: true, // Assume verified if token exists
+            id: userDetails?.user?.id,
+            email: userDetails.user?.email || '',
+            role: userDetails.user?.role || role || '',
+            isEmailVerified: true,
+            verification: userDetails.verification,
+            profile: userDetails.profile,
+            fullName: userDetails.verification?.full_name || userDetails.profile?.phone_number,
           } as User
-          console.log('User role restored from cookie:', role)
+          console.log('User details fetched from /me:', user.value)
+        } catch (meError) {
+          console.error('Failed to fetch user details from /me during init:', meError)
+          // Fallback to basic user restoration from token
+          if (role) {
+            user.value = {
+              id: extractUserIdFromToken(tokenValue) || '',
+              role: role as any,
+              email: '',
+              isEmailVerified: true,
+            } as User
+            console.log('User role restored from cookie:', role)
+          }
         }
       } else {
         console.log('❌ initializeAuth: No token found, user NOT authenticated')
@@ -181,13 +199,28 @@ export const useAuthStore = defineStore('auth', () => {
         userRole.value = response.role
       }
 
-      // Create user object from response - extract what's available
-      user.value = {
-        id: extractUserIdFromToken(accessTokenValue) || '',
-        email: response.email,
-        role: response.role,
-        isEmailVerified: response.is_email_verified,
-      } as User
+      // Fetch full user details from /me endpoint
+      try {
+        const userDetails = await authApi.me()
+        user.value = {
+          id: userDetails?.user?.id,
+          email: userDetails.user?.email || response.email,
+          role: userDetails.user?.role || response.role,
+          isEmailVerified: response.is_email_verified,
+          verification: userDetails.verification,
+          profile: userDetails.profile,
+          fullName: userDetails.verification?.full_name || userDetails.profile?.phone_number,
+        } as User
+      } catch (meError) {
+        console.error('Failed to fetch user details from /me:', meError)
+        // Fallback to basic user object
+        user.value = {
+          id: extractUserIdFromToken(accessTokenValue) || '',
+          email: response.email,
+          role: response.role,
+          isEmailVerified: response.is_email_verified,
+        } as User
+      }
 
       return {
         success: true,
@@ -211,7 +244,7 @@ export const useAuthStore = defineStore('auth', () => {
       handleError(err)
       return { success: false }
     } finally {
-      isLoading.value = false
+      isLoading.value = false 
     }
   }
 
@@ -535,6 +568,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     isLawyer,
     isAdmin,
+    userId,
 
     // Methods
     initializeAuth,

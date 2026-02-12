@@ -17,6 +17,16 @@ export interface User {
   avatar?: string
   createdAt?: string
   isEmailVerified?: boolean
+  verification?: {
+    id: string
+    full_name?: string
+    status: 'VERIFIED' | 'PENDING' | 'REJECTED' | 'NOT_SUBMITTED'
+    rejection_reason?: string | null
+  }
+  profile?: {
+    phone_number?: string
+    address?: any
+  }
 }
 
 export interface AuthResponse {

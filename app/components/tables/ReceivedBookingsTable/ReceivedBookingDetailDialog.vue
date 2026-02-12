@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '~/components/ui/dialog'
 import { Button } from '~/components/ui/button'
 import { bookingsApi, type BookingResponse } from '~/composables/api/bookings.api'
+import { chatApi } from '~/composables/api/chat.api'
 import { toast } from 'vue-sonner'
+import { useAuthStore } from '~/stores/auth'
 
 const props = defineProps<{
   open: boolean
@@ -16,6 +19,8 @@ const emit = defineEmits<{
   (e: 'reject', booking: BookingResponse): void
 }>()
 
+const router = useRouter()
+const authStore = useAuthStore()
 const isProcessing = ref(false)
 
 const closeDialog = () => {
@@ -70,7 +75,7 @@ const formatCourtType = (courtType: string): string => {
   return labelMap[courtType] || courtType
 }
 
-// Helper to format status with color
+// Helper to get status color
 const getStatusColor = (status: string): string => {
   switch (status) {
     case 'pending':
@@ -83,6 +88,33 @@ const getStatusColor = (status: string): string => {
       return 'bg-gray-100 text-gray-800 border-gray-200'
   }
 }
+
+// Handle opening chat
+const handleOpenChat = async () => {
+  if (!props.booking) return
+  isProcessing.value = true
+  try {
+    await chatApi.createRoom(props.booking.id)
+    toast.success('Chat room created successfully!')
+    
+    // Navigate based on user role
+    const userRole = authStore.userRole
+    if (userRole === 'client') {
+      router.push('/client/messages')
+    } else if (userRole === 'lawyer' || userRole === 'firm') {
+      router.push('/chat')
+    }
+    
+    closeDialog()
+  } catch (error: any) {
+    console.error('Error creating chat room:', error)
+    const errorMsg = error?.data?.detail || error?.message || 'Failed to create chat room'
+    toast.error(errorMsg)
+  } finally {
+    isProcessing.value = false
+  }
+}
+
 </script>
 
 <template>
@@ -192,6 +224,16 @@ const getStatusColor = (status: string): string => {
         >
           Close
         </Button>
+        <template v-if="booking?.status === 'accepted'">
+          <Button
+            class="flex-1 bg-primary-normal hover:bg-primary-normal-hover text-white"
+            :disabled="isProcessing"
+            @click="handleOpenChat"
+          >
+            <Icon icon="mdi:message" class="w-5 h-5 mr-2" />
+            Chat
+          </Button>
+        </template>
         <template v-if="booking?.status === 'pending'">
           <Button
             class="flex-1 bg-red-700 hover:bg-red-800 text-white"

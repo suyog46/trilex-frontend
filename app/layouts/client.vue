@@ -64,18 +64,18 @@ const sidebarItems = [
     path: '/client/messages',
     requiresVerification: true,
   },
-  {
-    label: 'Payments',
-    icon: 'mdi:credit-card',
-    path: '/client/payments',
+ {
+    label: 'Documents',
+    icon: 'mdi:file-document-outline',
+    path: '/client/documents',
     requiresVerification: true,
   },
-  {
-    label: 'Profile',
-    icon: 'mdi:account',
-    path: '/client/profile',
-    requiresVerification: false,
-  },
+  // {
+  //   label: 'Profile',
+  //   icon: 'mdi:account',
+  //   path: '/client/profile',
+  //   requiresVerification: false,
+  // },
   {
     label: 'Verification',
     icon: 'mdi:shield-check',
@@ -83,12 +83,7 @@ const sidebarItems = [
     requiresVerification: false,
     badge: verificationStatus.value === 'VERIFIED' ? 'check' : verificationStatus.value === 'PENDING' ? 'pending' : 'alert',
   },
-  {
-    label: 'Support',
-    icon: 'mdi:help-circle',
-    path: '/client/help',
-    requiresVerification: false,
-  },
+
 ]
 
 const handleItemClick = (item: any) => {
@@ -225,6 +220,7 @@ const handleBackToHome = () => {
         </div>
       </aside>
 
+      <!-- Overlay for mobile -->
       <div
         v-if="sidebarOpen"
         @click="sidebarOpen = false"
