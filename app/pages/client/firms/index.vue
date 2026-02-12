@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
 import { firmsApi, type Firm } from '~/composables/api/firms.api'
-import { addressApi, casesApi, type Province, type District, type Category } from '~/composables/api/address.api'
+import { addressApi, type Province, type District } from '~/composables/api/address.api'
+import { casesApi, type Category } from '~/composables/api/cases.api'
 import LawFirmCard from '~/components/cards/LawFirmCard.vue'
 import LawFirmCardSkeleton from '~/components/cards/LawFirmCardSkeleton.vue'
 import { Button } from '~/components/ui/button'

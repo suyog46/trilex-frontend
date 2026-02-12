@@ -4,7 +4,7 @@ import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { ref, onMounted, computed } from 'vue'
 import { bookingsApi } from '~/composables/api/bookings.api'
-import { casesApi, type Category } from '~/composables/api/address.api'
+import { casesApi, type Category } from '~/composables/api/cases.api'
 import { useAuthStore } from '~/stores/auth'
 import { toast } from 'vue-sonner'
 

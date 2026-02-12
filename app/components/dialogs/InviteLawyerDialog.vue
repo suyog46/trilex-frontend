@@ -2,7 +2,8 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { lawyersApi, type Lawyer, type Province, type District } from '~/composables/api/lawyers.api'
-import { addressApi, type Category, casesApi } from '~/composables/api/address.api'
+import { addressApi, type Category } from '~/composables/api/address.api'
+import { casesApi } from '~/composables/api/cases.api'
 import { firmsApi } from '~/composables/api/firms.api'
 import { toast } from 'vue-sonner'
 
