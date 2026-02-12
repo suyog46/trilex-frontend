@@ -27,6 +27,9 @@ const selectedClient = ref<RegisteredClient | null>(null)
 // Media upload
 const { uploadFile, isUploading: isUploadingMedia } = useMediaUpload()
 
+// Form submission state
+const isSubmitting = ref(false)
+
 // Categories
 const categories = ref<Category[]>([])
 const loadingCategories = ref(false)
@@ -50,10 +53,8 @@ const internalDocuments = ref<Array<{
   uploadedId: string
 }>>([])
 
-// Document folder state
 const activeDocumentFolder = ref<'client' | 'internal' | null>(null)
 
-// Dates state
 const caseDates = ref<Array<{
   id: string
   date: string
@@ -61,7 +62,6 @@ const caseDates = ref<Array<{
   assigned_to_name: string
 }>>([])
 
-// Form setup
 const { handleSubmit, values, setFieldValue, resetForm, errors } = useForm({
   validationSchema: toTypedSchema(createCaseSchema),
   initialValues: {
@@ -102,7 +102,6 @@ const steps = [
   { key: "progress", label: "Progress" },
 ]
 
-// Fetch categories
 const fetchCategories = async () => {
   loadingCategories.value = true
   try {
@@ -120,12 +119,10 @@ onMounted(() => {
   fetchCategories()
 })
 
-// Handle client selection from dialog
 const handleClientSelect = (client: RegisteredClient) => {
   selectedClient.value = client
   setFieldValue('client', client.id)
   
-  // Pre-fill client details if verification data exists
   if (client.verification) {
     setFieldValue('client_details.full_name', client.verification.full_name || '')
     setFieldValue('client_details.email', client.user.email || '')
@@ -135,14 +132,12 @@ const handleClientSelect = (client: RegisteredClient) => {
   toast.success('Client linked and details pre-filled successfully')
 }
 
-// Remove linked registered client
 const removeLinkedClient = () => {
   selectedClient.value = null
   setFieldValue('client', undefined)
   toast.info('Registered client unlinked')
 }
 
-// Document folder management
 const openDocumentFolder = (folder: 'client' | 'internal') => {
   activeDocumentFolder.value = folder
 }
@@ -167,28 +162,24 @@ const updateDocumentDescription = (id: string, description: string) => {
   }
 }
 
-// Document upload handlers
 const handleDocumentUpload = async (event: Event, scope: 'client' | 'internal') => {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
 
   if (!file) return
 
-  // Validate file type
   const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf']
   if (!allowedTypes.includes(file.type)) {
     toast.error('Invalid file type. Allowed: JPEG, PNG, GIF, WebP, PDF')
     return
   }
 
-  // Validate file size (max 10MB)
   const maxSize = 10 * 1024 * 1024
   if (file.size > maxSize) {
     toast.error('File size exceeds 10MB limit')
     return
   }
 
-  // Create preview
   const reader = new FileReader()
   reader.onload = (e) => {
     const preview = e.target?.result as string
@@ -211,7 +202,6 @@ const handleDocumentUpload = async (event: Event, scope: 'client' | 'internal') 
   }
   reader.readAsDataURL(file)
 
-  // Upload file
   const uploadedId = await uploadFile(file)
   if (uploadedId) {
     const docs = scope === 'client' ? clientDocuments.value : internalDocuments.value
@@ -222,7 +212,6 @@ const handleDocumentUpload = async (event: Event, scope: 'client' | 'internal') 
     toast.success('Document uploaded successfully')
   } else {
     toast.error('Failed to upload document')
-    // Remove the document from the array
     if (scope === 'client') {
       clientDocuments.value.pop()
     } else {
@@ -230,7 +219,6 @@ const handleDocumentUpload = async (event: Event, scope: 'client' | 'internal') 
     }
   }
 
-  // Reset input
   input.value = ''
 }
 
@@ -243,7 +231,6 @@ const removeDocument = (id: string, scope: 'client' | 'internal') => {
   toast.success('Document removed')
 }
 
-// Date handlers
 const addDate = () => {
   const id = Math.random().toString(36).substring(7)
   caseDates.value.push({
@@ -258,14 +245,13 @@ const removeDate = (id: string) => {
   caseDates.value = caseDates.value.filter(date => date.id !== id)
 }
 
-// Form submission
 const onSubmit = handleSubmit(async (formValues: any) => {
+  isSubmitting.value = true
   try {
     console.log('=== FORM SUBMISSION START ===')
     console.log('Form values:', JSON.stringify(formValues, null, 2))
     console.log('Current errors:', errors.value)
 
-    // Prepare documents array
     const documents = [
       ...clientDocuments.value.map(doc => {
         const fileType: 'image' | 'pdf' | 'document' = doc.file.type.includes('pdf') ? 'pdf' : doc.file.type.includes('image') ? 'image' : 'document'
@@ -289,7 +275,6 @@ const onSubmit = handleSubmit(async (formValues: any) => {
       }),
     ]
 
-    // Prepare dates array
     const dates = caseDates.value
       .filter(d => d.date) 
       .map(d => ({
@@ -299,7 +284,6 @@ const onSubmit = handleSubmit(async (formValues: any) => {
         assigned_to_name: d.assigned_to_name || '',
       }))
 
-    // Build payload
     const payload: CreateCaseInput = {
       title: formValues.title,
       case_category: formValues.case_category,
@@ -309,31 +293,25 @@ const onSubmit = handleSubmit(async (formValues: any) => {
       client_details: formValues.client_details, // Send client details as part of the main payload
     }
     
-    // Optionally link to registered client if selected
     if (formValues.client) {
       payload.client = formValues.client
     }
 
-    // Add waris if filled
     if (formValues.waris?.full_name) {
       payload.waris = formValues.waris
     }
 
-    // Add documents if any
     if (documents.length > 0) {
       payload.documents = documents
     }
 
-    // Add dates if any
     if (dates.length > 0) {
       payload.dates = dates
     }
 
-    // Submit
     await casesApi.createCase(payload)
     toast.success('Case created successfully!')
     
-    // Reset form
     resetForm()
     clientDocuments.value = []
     internalDocuments.value = []
@@ -342,7 +320,6 @@ const onSubmit = handleSubmit(async (formValues: any) => {
     activeDocumentFolder.value = null
     activeStep.value = 'general'
     
-    // Navigate to cases list
     setTimeout(() => {
       navigateTo(`/cases/${payload.status || ''}`)
     }, 1000)
@@ -350,9 +327,10 @@ const onSubmit = handleSubmit(async (formValues: any) => {
     console.error('Failed to create case:', error)
     const errorMessage = error?.data?.message || error?.message || 'Failed to create case'
     toast.error(errorMessage)
+  } finally {
+    isSubmitting.value = false
   }
 }, (validationErrors) => {
-  // Handle validation errors
   console.log('=== VALIDATION ERRORS ===')
   console.log('Validation errors:', JSON.stringify(validationErrors, null, 2))
   console.log('Form values at error time:', JSON.stringify(values, null, 2))
@@ -374,15 +352,13 @@ const onSubmit = handleSubmit(async (formValues: any) => {
   }
 })
 
-const isLoading = computed(() => isUploadingMedia.value)
+const isLoading = computed(() => isUploadingMedia.value || isSubmitting.value)
 
-// Navigation between steps
 const goToNextStep = () => {
   const currentIndex = steps.findIndex(s => s.key === activeStep.value)
   if (currentIndex < steps.length - 1 && currentIndex !== -1) {
     const nextStep = steps[currentIndex + 1]
     if (nextStep) {
-      // Close document folder view when navigating away from documents step
       if (activeStep.value === 'documents') {
         activeDocumentFolder.value = null
       }
@@ -396,7 +372,6 @@ const goToPreviousStep = () => {
   if (currentIndex > 0) {
     const prevStep = steps[currentIndex - 1]
     if (prevStep) {
-      // Close document folder view when navigating away from documents step
       if (activeStep.value === 'documents') {
         activeDocumentFolder.value = null
       }
@@ -417,10 +392,8 @@ const goToPreviousStep = () => {
           :steps="steps"
           width="full"
         >
-          <!-- STEP 1: General Information -->
           <TabsContent value="general" class="space-y-6" force-mount v-show="activeStep === 'general'">
             <div class="bg-white rounded-lg shadow p-6 space-y-10">
-              <!-- Title -->
               <FormField v-slot="{ componentField }" name="title">
                 <FormItem>
                   <FormLabel class="text-lg font-semibold">
@@ -477,7 +450,6 @@ const goToPreviousStep = () => {
                   </FormItem>
                 </FormField>
   
-                <!-- Court Type -->
                 <FormField v-slot="{ componentField }" name="court_type">
                   <FormItem>
                     <FormLabel class="text-lg font-semibold">
@@ -499,13 +471,10 @@ const goToPreviousStep = () => {
                 </FormField>
 
               </div>
-              <!-- Case Category -->
 
-              <!-- Description -->
           
             </div>
 
-            <!-- Navigation -->
             <div class="flex justify-end">
               <Button
                 type="button"
@@ -517,10 +486,8 @@ const goToPreviousStep = () => {
             </div>
           </TabsContent>
 
-          <!-- STEP 2: Client Details -->
           <TabsContent value="client" class="space-y-6" force-mount v-show="activeStep === 'client'">
             <div class="bg-white rounded-lg shadow p-6 space-y-6">
-              <!-- Optional: Link to Registered Client -->
               <div class="mb-6">
                 <div class="flex items-center justify-between mb-3">
                   <div>
@@ -686,7 +653,6 @@ const goToPreviousStep = () => {
               />
             </div>
 
-            <!-- Navigation -->
             <div class="flex justify-between">
               <Button type="button" variant="outline" @click="goToPreviousStep">
                 Previous
@@ -731,7 +697,6 @@ const goToPreviousStep = () => {
                 </FormItem>
               </FormField>
 
-              <!-- Address -->
               <FormField v-slot="{ componentField }" name="waris.address">
                 <FormItem>
                   <FormLabel>Address</FormLabel>
@@ -742,7 +707,6 @@ const goToPreviousStep = () => {
                 </FormItem>
               </FormField>
 
-              <!-- Date of Birth -->
               <FormField v-slot="{ componentField }" name="waris.date_of_birth">
                 <FormItem>
                   <FormLabel>Date of Birth</FormLabel>
@@ -753,7 +717,6 @@ const goToPreviousStep = () => {
                 </FormItem>
               </FormField>
 
-              <!-- Citizenship Number -->
               <FormField v-slot="{ componentField }" name="waris.citizenship_number">
                 <FormItem>
                   <FormLabel>Citizenship Number</FormLabel>
@@ -764,7 +727,6 @@ const goToPreviousStep = () => {
                 </FormItem>
               </FormField>
 
-              <!-- Gender -->
               <FormField v-slot="{ componentField }" name="waris.gender">
                 <FormItem>
                   <FormLabel>Gender</FormLabel>
@@ -780,7 +742,6 @@ const goToPreviousStep = () => {
               </FormField>
             </div>
 
-            <!-- Navigation -->
             <div class="flex justify-between">
               <Button type="button" variant="outline" @click="goToPreviousStep">
                 Previous
@@ -791,10 +752,8 @@ const goToPreviousStep = () => {
             </div>
           </TabsContent>
 
-          <!-- STEP 5: Progress -->
           <TabsContent value="progress" class="space-y-6" force-mount v-show="activeStep === 'progress'">
             <div class="bg-white rounded-lg shadow p-6 space-y-6">
-              <!-- Status Selection -->
               <FormField v-slot="{ componentField }" name="status">
                 <FormItem>
                   <FormLabel class="text-lg font-semibold">Case Status <span class="text-red-500">*</span></FormLabel>
@@ -855,7 +814,6 @@ const goToPreviousStep = () => {
                 </FormItem>
               </FormField>
 
-              <!-- Tarik Dates -->
               <div class="border-t pt-6">
                 <div class="flex items-center justify-between mb-4">
                   <h3 class="text-lg font-semibold">Tarik Dates</h3>
@@ -915,7 +873,6 @@ const goToPreviousStep = () => {
               </div>
             </div>
 
-            <!-- Navigation -->
             <div class="flex justify-between">
               <Button type="button" variant="outline" @click="goToPreviousStep">
                 Previous

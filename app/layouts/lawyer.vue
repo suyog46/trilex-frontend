@@ -4,6 +4,7 @@ import { ref, computed } from 'vue'
 import { onMounted, onUnmounted } from 'vue'
 import Sidebar from '~/composables/sidebar.vue';
 import UserAvatar from '@/components/ui/UserAvatar.vue'
+import { Button } from '@/components/ui/button'
 import { useAuthStore } from '~/stores/auth'
 import { toast } from 'vue-sonner'
 
@@ -94,16 +95,14 @@ const verificationMessage = computed(() => {
           </div>
 
           <div class="flex items-center gap-6">
-            <button 
+            <Button
+              v-if="authStore.user?.role !== 'client'"
               @click="navigateTo('/cases/create-case')"
-              class="relative group"
-              title="Create case"
+              class="bg-primary-normal hover:bg-primary-normal/90 text-white px-4 py-2"
             >
-              <Icon icon="mdi:plus-circle" class="w-6 h-6 text-primary-normal hover:text-primary-normal/80 transition-colors" />
-              <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap">
-                Create case
-              </span>
-            </button>
+              <Icon icon="mdi:plus" class="w-5 h-5 mr-2" />
+              Create Case
+            </Button>
             
             <button class="relative">
               <Icon icon="mdi:email-outline" class="w-6 h-6 text-gray-600" />
