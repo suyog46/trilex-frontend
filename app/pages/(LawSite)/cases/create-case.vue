@@ -123,7 +123,7 @@ onMounted(() => {
 // Handle client selection from dialog
 const handleClientSelect = (client: RegisteredClient) => {
   selectedClient.value = client
-  setFieldValue('client', client.user.id)
+  setFieldValue('client', client.id)
   
   // Pre-fill client details if verification data exists
   if (client.verification) {
@@ -573,11 +573,9 @@ const goToPreviousStep = () => {
                 </div>
               </div>
 
-              <!-- Client Form (Always Visible) -->
               <div>
                 <h3 class="text-base font-semibold text-gray-900 mb-4">Client Information <span class="text-red-500">*</span></h3>
                 <div class="grid grid-cols-2 gap-5">
-                <!-- Full Name -->
                 <FormField v-slot="{ componentField }" name="client_details.full_name">
                   <FormItem>
                     <FormLabel>Full Name <span class="text-red-500">*</span></FormLabel>
@@ -588,7 +586,6 @@ const goToPreviousStep = () => {
                   </FormItem>
                 </FormField>
 
-                <!-- Email -->
                 <FormField v-slot="{ componentField }" name="client_details.email">
                   <FormItem>
                     <FormLabel>Email <span class="text-red-500">*</span></FormLabel>
@@ -599,7 +596,6 @@ const goToPreviousStep = () => {
                   </FormItem>
                 </FormField>
 
-                <!-- Phone -->
                 <FormField v-slot="{ componentField }" name="client_details.phone">
                   <FormItem>
                     <FormLabel>Phone <span class="text-red-500">*</span></FormLabel>
@@ -621,7 +617,6 @@ const goToPreviousStep = () => {
                   </FormItem>
                 </FormField>
 
-                <!-- Date of Birth -->
                 <FormField v-slot="{ componentField }" name="client_details.date_of_birth">
                   <FormItem>
                     <FormLabel>Date of Birth <span class="text-red-500">*</span></FormLabel>
@@ -632,7 +627,6 @@ const goToPreviousStep = () => {
                   </FormItem>
                 </FormField>
 
-                <!-- Citizenship Number -->
                 <FormField v-slot="{ componentField }" name="client_details.citizenship_number">
                   <FormItem>
                     <FormLabel>Citizenship Number <span class="text-red-500">*</span></FormLabel>
@@ -643,7 +637,6 @@ const goToPreviousStep = () => {
                   </FormItem>
                 </FormField>
 
-                <!-- Gender -->
                 <FormField v-slot="{ componentField }" name="client_details.gender">
                   <FormItem>
                     <FormLabel>Gender <span class="text-red-500">*</span></FormLabel>
@@ -661,7 +654,6 @@ const goToPreviousStep = () => {
               </div>
             </div>
 
-            <!-- Navigation -->
             <div class="flex justify-between">
               <Button type="button" variant="outline" @click="goToPreviousStep">
                 Previous
@@ -672,10 +664,8 @@ const goToPreviousStep = () => {
             </div>
           </TabsContent>
 
-          <!-- STEP 3: Documents -->
           <TabsContent value="documents" class="space-y-6" force-mount v-show="activeStep === 'documents'">
             <div class="bg-white rounded-lg shadow p-6">
-              <!-- Show Folder View or Upload View -->
               <DocumentFolderView
                 v-if="!activeDocumentFolder"
                 :client-files-count="clientDocuments.length"
@@ -707,12 +697,10 @@ const goToPreviousStep = () => {
             </div>
           </TabsContent>
 
-          <!-- STEP 4: Waris Details -->
           <TabsContent value="waris" class="space-y-6" force-mount v-show="activeStep === 'waris'">
             <div class="bg-white rounded-lg shadow p-6  grid grid-cols-2 gap-5">
               <!-- <p class="text-gray-600 mb-4">Enter the opponent/waris details (optional)</p> -->
 
-              <!-- Full Name -->
               <FormField v-slot="{ componentField }" name="waris.full_name">
                 <FormItem>
                   <FormLabel>Full Name</FormLabel>
@@ -723,7 +711,6 @@ const goToPreviousStep = () => {
                 </FormItem>
               </FormField>
 
-              <!-- Email -->
               <FormField v-slot="{ componentField }" name="waris.email">
                 <FormItem>
                   <FormLabel>Email</FormLabel>
@@ -734,7 +721,6 @@ const goToPreviousStep = () => {
                 </FormItem>
               </FormField>
 
-              <!-- Phone -->
               <FormField v-slot="{ componentField }" name="waris.phone">
                 <FormItem>
                   <FormLabel>Phone</FormLabel>
