@@ -92,7 +92,6 @@ const handleBackToLogin = () => {
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
     <div class="w-full max-w-md">
-      <!-- Invalid Token State -->
       <div v-if="!isTokenValid" class="text-center">
         <div class="mb-6 flex justify-center">
           <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
@@ -113,7 +112,6 @@ const handleBackToLogin = () => {
         </Button>
       </div>
 
-      <!-- Reset Password Form -->
       <div v-else class="w-full flex flex-col gap-y-6 bg-white p-8 rounded-lg shadow-lg">
         <div>
           <h1 class="text-3xl font-bold text-primary-normal mb-2">
@@ -125,7 +123,6 @@ const handleBackToLogin = () => {
         </div>
 
         <form @submit.prevent="onSubmit" class="space-y-4">
-          <!-- New Password Field -->
           <FormField v-slot="{ componentField }" name="new_password">
             <FormItem>
               <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -154,7 +151,6 @@ const handleBackToLogin = () => {
             </FormItem>
           </FormField>
 
-          <!-- Confirm Password Field -->
           <FormField v-slot="{ componentField }" name="confirm_password">
             <FormItem>
               <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -183,7 +179,6 @@ const handleBackToLogin = () => {
             </FormItem>
           </FormField>
 
-          <!-- Submit Button -->
           <div class="w-full pt-3">
             <Button
               type="submit"
@@ -196,7 +191,6 @@ const handleBackToLogin = () => {
           </div>
         </form>
 
-        <!-- Back to Login Link -->
         <div class="text-center">
           <p class="text-slate-600">
             <span

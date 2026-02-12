@@ -48,24 +48,22 @@ export const useApiFetch = () => {
         } else {
           (options.headers as Record<string, string>)['Authorization'] = `Bearer ${token}`
         }
-        console.log('✅ Authorization header set')
+        console.log(' Authorization header set')
       } else {
-        console.warn('⚠️ No token found, request will fail with 403')
+        console.warn('No token found, request will fail with 403')
       }
     },
     onResponseError({ response }) {
-      console.error('❌ API Error:', response.status, response.statusText, response._data)
+      console.error(' API Error:', response.status, response.statusText, response._data)
       
       // Handle different HTTP status codes
       if (response.status === 401) {
         authStore.logout()
       }
       
-      // Parse and format error response for consistency
       const errorData = response._data || {}
       const errorMessage = errorData.detail || errorData.message || response.statusText || 'Unknown error'
       
-      // Throw custom ApiError with parsed data
       throw new ApiError(
         errorMessage,
         response.status,

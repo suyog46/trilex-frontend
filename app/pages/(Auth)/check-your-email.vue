@@ -55,7 +55,6 @@ onMounted(() => {
     }
   }, 60000) 
 
-  // Auto-resend verification link if coming from login attempt
   if (isFromLogin.value) {
     console.log('Auto-resending verification link for:', userEmail.value)
     handleResendEmail()
@@ -88,13 +87,10 @@ const handleResendEmail = async () => {
     const errorMessage = generalErrors.length > 0 ? generalErrors[0] : 'Failed to resend verification link'
     console.error('Resend verification error:', error)
     
-    // Only show error toast if manually triggered (not auto-resend on page load)
     if (!isFromLogin.value) {
       toast.error(errorMessage || 'Failed to resend verification link')
     } else {
-      // For auto-resend, just log and don't show error to avoid alerting user
       console.warn('Auto-resend failed:', errorMessage)
-      // Remove fromLogin flag so manual resend will work without cooldown
       resendCooldown.value = 0
     }
   } finally {

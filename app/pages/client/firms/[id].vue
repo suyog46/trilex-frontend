@@ -6,7 +6,6 @@ import BookingDialog from '~/components/shared/BookingDialog.vue'
 import { toast } from 'vue-sonner'
 
 definePageMeta({
-  layout: 'client',
   middleware: ['auth', 'client'],
 })
 

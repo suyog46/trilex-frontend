@@ -62,7 +62,6 @@ const handleToOTP = () => {
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
     <div class="w-full max-w-md">
-      <!-- Success State -->
       <div v-if="emailSent" class="text-center">
         <div class="mb-6 flex justify-center">
           <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
@@ -87,7 +86,6 @@ const handleToOTP = () => {
         </Button>
       </div>
 
-      <!-- Form State -->
       <div v-else class="w-full flex flex-col gap-y-6 bg-white p-8 rounded-lg shadow-lg">
         <div>
           <h1 class="text-3xl font-bold text-primary-normal mb-2">
@@ -99,7 +97,6 @@ const handleToOTP = () => {
         </div>
 
         <form @submit.prevent="onSubmit" class="space-y-4">
-          <!-- Email Field -->
           <FormField v-slot="{ componentField }" name="email">
             <FormItem>
               <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -118,7 +115,6 @@ const handleToOTP = () => {
             </FormItem>
           </FormField>
 
-          <!-- Submit Button -->
           <div class="w-full pt-3">
             <Button
               type="submit"
@@ -131,7 +127,6 @@ const handleToOTP = () => {
           </div>
         </form>
 
-        <!-- Back to Login Link -->
         <div class="text-center">
           <p class="text-slate-600">
             Remember your password?

@@ -76,17 +76,13 @@ const verificationMessage = computed(() => {
 
 <template>
   <div class="min-h-screen flex gap-3 px-4 relative">
-    <!-- Main Layout -->
     <div class="pt-20 border-r border-gray-200 px-3" :class="{ 'opacity-50 pointer-events-none': isVerificationBlocked }">
       <Sidebar/>
     </div>
 
-    <!-- Main Content -->
     <div class="flex-1 flex flex-col">
-      <!-- Header -->
       <header class="bg-white border-b border-gray-200 px-8 py-4">
         <div class="flex items-center justify-between">
-          <!-- Search -->
           <div class="relative max-w-md flex-1">
             <Icon icon="material-symbols-light:search-rounded" 
             class=" absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -97,9 +93,18 @@ const verificationMessage = computed(() => {
             />
           </div>
 
-          <!-- Right Section -->
           <div class="flex items-center gap-6">
-            <!-- Notifications -->
+            <button 
+              @click="navigateTo('/cases/create-case')"
+              class="relative group"
+              title="Create case"
+            >
+              <Icon icon="mdi:plus-circle" class="w-6 h-6 text-primary-normal hover:text-primary-normal/80 transition-colors" />
+              <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap">
+                Create case
+              </span>
+            </button>
+            
             <button class="relative">
               <Icon icon="mdi:email-outline" class="w-6 h-6 text-gray-600" />
               <span class="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full"></span>
@@ -109,7 +114,6 @@ const verificationMessage = computed(() => {
               <span class="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full"></span>
             </button>
 
-            <!-- User Profile -->
             <div ref="dropdownRef" class="relative">
               <button 
                 @click="toggleUserDropdown"
@@ -132,7 +136,6 @@ const verificationMessage = computed(() => {
                 </div> 
               </button>
 
-              <!-- Dropdown Menu -->
               <div 
                 v-if="showUserDropdown"
                 class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
@@ -151,7 +154,6 @@ const verificationMessage = computed(() => {
         </div>
       </header>
 
-      <!-- Page Content -->
       <main class="flex-1 p-8 overflow-auto">
         <slot />
       </main>

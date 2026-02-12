@@ -72,15 +72,3 @@ export const addressApi = {
   },
 }
 
-export const casesApi = {
-  /**
-   * Fetch case categories
-   * GET /api/cases/categories/
-   */
-  getCategories: (params?: { active?: boolean; page?: number; page_size?: number }): Promise<{ results: Category[] }> => {
-    const apiFetch = useApiFetch()
-    return apiFetch(URL.API.CASES.CATEGORIES, {
-      params,
-    })
-  },
-}

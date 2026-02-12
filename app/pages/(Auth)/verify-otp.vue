@@ -140,7 +140,6 @@ const handleBackToLogin = () => {
         </div>
 
         <form @submit.prevent="handleSubmit" class="space-y-6">
-          <!-- OTP Field -->
           <div>
             <label class="text-lg text-gray-700 font-semibold block mb-4">
               One-Time Password
@@ -158,7 +157,6 @@ const handleBackToLogin = () => {
             </p>
           </div>
 
-          <!-- Submit Button -->
           <div class="w-full pt-3">
             <Button
               type="submit"
@@ -171,7 +169,6 @@ const handleBackToLogin = () => {
           </div>
         </form>
 
-        <!-- Resend OTP Section -->
         <div class="text-center border-t pt-4">
           <p class="text-sm text-gray-600 mb-3">
             Didn't receive the OTP?
@@ -190,7 +187,6 @@ const handleBackToLogin = () => {
           </div>
         </div>
 
-        <!-- Back to Login Link -->
         <div class="text-center">
           <p class="text-slate-600">
             <span

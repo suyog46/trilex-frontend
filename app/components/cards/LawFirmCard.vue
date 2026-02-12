@@ -21,7 +21,7 @@ const formattedAddress = computed(() => {
 
 // Get firm ID from verification or generate placeholder
 const firmId = computed(() => {
-  return props.firm.verification?.id || props.firm.id || ''
+  return props.firm?.id ||  ''
 })
 </script>
 

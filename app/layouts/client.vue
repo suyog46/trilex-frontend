@@ -3,9 +3,14 @@ import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { toast } from 'vue-sonner'
 
+const route = useRoute()
 const authStore = useAuthStore()
 const isLoadingVerification = ref(false)
 const sidebarOpen = ref(true)
+
+const isActive = (path: string) => {
+  return route.path === path
+}
 
 onMounted(async () => {
   isLoadingVerification.value = true
@@ -28,8 +33,13 @@ const verificationStatus = computed(() => {
   return authStore.clientVerificationStatus?.status
 })
 
-// Sidebar items
 const sidebarItems = [
+  {
+    label: 'AI Assistant',
+    icon: 'mdi:robot-happy-outline',
+    path: '/client/ai-assistant',
+    requiresVerification: true,
+  },
   {
     label: 'Dashboard',
     icon: 'mdi:home',
@@ -81,7 +91,6 @@ const sidebarItems = [
   },
 ]
 
-// Handle sidebar item click
 const handleItemClick = (item: any) => {
   if (item.requiresVerification && !isVerified.value) {
     toast.error('Please verify your profile to access this feature')
@@ -91,7 +100,6 @@ const handleItemClick = (item: any) => {
   navigateTo(item.path)
 }
 
-// Handle back to home
 const handleBackToHome = () => {
   navigateTo('/')
 }
@@ -99,10 +107,8 @@ const handleBackToHome = () => {
 
 <template>
   <div class="min-h-screen flex flex-col bg-gray-50">
-    <!-- Header -->
     <header class="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40">
       <div class="h-16 flex items-center justify-between px-8">
-        <!-- Left: Sidebar Toggle + Logo -->
         <div class="flex items-center gap-4">
           <button
             @click="sidebarOpen = !sidebarOpen"
@@ -119,9 +125,7 @@ const handleBackToHome = () => {
           </NuxtLink>
         </div>
 
-        <!-- Right: Search + Notifications + User -->
         <div class="flex items-center gap-6">
-          <!-- Search (Hidden on mobile) -->
           <div class="relative hidden sm:block max-w-xs">
             <Icon
               icon="material-symbols-light:search-rounded"
@@ -134,7 +138,6 @@ const handleBackToHome = () => {
             />
           </div>
 
-          <!-- Notifications -->
           <button
             class="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
             aria-label="Notifications"
@@ -143,7 +146,6 @@ const handleBackToHome = () => {
             <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
 
-          <!-- User Menu -->
           <button
             class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
             aria-label="User menu"
@@ -157,9 +159,7 @@ const handleBackToHome = () => {
       </div>
     </header>
 
-    <!-- Main Container -->
     <div class="flex pt-16 flex-1">
-      <!-- Sidebar -->
       <aside
         :class="[
           'fixed lg:static top-16 left-0 bottom-0 w-64 bg-white border-r border-gray-200 z-30 transition-transform duration-300 overflow-y-auto',
@@ -167,42 +167,44 @@ const handleBackToHome = () => {
         ]"
       >
         <nav class="p-4 space-y-2">
-          <!-- Sidebar Items -->
           <div v-for="item in sidebarItems" :key="item.path" class="relative">
             <button
               @click="handleItemClick(item)"
               :disabled="item.requiresVerification && !isVerified"
               :class="[
                 'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left',
-                item.requiresVerification && !isVerified
-                  ? 'opacity-50 cursor-not-allowed text-gray-500'
-                  : 'text-gray-700 hover:bg-primary-light'
+                isActive(item.path)
+                  ? 'bg-primary-normal text-white'
+                  : item.requiresVerification && !isVerified
+                    ? 'opacity-50 cursor-not-allowed text-gray-500'
+                    : 'text-gray-700 hover:bg-primary-light'
               ]"
               :title="item.requiresVerification && !isVerified ? 'Please verify your profile first' : item.label"
             >
               <Icon :icon="item.icon" class="w-5 h-5" />
               <span class="text-sm font-medium flex-1">{{ item.label }}</span>
 
-              <!-- Badge for verification status -->
               <div v-if="item.label === 'Verification'" class="flex items-center gap-2">
                 <Icon
                   v-if="item.badge === 'check'"
                   icon="mdi:check-circle"
-                  class="w-4 h-4 text-green-500"
+                  :class="isActive(item.path) ? 'text-white' : 'text-green-500'"
+                  class="w-4 h-4"
                 />
                 <Icon
                   v-else-if="item.badge === 'pending'"
                   icon="mdi:clock"
-                  class="w-4 h-4 text-yellow-500"
+                  :class="isActive(item.path) ? 'text-white' : 'text-yellow-500'"
+                  class="w-4 h-4"
                 />
                 <Icon
                   v-else
                   icon="mdi:alert-circle"
-                  class="w-4 h-4 text-red-500"
+                  :class="isActive(item.path) ? 'text-white' : 'text-red-500'"
+                  class="w-4 h-4"
                 />
               </div>
 
-              <!-- Lock icon for disabled items -->
               <Icon
                 v-if="item.requiresVerification && !isVerified"
                 icon="mdi:lock"
@@ -212,7 +214,6 @@ const handleBackToHome = () => {
           </div>
         </nav>
 
-        <!-- Sidebar Bottom: Back to Home -->
         <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
           <button
             @click="handleBackToHome"
@@ -224,7 +225,6 @@ const handleBackToHome = () => {
         </div>
       </aside>
 
-      <!-- Overlay for mobile -->
       <div
         v-if="sidebarOpen"
         @click="sidebarOpen = false"

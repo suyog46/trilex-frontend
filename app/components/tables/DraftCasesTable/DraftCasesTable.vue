@@ -9,6 +9,7 @@ interface Props {
   currentPage: number
   pageSize: number
   totalCount: number
+  isLoading?: boolean
   onRowClick?: (row: Case) => void
 }
 
@@ -49,6 +50,7 @@ const handleRowClick = (row: Case) => {
       :current-page="currentPage"
       :page-size="pageSize"
       :total-count="totalCount"
+      :is-loading="isLoading"
       search-placeholder="Search cases..."
       :on-row-click="onRowClick"
       @page-change="handlePageChange"

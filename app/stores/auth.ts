@@ -125,7 +125,7 @@ export const useAuthStore = defineStore('auth', () => {
       })
       
       if (tokenValue && tokenValue.length > 0) {
-        console.log('✅ initializeAuth: Token found, user IS authenticated')
+        console.log('initializeAuth: Token found, user IS authenticated')
         // Restore user object with stored role
         if (role) {
           user.value = {
@@ -134,7 +134,7 @@ export const useAuthStore = defineStore('auth', () => {
             email: '', // Email will be populated on next request or remain empty
             isEmailVerified: true, // Assume verified if token exists
           } as User
-          console.log('✅ User role restored from cookie:', role)
+          console.log('User role restored from cookie:', role)
         }
       } else {
         console.log('❌ initializeAuth: No token found, user NOT authenticated')

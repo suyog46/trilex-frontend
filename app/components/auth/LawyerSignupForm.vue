@@ -11,7 +11,8 @@ import { useMediaUpload } from "~/composables/api/media.api"
 import { toast } from 'vue-sonner'
 import StepTabs from '~/components/ui/tabs/StepTabs.vue'
 import { TabsContent } from '~/components/ui/tabs'
-import { addressApi, type Province, type District, type Municipality, type Ward, type Category, casesApi } from '~/composables/api/address.api'
+import { addressApi, type Province, type District, type Municipality, type Ward } from '~/composables/api/address.api'
+import { casesApi, type Category } from '~/composables/api/cases.api'
 import type { LawyerSignupInput, LawFirmSignupInput } from "~/types/auth"
 
 const props = defineProps<{

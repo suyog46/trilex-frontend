@@ -217,16 +217,8 @@ const goToLastPage = () => {
       />
     </div>
 
-    <!-- Loading State -->
-    <div v-if="isLoading" class="flex items-center justify-center py-12">
-      <div class="flex flex-col items-center gap-4">
-        <Icon icon="mdi:loading" class="w-12 h-12 text-primary-normal animate-spin" />
-        <p class="text-gray-500">Loading data...</p>
-      </div>
-    </div>
-
     <!-- Table -->
-    <div v-else class="rounded-md ">
+    <div class="rounded-md">
       <Table>
         <TableHeader>
           <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
@@ -248,7 +240,38 @@ const goToLastPage = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          <template v-if="table.getRowModel().rows?.length">
+          <!-- Loading State - Skeleton Rows -->
+          <template v-if="isLoading">
+            <TableRow v-for="i in pageSize" :key="`skeleton-${i}`" class="border-b border-gray-300">
+              <TableCell 
+                v-for="(col, index) in columns" 
+                :key="`skeleton-cell-${i}-${index}`" 
+                class="py-4"
+              >
+                <div class="h-4 bg-gray-200 rounded animate-pulse" />
+              </TableCell>
+              <TableCell v-if="hasActions" class="py-4">
+                <div class="h-4 w-16 bg-gray-200 rounded animate-pulse" />
+              </TableCell>
+            </TableRow>
+          </template>
+          <!-- Loading State - Skeleton Rows -->
+          <template v-if="isLoading">
+            <TableRow v-for="i in pageSize" :key="`skeleton-${i}`" class="border-b border-gray-300">
+              <TableCell 
+                v-for="(col, index) in columns" 
+                :key="`skeleton-cell-${i}-${index}`" 
+                class="py-4"
+              >
+                <div class="h-4 bg-gray-200 rounded animate-pulse" />
+              </TableCell>
+              <TableCell v-if="hasActions" class="py-4">
+                <div class="h-4 w-16 bg-gray-200 rounded animate-pulse" />
+              </TableCell>
+            </TableRow>
+          </template>
+          <!-- Data Rows -->
+          <template v-else-if="table.getRowModel().rows?.length">
             <TableRow
               class="border-b border-gray-300"
               v-for="row in table.getRowModel().rows"
@@ -322,6 +345,7 @@ const goToLastPage = () => {
               </TableCell>
             </TableRow>
           </template>
+          <!-- No Results -->
           <template v-else>
             <TableRow>
               <TableCell :colspan="columns.length + (hasActions ? 1 : 0)" class="h-24 text-center">
@@ -334,7 +358,7 @@ const goToLastPage = () => {
     </div>
 
     <!-- Pagination -->
-    <div v-if="!isLoading" class="flex items-center justify-between px-2">
+    <div class="flex items-center justify-between px-2">
       <div class="flex-1 text-sm text-muted-foreground">
         {{ totalCount }} row(s) total.
       </div>

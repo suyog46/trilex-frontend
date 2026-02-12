@@ -32,9 +32,15 @@ const handleLogout = async () => {
   }
 }
 
-// Dynamic links based on user role
 const links = computed(() => {
+  const userRole = authStore.user?.role
   const baseLinks = [
+    {
+      title: "AI Assistant",
+      icon: "mdi:robot-happy-outline",
+      isDropdown: false,
+      link: userRole === 'lawyer' ? '/lawyer/ai-assistant' : userRole === 'firm' ? '/law-firm/ai-assistant' : '/client/ai-assistant'
+    },
     {
       title: "Dashboard",
       icon: "material-symbols-light:dashboard-outline-rounded",
@@ -72,6 +78,10 @@ const links = computed(() => {
         {
           title: "Completed Cases",
           link: "/cases/completed"
+        },
+          {
+          title: "Registered Cases",
+          link: "/cases/registered"
         }
       ]
     },
@@ -84,7 +94,6 @@ const links = computed(() => {
      
   ]
 
-  // Add firm-specific menu items
   if (authStore.user?.role === 'firm') {
     baseLinks.push({
       title: "User Management",
@@ -105,7 +114,6 @@ const links = computed(() => {
   }
 
 
-  // Add settings at the end
   baseLinks.push({
     title: "Settings",
     icon: "mdi:cog-outline",
@@ -138,7 +146,6 @@ const toggleDropdown = (title: string) => {
 
     <ul class="space-y-2">
       <li v-for="item in links" :key="item.title">
-        <!-- Non-dropdown items -->
         <NuxtLink
           v-if="!item.isDropdown && item.link"
           :to="item.link"
@@ -153,7 +160,6 @@ const toggleDropdown = (title: string) => {
           <span>{{ item.title }}</span>
         </NuxtLink>
 
-        <!-- Dropdown items -->
         <div v-else>
           <button
             @click="toggleDropdown(item.title)"
@@ -175,7 +181,6 @@ const toggleDropdown = (title: string) => {
             />
           </button>
 
-          <!-- Dropdown children -->
           <div v-if="openDropdown === item.title" class="mt-1 space-y-1 rounded-md flex justify-center">
             <div class="flex flex-col items-start gap-2 w-full">
               <NuxtLink
@@ -197,7 +202,6 @@ const toggleDropdown = (title: string) => {
       </li>
     </ul>
 
-    <!-- Logout Button -->
     <div class="pt-4 border-t border-gray-200">
       <button
         @click="handleLogout"

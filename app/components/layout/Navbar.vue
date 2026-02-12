@@ -264,7 +264,7 @@ const authStore = useAuthStore()
 const isAuthenticated = computed(() => {
   const result = authStore.isAuthenticated
   if (result) {
-    console.log('✅ Navbar: User IS authenticated')
+    console.log('Navbar: User IS authenticated')
   } else {
     console.log('❌ Navbar: User NOT authenticated')
   }

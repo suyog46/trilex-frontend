@@ -6,7 +6,6 @@ definePageMeta({
 
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- Hero Section -->
     <div class="bg-gradient-to-r from-primary-normal to-primary-normal-hover text-white py-20">
       <div class="max-w-6xl mx-auto px-4 text-center">
         <h1 class="text-4xl md:text-5xl font-bold mb-4">About Trilex</h1>
@@ -16,9 +15,7 @@ definePageMeta({
       </div>
     </div>
 
-    <!-- Main Content -->
     <div class="max-w-6xl mx-auto px-4 py-16">
-      <!-- Mission Section -->
       <section class="mb-16">
         <div class="text-center mb-12">
           <h2 class="text-3xl font-bold text-gray-900 mb-4">Our Mission</h2>
@@ -61,7 +58,6 @@ definePageMeta({
         </div>
       </section>
 
-      <!-- Stats Section -->
       <section class="bg-primary-normal rounded-2xl p-12 text-white mb-16">
         <div class="grid md:grid-cols-4 gap-8 text-center">
           <div>
@@ -83,7 +79,6 @@ definePageMeta({
         </div>
       </section>
 
-      <!-- Contact Section -->
       <section class="text-center">
         <h2 class="text-3xl font-bold text-gray-900 mb-4">Get in Touch</h2>
         <p class="text-gray-600 mb-8">Have questions? We're here to help.</p>

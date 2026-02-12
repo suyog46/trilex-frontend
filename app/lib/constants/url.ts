@@ -41,6 +41,12 @@ export const URL = {
     },
     CASES: {
       CATEGORIES: '/api/cases/categories/',
+      CREATE: '/api/cases/',
+      LIST: '/api/cases/list/',
+    },
+    CLIENTS: {
+      LIST: '/api/clients/',
+      DETAIL: (id: string) => `/api/clients/${id}/`,
     },
     ADMIN: {
       CASE_CATEGORIES: '/api/cases/categories/',

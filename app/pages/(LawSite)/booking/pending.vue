@@ -10,7 +10,6 @@ definePageMeta({
   layout: 'lawyer',
 })
 
-// State
 const data = ref<BookingResponse[]>([])
 const totalCount = ref(0)
 const currentPage = ref(1)
@@ -83,13 +82,11 @@ onMounted(() => {
 
 <template>
   <div class="flex flex-col gap-6">
-    <!-- Header -->
     <div>
       <h1 class="text-3xl font-bold text-gray-900">Booking Requests</h1>
       <p class="text-gray-600 mt-1">Manage incoming booking requests from clients</p>
     </div>
 
-    <!-- Status Tabs -->
     <div class="bg-white rounded-lg">
       <SimpleTabs
         v-model="selectedStatus"
@@ -98,7 +95,6 @@ onMounted(() => {
       />
     </div>
 
-    <!-- Loading State -->
     <div v-if="isLoading" class="flex justify-center items-center py-20">
       <div class="text-center">
         <Icon icon="mdi:loading" class="w-12 h-12 text-primary-normal animate-spin mx-auto mb-4" />
@@ -106,7 +102,6 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Empty State -->
     <div v-else-if="data.length === 0" class="text-center py-20">
       <Icon icon="mdi:inbox" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
       <h3 class="text-xl font-semibold text-gray-700 mb-2">No Bookings Found</h3>
@@ -115,7 +110,6 @@ onMounted(() => {
       </p>
     </div>
 
-    <!-- Bookings Table -->
     <div v-else class="bg-white rounded-lg p-6">
       <ReceivedBookingsTable
         :data="data"

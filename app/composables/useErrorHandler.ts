@@ -39,7 +39,6 @@ export interface ErrorHandlerResult {
 const parseDjangoErrors = (errorData: DjangoErrorResponse): FormattedError[] => {
   const errors: FormattedError[] = []
 
-  // Handle top-level error/message/detail keys first
   if (errorData.error && typeof errorData.error === 'string') {
     errors.push({
       field: 'detail',
@@ -66,13 +65,11 @@ const parseDjangoErrors = (errorData: DjangoErrorResponse): FormattedError[] => 
 
   Object.entries(errorData).forEach(([field, messages]) => {
     if (Array.isArray(messages)) {
-      // Simple array of error messages
       errors.push({
         field,
         message: messages.join(', '),
       })
     } else if (typeof messages === 'object' && messages !== null) {
-      // Nested object (for nested serializers or complex fields)
       Object.entries(messages).forEach(([subField, subMessages]) => {
         const nestedField = `${field}.${subField}`
         const message = Array.isArray(subMessages)
@@ -85,7 +82,6 @@ const parseDjangoErrors = (errorData: DjangoErrorResponse): FormattedError[] => 
         })
       })
     } else if (typeof messages === 'string') {
-      // Single error message as string
       errors.push({
         field,
         message: messages,
@@ -196,10 +192,6 @@ export const parseApiError = (error: any): ErrorHandlerResult => {
   }
 }
 
-/**
- * Composable hook for error handling
- * Provides easy access to error parsing and handling utilities
- */
 export const useErrorHandler = () => {
   const handleFormErrors = (
     error: any,
@@ -213,10 +205,6 @@ export const useErrorHandler = () => {
     return parseApiError(error)
   }
 
-  /**
-   * Handle errors and show toast notifications
-   * Uses vue-sonner toast directly
-   */
   const handleErrorWithToast = (
     error: any,
     options?: {
@@ -227,14 +215,12 @@ export const useErrorHandler = () => {
   ) => {
     const result = parseError(error)
 
-    // Set field errors if form is provided
     if (options?.form) {
       result.formErrors.forEach((message, field) => {
         options.form!.setFieldError(field, message)
       })
     }
 
-    // Show toast notification for general errors
     if (options?.showToast !== false) {
       result.generalErrors.forEach((message) => {
         const customMessage = options?.customMessages?.[message]
@@ -249,9 +235,7 @@ export const useErrorHandler = () => {
     return result
   }
 
-  /**
-   * Get field-specific error message
-   */
+  
   const getFieldError = (
     error: any,
     fieldName: string
@@ -260,9 +244,7 @@ export const useErrorHandler = () => {
     return result.formErrors.get(fieldName) || null
   }
 
-  /**
-   * Get all error messages as string array
-   */
+
   const getAllErrors = (error: any): string[] => {
     const result = parseError(error)
     const allErrors = Array.from(result.formErrors.values())

@@ -9,7 +9,6 @@ const route = useRoute()
 const router = useRouter()
 const { parseError } = useErrorHandler()
 
-// States
 const isVerifying = ref(false)
 const isVerified = ref(false)
 const verificationError = ref<string | null>(null)
@@ -26,7 +25,6 @@ onMounted(async () => {
   await verifyEmail()
 })
 
-// Verify email with token
 const verifyEmail = async () => {
   if (!token.value) {
     verificationError.value = 'No token provided'
@@ -68,13 +66,11 @@ const verifyEmail = async () => {
   }
 }
 
-// Handle retry
 const handleRetry = () => {
   verificationError.value = null
   verifyEmail()
 }
 
-// Handle go to login
 const handleGoToLogin = () => {
   router.push('/login')
 }
@@ -83,10 +79,8 @@ const handleGoToLogin = () => {
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center px-4">
     <div class="w-full max-w-md">
-      <!-- Card Container -->
       <div class="bg-white rounded-lg shadow-lg p-8 space-y-6">
         
-        <!-- Loading State -->
         <div v-if="isVerifying && !verificationError" class="space-y-6">
           <div class="flex justify-center">
             <div class="bg-blue-50 rounded-full p-4">
@@ -103,13 +97,11 @@ const handleGoToLogin = () => {
             </p>
           </div>
 
-          <!-- Progress Bar -->
           <div class="w-full bg-gray-200 rounded-full h-1 overflow-hidden">
             <div class="bg-blue-600 h-full animate-pulse"></div>
           </div>
         </div>
 
-        <!-- Success State -->
         <div v-else-if="isVerified" class="space-y-6">
           <div class="flex justify-center">
             <div class="bg-green-50 rounded-full p-4">
@@ -140,7 +132,6 @@ const handleGoToLogin = () => {
           </button>
         </div>
 
-        <!-- Error State -->
         <div v-else class="space-y-6">
           <div class="flex justify-center">
             <div class="bg-red-50 rounded-full p-4">
@@ -163,7 +154,6 @@ const handleGoToLogin = () => {
             </p>
           </div>
 
-          <!-- Action Buttons -->
           <div class="space-y-3">
             <button
               @click="handleRetry"
@@ -181,7 +171,6 @@ const handleGoToLogin = () => {
             </button>
           </div>
 
-          <!-- Support Message -->
           <div class="text-center">
             <p class="text-sm text-gray-600">
               Having trouble?
@@ -192,10 +181,9 @@ const handleGoToLogin = () => {
           </div>
         </div>
 
-        <!-- Footer Note -->
         <div class="pt-4 border-t border-gray-200 text-center">
           <p class="text-xs text-gray-500">
-            🔒 Secure verification process
+             Secure verification process
           </p>
         </div>
       </div>

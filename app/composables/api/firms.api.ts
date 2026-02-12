@@ -85,6 +85,10 @@ export interface PaginatedResponse<T> {
 export interface FirmListParams {
   page?: number
   page_size?: number
+  search?: string
+  province?: number
+  district?: number
+  services?: string
 }
 
 export interface LawyerUser {
@@ -144,7 +148,7 @@ export interface FirmInvitationsResponse {
 
 export const firmsApi = {
   /**
-   * Get all firms with pagination
+   * Get all firms with pagination and filters
    * GET /api/firms/
    */
   getFirms: (params?: FirmListParams): Promise<PaginatedResponse<Firm>> => {
@@ -153,6 +157,10 @@ export const firmsApi = {
     
     if (params?.page) queryParams.append('page', params.page.toString())
     if (params?.page_size) queryParams.append('page_size', params.page_size.toString())
+    if (params?.search) queryParams.append('search', params.search)
+    if (params?.province) queryParams.append('province', params.province.toString())
+    if (params?.district) queryParams.append('district', params.district.toString())
+    if (params?.services) queryParams.append('services', params.services)
     
     const url = queryParams.toString() ? `/api/firms/?${queryParams.toString()}` : '/api/firms/'
     return apiFetch(url)

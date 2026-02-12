@@ -1,13 +1,8 @@
-/**
- * Guest Middleware
- * Protects guest-only routes (login, register)
- * Redirects authenticated users to dashboard
- */
+
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
   const authStore = useAuthStore()
 
-  // Initialize auth if not already done
   if (!authStore.isInitialized) {
     await authStore.initializeAuth()
   }
