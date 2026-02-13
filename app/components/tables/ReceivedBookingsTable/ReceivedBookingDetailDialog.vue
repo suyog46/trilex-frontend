@@ -98,7 +98,7 @@ const handleOpenChat = async () => {
     toast.success('Chat room created successfully!')
     
     // Navigate based on user role
-    const userRole = authStore.userRole
+    const userRole = authStore.user?.role
     if (userRole === 'client') {
       router.push('/client/messages')
     } else if (userRole === 'lawyer' || userRole === 'firm') {

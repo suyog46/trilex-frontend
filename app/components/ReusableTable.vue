@@ -297,10 +297,9 @@ const goToLastPage = () => {
                   <button
                     v-if="canViewDetail"
                     @click.stop="handleViewDetail(row.original)"
-                    class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                    title="View Details"
+                    class="px-3 py-1 text-primary-normal border border-primary-normal hover:bg-primary-normal-hover hover:text-white rounded-md transition-colors font-medium text-sm"
                   >
-                    <Icon icon="mdi:eye" class="w-5 h-5" />
+                    View Details
                   </button>
                   <button
                     v-if="canAccept"
