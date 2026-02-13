@@ -22,22 +22,23 @@ interface MessageItem {
 
 interface Props {
   conversationId?: string | null
+  conversationUserName?: string | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  conversationId: null
+  conversationId: null,
+  conversationUserName: null
 })
 
 const authStore = useAuthStore()
 const { 
-  connect, 
-  disconnect, 
   sendMessage: sendSocketMessage, 
   sendTypingIndicator, 
   isConnected,
   messages: socketMessages,
   typingUsers,
-  messageUpdates
+  messageUpdates,
+  joinRoom
 } = useChatSocket()
 
 const messages = ref<MessageItem[]>([])
@@ -48,12 +49,13 @@ const roomDetails = ref<any>(null)
 
 // Get display name for conversation
 const conversationUserName = computed(() => {
+  if (props.conversationUserName) return props.conversationUserName
   if (!roomDetails.value) return 'Unknown User'
   
   const currentUserEmail = authStore.user?.email
   const otherParticipant = roomDetails.value.participants?.find((p: any) => p.user.email !== currentUserEmail)
   
-  return otherParticipant?.user.email || 'Unknown User'
+  return otherParticipant?.user.name || otherParticipant?.user.email || 'Unknown User'
 })
 
 // Get initials from user name
@@ -74,7 +76,7 @@ const transformMessage = (msg: ChatMessage): MessageItem => {
     createdAt: msg.created_at,
     isRead: true,
     senderId: msg.sender.id,
-    senderName: msg.sender.email,
+    senderName: msg.sender.name,
     senderProfile: null,
     status: 'sent'
   }
@@ -150,7 +152,7 @@ const handleSendMessage = async (content: string) => {
       createdAt: now,
       isRead: true,
       senderId: authStore.userId || '',
-      senderName: authStore.user?.email || 'Unknown',
+      senderName: authStore.user?.fullName || 'Unknown',
       senderProfile: null,
       status: 'sending',
       tempId
@@ -175,17 +177,13 @@ const handleTyping = () => {
 
 // Watch for conversation change
 watch(() => props.conversationId, (newConversationId, oldConversationId) => {
-  // Disconnect from old conversation
-  if (oldConversationId) {
-    disconnect()
-  }
-  
   // Connect to new conversation
   if (newConversationId) {
     currentPage.value = 1
     hasMoreMessages.value = true
     fetchMessages(1)
-    connect(newConversationId)
+    // Join the room (socket already connected globally)
+    joinRoom(newConversationId)
   }
 }, { immediate: true })
 
@@ -241,10 +239,7 @@ watch(socketMessages, (newMessages) => {
   })
 }, { deep: true })
 
-// Cleanup on unmount
-onUnmounted(() => {
-  disconnect()
-})
+// No cleanup needed - socket stays connected globally
 </script>
 
 <template>
@@ -259,7 +254,6 @@ onUnmounted(() => {
       <p class="text-gray-600">Select a conversation from the sidebar to start messaging</p>
     </div>
 
-    <!-- Chat Box -->
     <template v-else>
       <!-- Chat Header -->
       <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-200">

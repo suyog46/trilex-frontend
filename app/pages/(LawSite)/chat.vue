@@ -8,9 +8,11 @@ definePageMeta({
 })
 
 const selectedConversationId = ref<string | null>(null)
+const selectedConversationName = ref<string | null>(null)
 
-const handleSelectConversation = (conversationId: string) => {
-  selectedConversationId.value = conversationId
+const handleSelectConversation = (payload: { conversationId: string; userName: string; userProfile: string | null; isOnline: boolean }) => {
+  selectedConversationId.value = payload.conversationId
+  selectedConversationName.value = payload.userName
 }
 </script>
 
@@ -37,6 +39,7 @@ const handleSelectConversation = (conversationId: string) => {
         <ChatBox
           v-if="selectedConversationId"
           :conversation-id="selectedConversationId"
+          :conversation-user-name="selectedConversationName"
         />
         <div
           v-else

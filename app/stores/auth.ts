@@ -10,6 +10,7 @@ import type { User, AuthResponse, LoginInput, AuthError, LawyerRegisterInput, Us
   ForgotPasswordInput, ResetPasswordInput, VerifyForgotPasswordOtpInput, LawyerVerificationStatus, FirmVerificationStatus, ClientVerificationStatus } from '~/types/auth'
 import { authApi } from '~/composables/api/auth.api'
 import { verificationApi } from '~/composables/api/verification.api'
+import { useChatSocket } from '~/composables/useChatSocket'
 
 // Helper function to extract user_id from JWT token
 const extractUserIdFromToken = (token: string | undefined): string | null => {
@@ -37,6 +38,9 @@ export const useAuthStore = defineStore('auth', () => {
   const lawyerVerificationStatus = ref<LawyerVerificationStatus | null>(null)
   const firmVerificationStatus = ref<FirmVerificationStatus | null>(null)
   const clientVerificationStatus = ref<ClientVerificationStatus | null>(null)
+
+  // Chat socket instance
+  const { connect: connectChatSocket, disconnect: disconnectChatSocket } = useChatSocket()
 
   const accessToken = useCookie<string | null>('access_token', {
     maxAge: 60 * 60 * 24 * 7,
@@ -141,6 +145,9 @@ export const useAuthStore = defineStore('auth', () => {
             fullName: userDetails.verification?.full_name || userDetails.profile?.phone_number,
           } as User
           console.log('User details fetched from /me:', user.value)
+          
+          // Connect to chat socket after successful initialization
+          connectChatSocket('')
         } catch (meError) {
           console.error('Failed to fetch user details from /me during init:', meError)
           // Fallback to basic user restoration from token
@@ -152,6 +159,9 @@ export const useAuthStore = defineStore('auth', () => {
               isEmailVerified: true,
             } as User
             console.log('User role restored from cookie:', role)
+            
+            // Connect to chat socket even with fallback user
+            connectChatSocket('')
           }
         }
       } else {
@@ -221,6 +231,9 @@ export const useAuthStore = defineStore('auth', () => {
           isEmailVerified: response.is_email_verified,
         } as User
       }
+
+      // Connect to chat socket after successful login
+      connectChatSocket('')
 
       return {
         success: true,
@@ -372,6 +385,9 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
 
     try {
+      // Disconnect chat socket before clearing auth
+      disconnectChatSocket()
+      
       accessToken.value = null
       refreshToken.value = null
       userRole.value = null

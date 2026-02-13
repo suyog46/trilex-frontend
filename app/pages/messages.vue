@@ -31,54 +31,28 @@ const selectedConversationUser = ref<ConversationUser | null>(null)
 const isLoadingConversations = ref(false)
 const searchQuery = ref('')
 
-// Fetch conversations from API
-const fetchConversations = async () => {
-  isLoadingConversations.value = true
-  
-  try {
-    // TODO: Replace with actual API call
-    // const response = await messagesApi.getConversations({
-    //   search: searchQuery.value,
-    //   page: 1,
-    //   page_size: 50
-    // })
-    // conversations.value = response.results
-    
-    // Temporary mock data
-    conversations.value = []
-  } catch (error) {
-    console.error('Error fetching conversations:', error)
-  } finally {
-    isLoadingConversations.value = false
-  }
-}
+
 
 // Handle conversation selection
-const handleSelectConversation = (conversationId: string) => {
-  selectedConversationId.value = conversationId
-  
-  // Find and set the selected conversation user
-  const conversation = conversations.value.find(c => c.id === conversationId)
-  
-  if (conversation) {
-    selectedConversationUser.value = {
-      id: conversationId, // TODO: Get actual user ID from conversation
-      name: conversation.userName,
-      profile: conversation.userProfile,
-      isOnline: conversation.isOnline
-    }
+const handleSelectConversation = (payload: { conversationId: string; userName: string; userProfile: string | null; isOnline: boolean }) => {
+  selectedConversationId.value = payload.conversationId
+
+  selectedConversationUser.value = {
+    id: payload.conversationId,
+    name: payload.userName,
+    profile: payload.userProfile,
+    isOnline: payload.isOnline
   }
 }
 
 // Handle search
 const handleSearch = (query: string) => {
   searchQuery.value = query
-  fetchConversations()
+  // fetchConversations()
 }
 
-// Initial load
 onMounted(() => {
-  fetchConversations()
+  // fetchConversations()
 })
 </script>
 
@@ -99,7 +73,7 @@ onMounted(() => {
     <div class="flex-1">
       <ChatBox
         :conversation-id="selectedConversationId"
-        :conversation-user="selectedConversationUser"
+        :conversation-user-name="selectedConversationUser?.name"
       />
     </div>
   </div>

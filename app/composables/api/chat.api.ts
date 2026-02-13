@@ -4,7 +4,7 @@ import { URL } from "~/lib/constants/url"
 export interface ChatUser {
   id: string
   email: string
-  role: string
+  name: string
 }
 
 export interface ChatParticipant {
@@ -40,7 +40,7 @@ export interface ChatRoomsResponse {
 export interface MessageSender {
   id: string
   email: string
-  role: string
+  name: string
 }
 
 export interface ChatMessage {

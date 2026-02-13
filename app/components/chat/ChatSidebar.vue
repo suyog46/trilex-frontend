@@ -26,7 +26,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  'select-conversation': [conversationId: string]
+  'select-conversation': [payload: { conversationId: string; userName: string; userProfile: string | null; isOnline: boolean }]
   'search': [query: string]
 }>()
 
@@ -45,7 +45,7 @@ const conversations = computed<ConversationItem[]>(() => {
     return {
       id: room.id,
       userProfile: null,
-      userName: otherParticipant?.user.email || 'Unknown User',
+      userName: otherParticipant?.user.name || otherParticipant?.user.email || 'Unknown User',
       lastMessage: room.last_message?.message || 'No messages yet',
       lastSeen: room.last_message?.created_at || room.updated_at,
       unreadCount: room.unread_count,
@@ -59,11 +59,18 @@ const handleSearch = () => {
   fetchConversations()
 }
 
-const { joinRoom } = useChatSocket()
+const { roomUpdates } = useChatSocket()
+const processedRoomUpdates = ref(0)
 
 const handleSelectConversation = (conversationId: string) => {
-  emit('select-conversation', conversationId)
-  joinRoom(conversationId)
+  const selected = conversations.value.find(conversation => conversation.id === conversationId)
+
+  emit('select-conversation', {
+    conversationId,
+    userName: selected?.userName || 'Unknown User',
+    userProfile: selected?.userProfile || null,
+    isOnline: selected?.isOnline ?? false
+  })
 }
 
 // Fetch conversations from API
@@ -75,6 +82,9 @@ const fetchConversations = async () => {
       page_size: 50
     })
     chatRooms.value = response.results
+
+    console.log('Fetched chat rooms:', response.results)
+
   } catch (error: any) {
     console.error('Error fetching chat rooms:', error)
     toast.error('Failed to load conversations')
@@ -92,6 +102,40 @@ watch(searchQuery, () => {
     handleSearch()
   }
 })
+
+watch(roomUpdates, (updates) => {
+  for (let i = processedRoomUpdates.value; i < updates.length; i += 1) {
+    const update = updates[i]
+    if (!update) continue
+
+    const roomIndex = chatRooms.value.findIndex(room => room.id === update.room_id)
+    if (roomIndex === -1) {
+      fetchConversations()
+      continue
+    }
+
+    const room = chatRooms.value[roomIndex]
+    if (!room) continue
+
+    const isSameMessage = room.last_message?.id === update.id
+    if (!isSameMessage) {
+      room.last_message = {
+        id: update.id,
+        sender: update.sender?.name || update.sender?.email || '',
+        message: update.message,
+        created_at: update.created_at
+      }
+      room.updated_at = update.created_at
+    }
+
+    if (roomIndex > 0) {
+      chatRooms.value.splice(roomIndex, 1)
+      chatRooms.value.unshift(room)
+    }
+  }
+
+  processedRoomUpdates.value = updates.length
+}, { deep: true })
 </script>
 
 <template>

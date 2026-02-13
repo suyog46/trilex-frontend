@@ -107,19 +107,18 @@ const getInitials = (name: string) => {
         </p>
         
         <!-- Unread Badge -->
-        <span
+        <!-- <span
           v-if="conversation.unreadCount > 0"
           class="flex-shrink-0 min-w-[20px] h-5 px-1.5 bg-primary-normal text-white text-xs font-semibold rounded-full flex items-center justify-center"
         >
           {{ conversation.unreadCount > 99 ? '99+' : conversation.unreadCount }}
-        </span>
+        </span> -->
         
-        <!-- Read Status (Double Check) -->
-        <Icon
+        <!-- <Icon
           v-else-if="!conversation.unreadCount"
           icon="mdi:check-all"
           class="w-4 h-4 text-blue-500 flex-shrink-0"
-        />
+        /> -->
       </div>
     </div>
   </div>

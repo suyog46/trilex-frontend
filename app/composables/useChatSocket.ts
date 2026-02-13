@@ -9,17 +9,36 @@ interface ChatMessage {
   created_at: string
 }
 
+interface RoomUpdatedMessage {
+  type: 'room_updated'
+  id: string
+  room_id: string
+  message: string
+  created_at: string
+  sender: {
+    id: string
+    name: string
+    email: string
+  }
+}
+
 
 
 export const useChatSocket = () => {
   const socket = ref<WebSocket | null>(null)
   const isConnected = ref(false)
   const messages = ref<ChatMessage[]>([])
+  const roomUpdates = ref<RoomUpdatedMessage[]>([])
   const messageUpdates = ref<Map<string, { message_id: string, created_at: string, status: 'sending' | 'sent' | 'delivered' | 'read' }>>(new Map())
   const typingUsers = ref<string[]>([])
 
   const connect = (conversationId: string) => {
     if (socket.value?.readyState === WebSocket.OPEN) {
+      console.log('WebSocket already connected')
+      // Join room if provided
+      if (conversationId) {
+        joinRoom(conversationId)
+      }
       return
     }
 
@@ -35,10 +54,12 @@ export const useChatSocket = () => {
     socket.value = new WebSocket(wsUrl)
 
     socket.value.onopen = () => {
-      console.log('WebSocket connected')
+      console.log('WebSocket connected globally')
       isConnected.value = true
-      // Join the room
-      joinRoom(conversationId)
+      // Join the room if conversationId is provided
+      if (conversationId) {
+        joinRoom(conversationId)
+      }
     }
 
     socket.value.onmessage = (event) => {
@@ -83,6 +104,10 @@ export const useChatSocket = () => {
             }
             console.log('Read 👁')
           }
+          break
+
+        case 'room_updated':
+          roomUpdates.value.push(data)
           break
 
         default:
@@ -177,6 +202,7 @@ export const useChatSocket = () => {
     socket,
     isConnected,
     messages,
+    roomUpdates,
     messageUpdates,
     typingUsers,
     connect,
