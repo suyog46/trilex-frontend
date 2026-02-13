@@ -199,6 +199,7 @@ onMounted(() => {
       v-model:open="showBookingDialog"
       type="firm"
       :name="firm?.verification?.firm_name || 'Law Firm'"
+      :firm-id="firmId"
       @confirm="handleBookingConfirm"
     />
   </div>

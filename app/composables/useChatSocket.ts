@@ -4,8 +4,9 @@ interface ChatMessage {
   type: string
   room_id: string
   message: string
-  sender: string
-  message_id: string
+  sender: string | { id: string; name?: string; email?: string }
+  message_id?: string
+  id?: string
   created_at: string
 }
 
@@ -85,10 +86,20 @@ export const useChatSocket = () => {
       console.log('Server:', data)
 
       switch(data.type) {
-        case 'chat_message':
+        case 'chat_message': {
+          const normalized: ChatMessage = {
+            type: data.type,
+            room_id: data.room_id,
+            message: data.message,
+            created_at: data.created_at,
+            sender: data.sender,
+            message_id: data.message_id || data.id,
+            id: data.id
+          }
           // New message received
-          messages.value.push(data)
+          messages.value.push(normalized)
           break
+        }
 
         case 'message_sent':
           // Message was saved

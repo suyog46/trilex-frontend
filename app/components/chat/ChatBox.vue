@@ -260,17 +260,25 @@ watch(messageUpdates, (newUpdates) => {
 watch(socketMessages, (newMessages) => {
     console.log("new message from the socket:", newMessages)
   newMessages.forEach((socketMessage) => {
+    const messageId = socketMessage.message_id || socketMessage.id
+    const senderId = typeof socketMessage.sender === 'string'
+      ? socketMessage.sender
+      : socketMessage.sender?.id || ''
+    const senderName = typeof socketMessage.sender === 'string'
+      ? socketMessage.sender
+      : socketMessage.sender?.name || socketMessage.sender?.email || ''
+
     // Check if message already exists (by message_id or tempId)
-    const exists = messages.value.some(m => m.id === socketMessage.message_id)
+    const exists = messages.value.some(m => m.id === messageId)
     
-    if (!exists) {
+    if (!exists && messageId) {
       const messageItem: MessageItem = {
-        id: socketMessage.message_id,
+        id: messageId,
         content: socketMessage.message,
         createdAt: socketMessage.created_at,
         isRead: true,
-        senderId: socketMessage.sender,
-        senderName: socketMessage.sender,
+        senderId,
+        senderName,
         senderProfile: null,
         status: 'sent'
       }
