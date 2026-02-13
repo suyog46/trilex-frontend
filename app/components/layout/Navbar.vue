@@ -1,12 +1,18 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
+
+const props = defineProps<{
+  forceWhite?: boolean
+}>()
 
 const isSticky = ref(false)
 let unsubscribe: (() => void) | null = null
 const authStore = useAuthStore()
+const route = useRoute()
 
 // Use computed properties for reactivity instead of destructuring
 const isAuthenticated = computed(() => {
@@ -14,7 +20,7 @@ const isAuthenticated = computed(() => {
   if (result) {
     console.log('Navbar: User IS authenticated')
   } else {
-    console.log('❌ Navbar: User NOT authenticated')
+    console.log(' Navbar: User NOT authenticated')
   }
   return result
 })
@@ -43,6 +49,39 @@ const verificationPagePath = computed(() => {
   return '/dashboard'
 })
 
+const hideNavbar = computed(() => route.path === '/law-firm/ai-assistant')
+
+const clientSidebarRoutes = [
+  '/client/ai-assistant',
+  '/client/dashboard',
+  '/client/bookings',
+  '/client/cases',
+  '/client/messages',
+  '/client/documents',
+  '/client/verification-status',
+]
+
+const isClientDashboardRoute = computed(() => {
+  if (route.path.startsWith('/client/cases/')) return true
+  return clientSidebarRoutes.includes(route.path)
+})
+
+const dashboardAction = computed(() => {
+  if (isClientDashboardRoute.value) {
+    return { label: 'Go to Home', path: '/' }
+  }
+  return { label: 'Go to Dashboard', path: getDashboardPath() }
+})
+
+const headerClass = computed(() => {
+  if (props.forceWhite) {
+    return 'fixed top-0 bg-white text-primary-normal shadow-sm'
+  }
+  return isSticky.value
+    ? 'fixed top-0 bg-primary-normal text-white shadow-lg'
+    : 'absolute top-0 bg-transparent text-primary-normal'
+})
+
 const navLinks = [
   { title: 'Find Lawyer', path: '/client/lawyers' },
   { title: 'Find Law Firm', path: '/client/firms' },
@@ -50,13 +89,13 @@ const navLinks = [
   { title: 'Case Enquiry', path: '/case-enquiry' },
 ]
 
-const userMenuItems = [
-  { label: 'Wishlist', path: '/wishlist' },
-  { label: 'Recent History', path: '/recent-history' },
-  { label: 'My Cases', path: '/my-cases' },
-  { label: 'Settings', path: '/settings' },
-  { label: 'Help Center', path: '/help-center' },
-]
+// const userMenuItems = [
+//   { label: 'Wishlist', path: '/wishlist' },
+//   { label: 'Recent History', path: '/recent-history' },
+//   { label: 'My Cases', path: '/my-cases' },
+//   { label: 'Settings', path: '/settings' },
+//   { label: 'Help Center', path: '/help-center' },
+// ]
 
 const handleLogout = async () => {
   await authStore.logout()
@@ -93,15 +132,13 @@ onUnmounted(() => {
 })
 </script>
 <template>
-  <div>
+  <div v-if="!hideNavbar">
     <Disclosure as="nav">
       <template #default="{ open }">
         <header
           :class="[
             'w-full h-16 z-[9999999] flex items-center transition-all duration-300',
-            isSticky 
-              ? 'fixed top-0 bg-primary-normal text-white shadow-lg' 
-              : 'absolute top-0 bg-transparent text-primary-normal'
+            headerClass
           ]"
         >
           <nav class="w-full h-full flex items-center justify-between px-4 md:px-8">
@@ -134,13 +171,13 @@ onUnmounted(() => {
             <!-- Right Side Actions -->
             <div class="flex items-center gap-4">
               <!-- Search Button (Hidden on mobile) -->
-              <button
+              <!-- <button
                 class="hidden lg:flex items-center justify-center p-2 rounded-lg transition-colors"
                 :class="isSticky ? 'hover:bg-primary-normal-hover' : 'hover:bg-primary-light-active'"
                 aria-label="Search"
               >
                 <Icon icon="mdi:magnify" :class="['w-5 h-5', isSticky ? 'text-white' : 'text-primary-normal']" />
-              </button>
+              </button> -->
 
               <!-- Verification Status Indicator -->
               <!-- <button
@@ -153,18 +190,10 @@ onUnmounted(() => {
                 />
               </button> -->
 
-              <!-- Notification Button (Hidden on mobile) -->
-              <button
-                v-if="isAuthenticated"
-                class="hidden sm:flex items-center justify-center p-2 rounded-lg transition-colors relative"
-                :class="isSticky ? 'hover:bg-primary-normal-hover' : 'hover:bg-primary-light-active'"
-                aria-label="Notifications"
-              >
-                <Icon icon="mdi:bell" :class="['w-5 h-5', isSticky ? 'text-white' : 'text-primary-normal']" />
-                <span class="absolute top-1 right-1 flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full">
-                  5
-                </span>
-              </button>
+              <!-- Notification Dropdown (Hidden on mobile) -->
+              <div v-if="isAuthenticated" class="hidden sm:block">
+                <NotificationDropdown />
+              </div>
 
               <!-- Mobile Menu Button -->
               <DisclosureButton class="lg:hidden inline-flex items-center justify-center p-2 rounded-lg transition-colors"
@@ -216,7 +245,7 @@ onUnmounted(() => {
                       </div>
 
                       <!-- Menu Items -->
-                      <div class="py-2">
+                      <!-- <div class="py-2">
                         <MenuItem v-for="item in userMenuItems" :key="item.label">
                           <template #default="{ active }">
                             <NuxtLink
@@ -232,15 +261,15 @@ onUnmounted(() => {
                             </NuxtLink>
                           </template>
                         </MenuItem>
-                      </div>
+                      </div> -->
 
                       <!-- Dashboard Button -->
                       <div class="px-4 py-2 border-t border-primary-light-active">
                         <NuxtLink
-                          :to="getDashboardPath()"
+                          :to="dashboardAction.path"
                           class="block w-full px-4 py-2 text-sm font-semibold text-center text-white bg-primary-normal rounded-md hover:bg-primary-normal-hover transition-colors"
                         >
-                          Go to Dashboard
+                          {{ dashboardAction.label }}
                         </NuxtLink>
                       </div>
 
@@ -287,7 +316,7 @@ onUnmounted(() => {
             <!-- Mobile Menu Divider -->
             <div class="border-t border-primary-normal-hover py-3">
               <!-- Mobile User Menu Items (only if authenticated) -->
-              <template v-if="isAuthenticated">
+              <!-- <template v-if="isAuthenticated">
                 <NuxtLink
                   v-for="item in userMenuItems"
                   :key="item.label"
@@ -296,7 +325,7 @@ onUnmounted(() => {
                 >
                   {{ item.label }}
                 </NuxtLink>
-              </template>
+              </template> -->
             </div>
 
             <!-- Mobile Buttons -->
@@ -304,10 +333,10 @@ onUnmounted(() => {
               <!-- Show dashboard/logout if authenticated -->
               <template v-if="isAuthenticated">
                 <NuxtLink
-                  :to="getDashboardPath()"
+                  :to="dashboardAction.path"
                   class="flex-1 px-4 py-2 text-sm font-semibold text-center text-primary-normal bg-white rounded-md hover:bg-primary-light transition-colors"
                 >
-                  Dashboard
+                  {{ dashboardAction.label }}
                 </NuxtLink>
                 <button
                   @click="handleLogout"

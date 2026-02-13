@@ -17,13 +17,8 @@ const handleSelectConversation = (payload: { conversationId: string; userName: s
 </script>
 
 <template>
-  <div class="flex flex-col h-[calc(100vh-4rem)]">
-    <!-- Header -->
-    <div class="px-6 py-4 border-b border-gray-200 bg-white">
-      <h1 class="text-2xl font-bold text-gray-900">Messages</h1>
-      <p class="text-sm text-gray-600 mt-1">Chat with your clients</p>
-    </div>
-
+  <div class="flex flex-col h-[95vh]">
+   
     <!-- Chat Container -->
     <div class="flex-1 flex overflow-hidden">
       <!-- Sidebar -->

@@ -1,52 +1,111 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/auth'
+import { useApiFetch } from '~/composables/useApiFetch'
+import { notificationsApi } from '~/composables/api/notifications.api'
 
 definePageMeta({
   layout: 'client',
-  middleware: ['auth'],
+  middleware: 'client',
 })
 
 const authStore = useAuthStore()
+const apiFetch = useApiFetch()
+
+// Dashboard data
+const dashboardData = ref({
+  accepted_bookings: 0,
+  active_cases: 0,
+  verification_status: 'UNVERIFIED',
+})
+
+const recentActivityData = ref<any[]>([])
+const loading = ref(true)
+const error = ref<string | null>(null)
+
+// Fetch dashboard data
+const fetchDashboardData = async () => {
+  try {
+    loading.value = true
+    error.value = null
+    const response = await apiFetch<any>('/api/clients/dashboard/', {
+      method: 'GET',
+    })
+    dashboardData.value = response as any
+  } catch (err: any) {
+    console.error('Failed to fetch dashboard data:', err)
+    error.value = err.message || 'Failed to load dashboard'
+  }
+}
+
+// Fetch notifications/recent activity
+const fetchRecentActivity = async () => {
+  try {
+    const response = await notificationsApi.getNotifications({
+      page_size: 3,
+    })
+    recentActivityData.value = response.results.map((notification: any) => ({
+      type: notification.type.includes('booking') ? 'booking' : notification.type.includes('firm') ? 'message' : 'payment',
+      title: notification.title,
+      description: notification.message,
+      time: new Date(notification.created_at).toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
+      icon: notification.type.includes('booking') ? 'mdi:calendar-check' : notification.type.includes('firm') ? 'mdi:message' : 'mdi:check-circle',
+    }))
+  } catch (err: any) {
+    console.error('Failed to fetch notifications:', err)
+    // Don't show error for notifications, just keep default data
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(async () => {
+  await Promise.all([fetchDashboardData(), fetchRecentActivity()])
+})
 
 const isVerified = computed(() => {
   return authStore.clientVerificationStatus?.status === 'VERIFIED'
 })
 
 const verificationStatus = computed(() => {
-  return authStore.clientVerificationStatus?.status
+  return authStore.clientVerificationStatus?.status || 'UNVERIFIED'
 })
 
-// Quick stats
-const quickStats = [
+// Quick stats - now using computed properties from API data
+const quickStats = computed(() => [
   {
-    label: 'Active Bookings',
-    value: '2',
+    label: 'Accepted Bookings',
+    value: dashboardData.value.accepted_bookings.toString(),
     icon: 'mdi:calendar-check',
     color: 'blue',
   },
   {
-    label: 'Messages',
-    value: '5',
-    icon: 'mdi:message',
+    label: 'Active Cases',
+    value: dashboardData.value.active_cases.toString(),
+    icon: 'mdi:briefcase',
     color: 'green',
   },
   {
-    label: 'Pending Cases',
-    value: '1',
-    icon: 'mdi:briefcase',
-    color: 'orange',
+    label: 'Verification',
+    value: verificationStatus.value === 'VERIFIED' ? 'Verified' : verificationStatus.value === 'PENDING' ? 'Pending' : 'Required',
+    icon: verificationStatus.value === 'VERIFIED' ? 'mdi:check-circle' : verificationStatus.value === 'PENDING' ? 'mdi:clock-outline' : 'mdi:alert-circle',
+    color: verificationStatus.value === 'VERIFIED' ? 'green' : verificationStatus.value === 'PENDING' ? 'yellow' : 'red',
   },
   {
-    label: 'Payments Due',
-    value: 'Rs. 5,000',
-    icon: 'mdi:credit-card',
-    color: 'red',
+    label: 'Visiting Lawyers',
+    value: '12',
+    icon: 'mdi:account-multiple',
+    color: 'purple',
   },
-]
+])
 
-// Recent activity
-const recentActivity = [
+// Default recent activity fallback
+const defaultRecentActivity = [
   {
     type: 'booking',
     title: 'New booking confirmed',
@@ -69,16 +128,35 @@ const recentActivity = [
     icon: 'mdi:check-circle',
   },
 ]
+
+// Use fetched data or fallback to defaults
+const recentActivity = computed(() => {
+  return recentActivityData.value.length > 0 ? recentActivityData.value : defaultRecentActivity
+})
 </script>
 
 <template>
   <div class="space-y-6">
+    <!-- Error Alert -->
+    <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+      <Icon icon="mdi:alert-circle" class="w-5 h-5 text-red-600 flex-shrink-0" />
+      <p class="text-red-800 text-sm">{{ error }}</p>
+    </div>
+
+    <!-- Loading Skeleton -->
+    <div v-if="loading" class="space-y-4">
+      <div class="bg-gradient-to-r from-slate-200 to-slate-300 rounded-lg p-6 h-24 animate-pulse" />
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div v-for="i in 4" :key="i" class="bg-slate-200 rounded-lg p-6 h-32 animate-pulse" />
+      </div>
+    </div>
+
     <!-- Welcome Header -->
-    <div class="bg-gradient-to-r from-primary-normal to-primary-normal-hover rounded-lg p-6 text-white">
+    <div v-if="!loading" class="bg-gradient-to-r from-primary-normal to-primary-normal-hover rounded-lg p-6 text-white">
       <h1 class="text-3xl font-bold mb-2">Welcome back, {{ authStore.user?.fullName || 'User' }}!</h1>
       <p class="text-primary-light">
-        {{ isVerified 
-          ? 'Your profile is verified. You have full access to all features.' 
+        {{ isVerified
+          ? 'Your profile is verified. You have full access to all features.'
           : verificationStatus === 'PENDING'
             ? 'Your profile verification is under review.'
             : 'Complete your profile verification to unlock all features.' }}
@@ -86,7 +164,7 @@ const recentActivity = [
     </div>
 
     <!-- Quick Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div v-if="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <div
         v-for="stat in quickStats"
         :key="stat.label"
@@ -102,6 +180,8 @@ const recentActivity = [
               stat.color === 'green' && 'text-green-500',
               stat.color === 'orange' && 'text-orange-500',
               stat.color === 'red' && 'text-red-500',
+              stat.color === 'yellow' && 'text-yellow-500',
+              stat.color === 'purple' && 'text-purple-500',
             ]"
           />
         </div>
@@ -110,16 +190,14 @@ const recentActivity = [
     </div>
 
     <!-- Two Column Layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div v-if="!loading" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Main Content: Recent Activity -->
-      <div class="lg:col-span-2">
+      <!-- <div class="lg:col-span-2">
         <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <!-- Header -->
           <div class="px-6 py-4 border-b border-gray-200">
             <h2 class="text-lg font-semibold text-gray-900">Recent Activity</h2>
           </div>
 
-          <!-- Activity List -->
           <div class="divide-y divide-gray-200">
             <div
               v-if="recentActivity.length > 0"
@@ -160,7 +238,6 @@ const recentActivity = [
             </div>
           </div>
 
-          <!-- View All Button -->
           <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
             <NuxtLink
               to="/client/bookings"
@@ -170,7 +247,7 @@ const recentActivity = [
             </NuxtLink>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- Sidebar: Quick Actions + Alerts -->
       <div class="space-y-6">
@@ -192,13 +269,7 @@ const recentActivity = [
               <Icon icon="mdi:message" class="w-5 h-5" />
               <span class="text-sm font-medium">Send Message</span>
             </NuxtLink>
-            <NuxtLink
-              to="/client/profile"
-              class="flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
-            >
-              <Icon icon="mdi:account-edit" class="w-5 h-5" />
-              <span class="text-sm font-medium">Edit Profile</span>
-            </NuxtLink>
+            
           </div>
         </div>
 
@@ -242,7 +313,7 @@ const recentActivity = [
                   !isVerified && verificationStatus !== 'PENDING' && 'text-yellow-700',
                 ]"
               >
-                {{ isVerified 
+                {{ isVerified
                   ? 'Your profile has been verified successfully.'
                   : verificationStatus === 'PENDING'
                     ? 'Your verification is under review. Check back soon.'

@@ -11,7 +11,6 @@ definePageMeta({
 const selectedConversationId = ref<string | null>(null)
 const selectedConversationName = ref<string | null>(null)
 
-// Handle conversation selection
 const handleSelectConversation = (payload: { conversationId: string; userName: string; userProfile: string | null; isOnline: boolean }) => {
   selectedConversationId.value = payload.conversationId
   selectedConversationName.value = payload.userName
@@ -20,7 +19,7 @@ const handleSelectConversation = (payload: { conversationId: string; userName: s
 </script>
 
 <template>
-  <div class="h-[90vh] flex">
+  <div class="h-[87vh] flex">
     <!-- Sidebar -->
     <div class="w-80 flex-shrink-0">
       <ChatSidebar

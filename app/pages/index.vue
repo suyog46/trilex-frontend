@@ -342,7 +342,7 @@
     </section>
 
     <!-- Registration Process Section -->
-    <section class="py-20 px-4 bg-white">
+    <!-- <section class="py-20 px-4 bg-white">
       <div class="container mx-auto">
         <div 
           class="text-center mb-12 opacity-0 animate-fade-in-up"
@@ -360,7 +360,7 @@
         </div>
         <RegistrationProcess :steps="registrationSteps" />
       </div>
-    </section>
+    </section> -->
 
     <!-- FAQ Section -->
     <section class="py-20 px-4 bg-gradient-to-b from-primary-light/20 to-white">

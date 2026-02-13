@@ -87,7 +87,7 @@ const links = computed(() => {
       title: "Messages",
       icon: "mdi:message",
       isDropdown: false,
-      link: "/messages"
+      link: userRole === 'client' ? '/messages' : '/chat'
     },
 
   ]
@@ -143,7 +143,7 @@ const toggleDropdown = (title: string) => {
 </script>
 
 <template>
-  <aside class="w-64 space-y-6 h-screen">
+  <aside class="w-64 space-y-6 h-[90vh]">
     <p class="text-lg">Menu</p>
 
     <ul class="space-y-2">

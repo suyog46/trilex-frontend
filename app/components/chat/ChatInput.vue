@@ -60,9 +60,9 @@ watch(messageContent, () => {
   }
   
   // Emit typing event
-  if (messageContent.value) {
-    emit('typing')
-  }
+  // if (messageContent.value) {
+  //   emit('typing')
+  // }
   
   // Stop typing indicator after 3 seconds of inactivity
   typingTimeout = setTimeout(() => {
@@ -88,19 +88,19 @@ const handleEmojiPicker = () => {
 
 <template>
   <div class="border-t border-gray-200 bg-white px-6 py-4">
-    <div class="flex items-end gap-3">
+    <!-- <div class="flex items-end gap-3"> -->
       <!-- Attachment Button -->
-      <button
+      <!-- <button
         type="button"
         class="flex-shrink-0 p-2 text-gray-500 hover:text-primary-normal hover:bg-primary-light rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         :disabled="disabled"
         @click="handleAttachFile"
       >
         <Icon icon="mdi:attachment" class="w-6 h-6" />
-      </button>
+      </button> -->
 
       <!-- Message Input Container -->
-      <div class="flex-1 relative">
+      <div class="flex gap-2 justify-between relative">
         <textarea
           ref="textareaRef"
           v-model="messageContent"
@@ -112,30 +112,27 @@ const handleEmojiPicker = () => {
         ></textarea>
 
         <!-- Emoji Picker Button (inside textarea) -->
-        <button
+        <!-- <button
           type="button"
           class="absolute right-3 bottom-2 text-gray-500 hover:text-primary-normal transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           :disabled="disabled"
           @click="handleEmojiPicker"
         >
           <Icon icon="mdi:emoticon-happy-outline" class="w-5 h-5" />
+        </button> -->
+        <button
+          type="button"
+          class="flex-shrink-0 p-2 bg-primary-normal text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="disabled || !messageContent.trim()"
+          @click="handleSendMessage"
+        >
+          <Icon icon="mdi:send" class="w-6 h-6" />
         </button>
       </div>
 
       <!-- Send Button -->
-      <button
-        type="button"
-        class="flex-shrink-0 p-2 bg-primary-normal text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        :disabled="disabled || !messageContent.trim()"
-        @click="handleSendMessage"
-      >
-        <Icon icon="mdi:send" class="w-6 h-6" />
-      </button>
-    </div>
+    <!-- </div> -->
 
-    <!-- Helper Text -->
-    <p class="text-xs text-gray-500 mt-2">
-      Press Enter to send, Shift + Enter for new line
-    </p>
+  
   </div>
 </template>

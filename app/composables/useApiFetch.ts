@@ -1,9 +1,5 @@
 import { useAuthStore } from '~/stores/auth'
 
-/**
- * Enhanced error object returned from API
- * Includes parsed Django error data for easy handling
- */
 export class ApiError extends Error {
   status: number
   data: any
@@ -33,7 +29,7 @@ export const useApiFetch = () => {
           : authStore.accessToken
       }
       
-      console.log('🌐 API Request to:', request, {
+      console.log(' API Request to:', request, {
         hasToken: !!token,
         tokenPreview: token ? `${token.substring(0, 20)}...` : 'NONE',
         accessTokenStore: authStore.accessToken ? `exists (${typeof authStore.accessToken})` : 'empty'

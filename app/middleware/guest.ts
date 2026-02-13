@@ -1,5 +1,7 @@
 
 
+import { toast } from 'vue-sonner'
+
 export default defineNuxtRouteMiddleware(async (to, from) => {
   const authStore = useAuthStore()
 
@@ -12,7 +14,9 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     // Redirect to role-based dashboard
     if (authStore.isLawyer) {
       return navigateTo('/lawyer/dashboard')
+    } else if (authStore.user?.role === 'firm') {
+      return navigateTo('/law-firm/dashboard')
     }
-    return navigateTo('/')
+    return navigateTo('/client/dashboard')
   }
 })

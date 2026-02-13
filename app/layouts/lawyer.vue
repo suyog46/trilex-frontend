@@ -76,12 +76,12 @@ const verificationMessage = computed(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex gap-3 px-4 relative">
-    <div class="pt-20 border-r border-gray-200 px-3" :class="{ 'opacity-50 pointer-events-none': isVerificationBlocked }">
+  <div class="flex gap-3 px-4 relative h-screen">
+    <div class="pt-20 border-r border-gray-200 px-3 h-full overflow-y-auto" :class="{ 'opacity-50 pointer-events-none': isVerificationBlocked }">
       <Sidebar/>
     </div>
 
-    <div class="flex-1 flex flex-col">
+    <div class="flex-1 flex flex-col h-screen">
       <header class="bg-white border-b border-gray-200 px-8 py-4">
         <div class="flex items-center justify-between">
           <div class="relative max-w-md flex-1">
@@ -104,14 +104,8 @@ const verificationMessage = computed(() => {
               Create Case
             </Button>
             
-            <button class="relative">
-              <Icon icon="mdi:email-outline" class="w-6 h-6 text-gray-600" />
-              <span class="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full"></span>
-            </button>
-            <button class="relative">
-              <Icon icon="mdi:bell-outline" class="w-6 h-6 text-gray-600" />
-              <span class="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full"></span>
-            </button>
+       
+            <NotificationDropdown />
 
             <div ref="dropdownRef" class="relative">
               <button 

@@ -81,9 +81,17 @@ const fetchConversations = async () => {
       page: 1,
       page_size: 50
     })
-    chatRooms.value = response.results
+    
+    // Sort by latest message date (newest first)
+    const sorted = response.results.sort((a, b) => {
+      const dateA = new Date(a.last_message?.created_at || a.updated_at).getTime()
+      const dateB = new Date(b.last_message?.created_at || b.updated_at).getTime()
+      return dateB - dateA // Descending order: newest first
+    })
+    
+    chatRooms.value = sorted
 
-    console.log('Fetched chat rooms:', response.results)
+    console.log('Fetched and sorted chat rooms:', sorted)
 
   } catch (error: any) {
     console.error('Error fetching chat rooms:', error)

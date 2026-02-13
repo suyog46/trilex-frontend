@@ -292,7 +292,7 @@ watch(socketMessages, (newMessages) => {
 </script>
 
 <template>
-  <div class="h-full flex flex-col bg-white">
+  <div class="h-[90vh] flex flex-col bg-white">
     <!-- No Conversation Selected State -->
     <div
       v-if="!conversationId"
@@ -323,14 +323,14 @@ watch(socketMessages, (newMessages) => {
         </div>
 
         <!-- Actions -->
-        <div class="flex items-center gap-2">
+        <!-- <div class="flex items-center gap-2">
           <button
             type="button"
             class="p-2 text-gray-500 hover:text-primary-normal hover:bg-primary-light rounded-lg transition-colors"
           >
             <Icon icon="mdi:dots-vertical" class="w-6 h-6" />
           </button>
-        </div>
+        </div> -->
       </div>
 
       <!-- Chat Content & Input -->

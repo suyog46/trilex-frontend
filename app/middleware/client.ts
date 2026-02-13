@@ -19,6 +19,13 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     return navigateTo('/')
   }
 
+  // Prevent clients from accessing lawyer or law-firm pages
+  if (to.path.startsWith('/lawyer/') || to.path.startsWith('/law-firm/')) {
+    console.log(' Client Middleware: Clients cannot access', to.path)
+    toast.error('Access denied. This page is not available for clients.')
+    return navigateTo('/client/dashboard')
+  }
+
   console.log(' Client Middleware: User is authenticated client, proceeding...')
 
   if (!authStore.clientVerificationStatus) {

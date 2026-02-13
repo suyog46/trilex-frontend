@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { toast } from 'vue-sonner'
+import Navbar from '~/components/layout/Navbar.vue'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -86,6 +87,21 @@ const sidebarItems = [
 
 ]
 
+const clientSidebarRoutes = [
+  '/client/ai-assistant',
+  '/client/dashboard',
+  '/client/bookings',
+  '/client/cases',
+  '/client/messages',
+  '/client/documents',
+  '/client/verification-status',
+]
+
+const forceWhiteNavbar = computed(() => {
+  if (route.path.startsWith('/client/cases/')) return true
+  return clientSidebarRoutes.includes(route.path)
+})
+
 const handleItemClick = (item: any) => {
   if (item.requiresVerification && !isVerified.value) {
     toast.error('Please verify your profile to access this feature')
@@ -102,7 +118,7 @@ const handleBackToHome = () => {
 
 <template>
   <div class="h-[95vh] flex flex-col bg-gray-50">
-    <header class="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40">
+    <!-- <header class="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40">
       <div class="h-16 flex items-center justify-between px-8">
         <div class="flex items-center gap-4">
           <button
@@ -152,7 +168,9 @@ const handleBackToHome = () => {
           </button>
         </div>
       </div>
-    </header>
+    </header> -->
+    <Navbar :force-white="forceWhiteNavbar" />
+
 
     <div class="flex pt-16 h-[calc(100vh-4rem)]">
       <aside
@@ -179,15 +197,9 @@ const handleBackToHome = () => {
               <Icon :icon="item.icon" class="w-5 h-5" />
               <span class="text-sm font-medium flex-1">{{ item.label }}</span>
 
-              <div v-if="item.label === 'Verification'" class="flex items-center gap-2">
+              <div v-if="item.label === 'Verification' && !isVerified" class="flex items-center gap-2">
                 <Icon
-                  v-if="item.badge === 'check'"
-                  icon="mdi:check-circle"
-                  :class="isActive(item.path) ? 'text-white' : 'text-green-500'"
-                  class="w-4 h-4"
-                />
-                <Icon
-                  v-else-if="item.badge === 'pending'"
+                  v-if="item.badge === 'pending'"
                   icon="mdi:clock"
                   :class="isActive(item.path) ? 'text-white' : 'text-yellow-500'"
                   class="w-4 h-4"

@@ -61,7 +61,7 @@ onMounted(() => {
 
 <template>
   <div class="min-h-screen bg-gray-50 pt-16 pb-2 px-4 md:px-8">
-    <div class="max-w-full mx-auto">
+    <div class="w-full">
       <!-- Back Button -->
       <NuxtLink 
         to="/client/lawyers"
@@ -93,105 +93,99 @@ onMounted(() => {
       </div>
 
       <!-- Lawyer Details -->
-      <div v-else class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <!-- Header Image -->
-        <div class="h-64 bg-gradient-to-br from-primary-light-active to-primary-light flex items-center justify-center overflow-hidden">
-          <img 
-            v-if="lawyer.verification?.license_photo?.url" 
-            :src="lawyer.verification.license_photo.url" 
+      <div v-else class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="h-48 bg-slate-100 flex items-center justify-center overflow-hidden">
+          <img
+            v-if="lawyer.verification?.license_photo?.url"
+            :src="lawyer.verification.license_photo.url"
             :alt="lawyer.verification?.full_name || 'Lawyer'"
             class="w-full h-full object-cover"
           />
-          <Icon v-else icon="mdi:account-tie" class="w-24 h-24 text-primary-normal" />
+          <Icon v-else icon="mdi:account-tie" class="w-20 h-20 text-primary-normal" />
         </div>
 
-        <!-- Content -->
-        <div class="p-8">
-          <!-- Title and Book Button -->
-          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
-            <div>
-              <h1 class="text-3xl font-bold text-gray-900 mb-2">
+        <div class="p-8 space-y-8">
+          <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+            <div class="space-y-2">
+              <p class="text-xs uppercase tracking-wider text-gray-500">Lawyer</p>
+              <h1 class="text-3xl font-semibold text-gray-900">
                 {{ lawyer.verification?.full_name || 'Lawyer' }}
               </h1>
-              <p class="text-gray-600">{{ lawyer.user?.email }}</p>
+              <p class="text-sm text-gray-600">{{ lawyer.user?.email || 'N/A' }}</p>
+              <p class="text-sm text-gray-600">{{ formattedAddress }}</p>
             </div>
-            <Button
-              @click="handleBooking"
-              class="bg-primary-normal hover:bg-primary-normal-hover text-white px-8 py-3 text-lg"
-            >
-              <Icon icon="mdi:calendar-check" class="w-5 h-5 mr-2" />
-              Book This Lawyer
-            </Button>
-          </div>
-
-          <!-- Details Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <!-- Contact Info -->
-            <div class="bg-gray-50 rounded-lg p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
-              <div class="space-y-3">
-                <div class="flex items-center gap-3">
-                  <Icon icon="mdi:email" class="w-5 h-5 text-primary-normal" />
-                  <span class="text-gray-700">{{ lawyer.user?.email || 'N/A' }}</span>
-                </div>
-                <div class="flex items-center gap-3">
-                  <Icon icon="mdi:phone" class="w-5 h-5 text-primary-normal" />
-                  <span class="text-gray-700">{{ lawyer.profile?.phone_number || 'N/A' }}</span>
-                </div>
-                <div class="flex items-start gap-3">
-                  <Icon icon="mdi:map-marker" class="w-5 h-5 text-primary-normal mt-0.5" />
-                  <span class="text-gray-700">{{ formattedAddress }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- License Photo -->
-            <div class="bg-gray-50 rounded-lg p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">License</h3>
-              <div v-if="lawyer.verification?.license_photo?.url" class="space-y-3">
-                <a 
-                  :href="lawyer.verification.license_photo.url" 
-                  target="_blank"
-                  class="inline-flex items-center gap-2 text-primary-normal hover:text-primary-normal-hover"
-                >
-                  <Icon icon="mdi:file-document" class="w-5 h-5" />
-                  View License Document
-                  <Icon icon="mdi:open-in-new" class="w-4 h-4" />
-                </a>
-              </div>
-              <p v-else class="text-gray-500">License document not available</p>
+            <div class="flex items-center gap-3">
+              <Button
+                @click="handleBooking"
+                class="bg-primary-normal hover:bg-primary-normal-hover text-white px-6 py-3"
+              >
+                <Icon icon="mdi:calendar-check" class="w-5 h-5 mr-2" />
+                Book Consultation
+              </Button>
             </div>
           </div>
 
-          <!-- Services -->
-          <div class="mb-8">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Services Offered</h3>
+          <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div class="xl:col-span-2 rounded-xl border border-gray-100 bg-white p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Contact</h3>
+              <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <dt class="text-gray-500">Email</dt>
+                  <dd class="text-gray-900 mt-1">{{ lawyer.user?.email || 'N/A' }}</dd>
+                </div>
+                <div>
+                  <dt class="text-gray-500">Phone</dt>
+                  <dd class="text-gray-900 mt-1">{{ lawyer.profile?.phone_number || 'N/A' }}</dd>
+                </div>
+                <div class="sm:col-span-2">
+                  <dt class="text-gray-500">Address</dt>
+                  <dd class="text-gray-900 mt-1">{{ formattedAddress }}</dd>
+                </div>
+              </dl>
+            </div>
+
+            <div class="rounded-xl border border-gray-100 bg-white p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">License</h3>
+              <p class="text-sm text-gray-600 mb-4">Professional license document.</p>
+              <a
+                v-if="lawyer.verification?.license_photo?.url"
+                :href="lawyer.verification.license_photo.url"
+                target="_blank"
+                class="inline-flex items-center gap-2 text-primary-normal hover:text-primary-normal-hover text-sm font-medium"
+              >
+                <Icon icon="mdi:file-document" class="w-4 h-4" />
+                View License
+                <Icon icon="mdi:open-in-new" class="w-4 h-4" />
+              </a>
+              <p v-else class="text-sm text-gray-500">License document not available.</p>
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-gray-100 bg-white p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Services</h3>
             <div v-if="lawyer.profile?.services?.length" class="flex flex-wrap gap-2">
-              <span 
-                v-for="service in lawyer.profile.services" 
+              <span
+                v-for="service in lawyer.profile.services"
                 :key="service.id"
-                class="px-4 py-2 bg-primary-light text-primary-normal font-medium rounded-full"
+                class="px-3 py-1.5 bg-slate-100 text-gray-700 text-sm font-medium rounded-full"
               >
                 {{ service.name }}
               </span>
             </div>
-            <p v-else class="text-gray-500">No services listed</p>
+            <p v-else class="text-sm text-gray-500">No services listed.</p>
           </div>
 
-          <!-- CTA -->
-          <div class="border-t border-gray-200 pt-6">
-            <div class="bg-primary-light/30 rounded-lg p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-              <div>
-                <h3 class="text-lg font-semibold text-gray-900">Ready to get started?</h3>
-                <p class="text-gray-600">Book a consultation with this lawyer today.</p>
-              </div>
-              <Button
-                @click="handleBooking"
-                class="bg-primary-normal hover:bg-primary-normal-hover text-white px-8 py-3"
-              >
-                Book Now
-              </Button>
+          <div class="rounded-xl border border-gray-100 bg-slate-50 p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900">Ready to get started?</h3>
+              <p class="text-sm text-gray-600">Book a consultation with this lawyer today.</p>
             </div>
+            <Button
+              @click="handleBooking"
+              class="bg-primary-normal hover:bg-primary-normal-hover text-white px-6 py-3"
+            >
+              Book Now
+            </Button>
           </div>
         </div>
       </div>

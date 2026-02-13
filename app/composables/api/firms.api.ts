@@ -4,6 +4,7 @@ import { URL } from "~/lib/constants/url"
 export interface FirmUser {
   email: string
   role: string
+  id: string
 }
 
 export interface Province {

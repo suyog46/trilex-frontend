@@ -1,4 +1,6 @@
 import { ref } from 'vue'
+import { toast } from 'vue-sonner'
+import { navigateTo } from '#app'
 
 interface ChatMessage {
   type: string
@@ -33,6 +35,8 @@ const globalMessages = ref<ChatMessage[]>([])
 const globalRoomUpdates = ref<RoomUpdatedMessage[]>([])
 const globalMessageUpdates = ref<Map<string, { message_id: string, created_at: string, status: 'sending' | 'sent' | 'delivered' | 'read' }>>(new Map())
 const globalTypingUsers = ref<string[]>([])
+const globalUnreadNotificationCount = ref(0)
+const globalNotifications = ref<any[]>([])
 
 export const useChatSocket = () => {
   // Use global singleton refs instead of creating new ones
@@ -42,6 +46,8 @@ export const useChatSocket = () => {
   const roomUpdates = globalRoomUpdates
   const messageUpdates = globalMessageUpdates
   const typingUsers = globalTypingUsers
+  const unreadNotificationCount = globalUnreadNotificationCount
+  const notifications = globalNotifications
 
   const connect = (conversationId: string) => {
     console.log(' Connect called with conversationId:', conversationId)
@@ -137,6 +143,32 @@ export const useChatSocket = () => {
 
         case 'room_updated':
           roomUpdates.value.push(data)
+          break
+
+        case 'unread_count':
+          unreadNotificationCount.value = data.count
+          console.log('📬 Unread notifications count:', data.count)
+          break
+
+        case 'notification':
+          notifications.value.unshift(data.notification)
+          if (!data.notification.is_read) {
+            unreadNotificationCount.value += 1
+          }
+          const notificationTitle = data.notification.title || 'New notification'
+          const notificationMessage = data.notification.message || ''
+          // Show toast notification
+          toast(notificationTitle, {
+            description: notificationMessage,
+            action: {
+              label: 'View',
+              onClick: () => {
+                navigateTo('/notifications')
+              }
+            },
+            duration: 5000
+          })
+          console.log('🔔 New notification received:', data.notification)
           break
 
         default:
@@ -244,6 +276,8 @@ export const useChatSocket = () => {
     roomUpdates,
     messageUpdates,
     typingUsers,
+    unreadNotificationCount,
+    notifications,
     connect,
     disconnect,
     sendMessage,

@@ -27,6 +27,8 @@ export const URL = {
       VERIFY_LINK: '/api/auth/verify-link/',
       RESEND_VERIFICATION_LINK: '/api/auth/resend-verification-link/',
       ME: '/api/clients/me',
+      LAWYER_ME: '/api/lawyers/me/',
+      FIRM_ME: '/api/firms/me/',
       REFRESH: '/auth/refresh',
       LOGOUT: '/api/auth/logout/',
       FORGOT_PASSWORD: '/api/auth/forgot-password/',

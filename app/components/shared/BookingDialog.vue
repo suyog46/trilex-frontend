@@ -34,11 +34,9 @@ const loadingCategories = ref(false)
 const isSubmitting = ref(false)
 
 const courtTypes = [
-  { value: 'district', label: 'District Court' },
-  { value: 'supreme', label: 'Supreme Court' },
-  { value: 'high', label: 'High Court' },
-  { value: 'family', label: 'Family Court' },
-  { value: 'commercial', label: 'Commercial Court' },
+  { value: 'district', label: 'District' },
+  { value: 'high', label: 'High' },
+  { value: 'supreme', label: 'Supreme' },
 ]
 
 const createdTo = computed(() => {

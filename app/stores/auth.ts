@@ -132,9 +132,13 @@ export const useAuthStore = defineStore('auth', () => {
       if (tokenValue && tokenValue.length > 0) {
         console.log('initializeAuth: Token found, user IS authenticated')
         
-        // Try to fetch full user details from /me endpoint
+        // Try to fetch full user details from role-based /me endpoint
         try {
-          const userDetails = await authApi.me()
+          const userDetails = role === 'lawyer'
+            ? await authApi.lawyerMe()
+            : role === 'firm'
+              ? await authApi.firmMe()
+              : await authApi.me()
           user.value = {
             id: userDetails?.user?.id,
             email: userDetails.user?.email || '',
@@ -144,6 +148,9 @@ export const useAuthStore = defineStore('auth', () => {
             profile: userDetails.profile,
             fullName: userDetails.verification?.full_name || userDetails.profile?.phone_number,
           } as User
+          if (user.value?.role) {
+            userRole.value = user.value.role as string
+          }
           console.log('User details fetched from /me:', user.value)
           
           // Connect to chat socket after successful initialization
@@ -165,7 +172,7 @@ export const useAuthStore = defineStore('auth', () => {
           }
         }
       } else {
-        console.log('❌ initializeAuth: No token found, user NOT authenticated')
+        console.log(' initializeAuth: No token found, user NOT authenticated')
       }
     } catch (err) {
       console.error('initializeAuth: Unexpected error:', err)
@@ -209,9 +216,14 @@ export const useAuthStore = defineStore('auth', () => {
         userRole.value = response.role
       }
 
-      // Fetch full user details from /me endpoint
+      // Fetch full user details from role-based /me endpoint
       try {
-        const userDetails = await authApi.me()
+        const role = response.role as string
+        const userDetails = role === 'lawyer'
+          ? await authApi.lawyerMe()
+          : role === 'firm'
+            ? await authApi.firmMe()
+            : await authApi.me()
         user.value = {
           id: userDetails?.user?.id,
           email: userDetails.user?.email || response.email,
@@ -221,6 +233,9 @@ export const useAuthStore = defineStore('auth', () => {
           profile: userDetails.profile,
           fullName: userDetails.verification?.full_name || userDetails.profile?.phone_number,
         } as User
+        if (user.value?.role) {
+          userRole.value = user.value.role as string
+        }
       } catch (meError) {
         console.error('Failed to fetch user details from /me:', meError)
         // Fallback to basic user object
@@ -488,7 +503,7 @@ export const useAuthStore = defineStore('auth', () => {
   const getLawyerVerificationStatus = async () => {
     try {
       const status = await verificationApi.getLawyerVerificationStatus()
-      console.log('🔍 Raw Lawyer Verification Status from API:', status)
+      console.log(' Raw Lawyer Verification Status from API:', status)
       lawyerVerificationStatus.value = status
       return status
     } catch (err: any) {
@@ -516,7 +531,7 @@ export const useAuthStore = defineStore('auth', () => {
   const getFirmVerificationStatus = async () => {
     try {
       const status = await verificationApi.getFirmVerificationStatus()
-      console.log('🔍 Raw Firm Verification Status from API:', status)
+      console.log(' Raw Firm Verification Status from API:', status)
       firmVerificationStatus.value = status
       return status
     } catch (err: any) {
@@ -544,7 +559,7 @@ export const useAuthStore = defineStore('auth', () => {
   const getClientVerificationStatus = async () => {
     try {
       const status = await verificationApi.getClientVerificationStatus()
-      console.log('🔍 Raw Client Verification Status from API:', status)
+      console.log(' Raw Client Verification Status from API:', status)
       clientVerificationStatus.value = status
       return status
     } catch (err: any) {

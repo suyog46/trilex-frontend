@@ -14,75 +14,57 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-      <!-- Active Clients -->
-      <div class="bg-white rounded-xl p-6 border border-gray-200">
-        <div class="flex items-start justify-between mb-4">
-          <div>
-            <p class="text-sm font-medium text-gray-600 mb-1">Active Clients</p>
-            <h3 class="text-3xl font-bold" style="color: var(--color-primary-normal)">24</h3>
-          </div>
-          <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
-            <Icon name="mdi:account-group" class="w-6 h-6" style="color: var(--color-primary-normal)" />
-          </div>
-        </div>
-        <p class="text-sm text-green-600 font-medium">+15.3% from last month</p>
-      </div>
-
-      <!-- Total Cases -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <div class="bg-white rounded-xl p-6 border border-gray-200">
         <div class="flex items-start justify-between mb-4">
           <div>
             <p class="text-sm font-medium text-gray-600 mb-1">Total Cases</p>
-            <h3 class="text-3xl font-bold" style="color: var(--color-primary-normal)">156</h3>
+            <h3 class="text-3xl font-bold" style="color: var(--color-primary-normal)">{{ totals.totalCases }}</h3>
           </div>
           <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
             <Icon name="mdi:briefcase" class="w-6 h-6" style="color: var(--color-primary-normal)" />
           </div>
         </div>
-        <p class="text-sm text-green-600 font-medium">+8.2% from last month</p>
+        <p class="text-sm text-gray-500 font-medium">All firm cases</p>
       </div>
 
-      <!-- Team Members -->
       <div class="bg-white rounded-xl p-6 border border-gray-200">
         <div class="flex items-start justify-between mb-4">
           <div>
-            <p class="text-sm font-medium text-gray-600 mb-1">Team Members</p>
-            <h3 class="text-3xl font-bold" style="color: var(--color-primary-normal)">12</h3>
+            <p class="text-sm font-medium text-gray-600 mb-1">Ongoing Cases</p>
+            <h3 class="text-3xl font-bold" style="color: var(--color-primary-normal)">{{ totals.ongoingCases }}</h3>
           </div>
-          <div class="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center">
-            <Icon name="mdi:account-multiple" class="w-6 h-6" style="color: var(--color-primary-normal)" />
+          <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
+            <Icon name="mdi:trending-up" class="w-6 h-6" style="color: var(--color-primary-normal)" />
           </div>
         </div>
-        <p class="text-sm text-green-600 font-medium">+3 new this month</p>
+        <p class="text-sm text-gray-500 font-medium">In progress</p>
       </div>
 
-      <!-- Pending Requests -->
       <div class="bg-white rounded-xl p-6 border border-gray-200">
         <div class="flex items-start justify-between mb-4">
           <div>
-            <p class="text-sm font-medium text-gray-600 mb-1">Pending Requests</p>
-            <h3 class="text-3xl font-bold" style="color: var(--color-primary-normal)">5</h3>
+            <p class="text-sm font-medium text-gray-600 mb-1">Pending Bookings</p>
+            <h3 class="text-3xl font-bold" style="color: var(--color-primary-normal)">{{ totals.pendingBookings }}</h3>
           </div>
           <div class="w-12 h-12 rounded-full bg-yellow-50 flex items-center justify-center">
             <Icon name="mdi:clock-outline" class="w-6 h-6" style="color: var(--color-primary-normal)" />
           </div>
         </div>
-        <p class="text-sm text-red-600 font-medium">2 urgent</p>
+        <p class="text-sm text-gray-500 font-medium">Awaiting review</p>
       </div>
 
-      <!-- Firm Revenue -->
       <div class="bg-white rounded-xl p-6 border border-gray-200">
         <div class="flex items-start justify-between mb-4">
           <div>
-            <p class="text-sm font-medium text-gray-600 mb-1">Firm Revenue</p>
-            <h3 class="text-3xl font-bold" style="color: var(--color-primary-normal)">$45.2K</h3>
+            <p class="text-sm font-medium text-gray-600 mb-1">Team Members</p>
+            <h3 class="text-3xl font-bold" style="color: var(--color-primary-normal)">{{ totals.teamMembers }}</h3>
           </div>
-          <div class="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center">
-            <Icon name="mdi:cash" class="w-6 h-6" style="color: var(--color-primary-normal)" />
+          <div class="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center">
+            <Icon name="mdi:account-multiple" class="w-6 h-6" style="color: var(--color-primary-normal)" />
           </div>
         </div>
-        <p class="text-sm text-green-600 font-medium">+12.5% from last month</p>
+        <p class="text-sm text-gray-500 font-medium">Active firm members</p>
       </div>
     </div>
 
@@ -109,7 +91,7 @@
                 <div
                   class="w-full rounded-t-lg transition-all"
                   :style="{
-                    height: `${(data.value / 25) * 100}%`,
+                    height: `${(data.value / chartMax) * 100}%`,
                     background: 'var(--color-primary-normal)'
                   }"
                 ></div>
@@ -175,21 +157,56 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { navigateTo } from '#app'
+import { useApiFetch } from '~/composables/useApiFetch'
+import { useAuthStore } from '~/stores/auth'
 
-const chartData = ref([
-  { month: 'Jan', value: 18 },
-  { month: 'Feb', value: 12 },
-  { month: 'Mar', value: 22 },
-  { month: 'Apr', value: 19 },
-  { month: 'May', value: 25 },
-  { month: 'Jun', value: 21 },
-  { month: 'Jul', value: 24 },
-  { month: 'Aug', value: 23 },
-  { month: 'Sep', value: 20 },
-  { month: 'Oct', value: 26 },
-  { month: 'Nov', value: 28 },
-  { month: 'Dec', value: 22 }
-])
+type CasesPerMonthItem = {
+  month: string
+  year: number
+  count: number
+}
+
+type FirmDashboardResponse = {
+  total_cases: number
+  total_ongoing_cases: number
+  total_pending_bookings: number
+  total_members: number
+  cases_per_month: CasesPerMonthItem[]
+}
+
+const authStore = useAuthStore()
+const apiFetch = useApiFetch()
+const dashboardData = ref<FirmDashboardResponse | null>(null)
+
+const chartData = computed(() => {
+  return (dashboardData.value?.cases_per_month || []).map(item => ({
+    month: item.month,
+    value: item.count,
+  }))
+})
+
+const chartMax = computed(() => {
+  const values = chartData.value.map(item => item.value)
+  return Math.max(1, ...values)
+})
+
+const totals = computed(() => {
+  return {
+    totalCases: dashboardData.value?.total_cases ?? 0,
+    ongoingCases: dashboardData.value?.total_ongoing_cases ?? 0,
+    pendingBookings: dashboardData.value?.total_pending_bookings ?? 0,
+    teamMembers: dashboardData.value?.total_members ?? 0,
+  }
+})
+
+const fetchDashboard = async () => {
+  if (authStore.user?.role !== 'firm') return
+  dashboardData.value = await apiFetch('/api/firms/dashboard/')
+}
+
+onMounted(() => {
+  fetchDashboard()
+})
 </script>

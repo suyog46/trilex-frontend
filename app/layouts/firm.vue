@@ -8,6 +8,7 @@ import { useAuthStore } from '~/stores/auth'
 
 const authStore = useAuthStore()
 const isLoadingVerification = ref(false)
+const route = useRoute()
 
 onMounted(async () => {
   isLoadingVerification.value = true
@@ -36,6 +37,8 @@ const verificationMessage = computed(() => {
   }
   return ''
 })
+
+const hideNavbarSection = computed(() => route.path === '/law-firm/ai-assistant')
 </script>
 
 <template>
@@ -45,7 +48,7 @@ const verificationMessage = computed(() => {
     </div>
 
     <div class="flex-1 flex flex-col">
-      <header class="bg-white border-b border-gray-200 px-8 py-4">
+      <header v-if="!hideNavbarSection" class="bg-white border-b border-gray-200 px-8 py-4">
         <div class="flex items-center justify-between">
           <div class="relative max-w-md flex-1">
             <Icon icon="material-symbols-light:search-rounded" 

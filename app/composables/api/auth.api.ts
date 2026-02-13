@@ -109,6 +109,22 @@ export const authApi = {
   },
 
   /**
+   * Get current lawyer info
+   */
+  lawyerMe: (): Promise<any> => {
+    const apiFetch = useApiFetch()
+    return apiFetch(URL.API.AUTH.LAWYER_ME)
+  },
+
+  /**
+   * Get current firm info
+   */
+  firmMe: (): Promise<any> => {
+    const apiFetch = useApiFetch()
+    return apiFetch(URL.API.AUTH.FIRM_ME)
+  },
+
+  /**
    * Refresh access token using refresh token
    */
   refreshToken: (token: string): Promise<AuthResponse> => {

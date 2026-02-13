@@ -15,60 +15,56 @@
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <!-- Active Clients -->
-      <div class="bg-white rounded-xl p-6 border border-gray-200">
-        <div class="flex items-start justify-between mb-4">
-          <div>
-            <p class="text-sm font-medium text-gray-600 mb-1">Active Clients</p>
-            <h3 class="text-3xl font-bold" style="color: var(--color-primary-normal)">13</h3>
-          </div>
-          <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
-            <Icon name="mdi:account-group" class="w-6 h-6" style="color: var(--color-primary-normal)" />
-          </div>
-        </div>
-        <p class="text-sm text-green-600 font-medium">+20.1% from last month</p>
-      </div>
-
-      <!-- Total Cases -->
       <div class="bg-white rounded-xl p-6 border border-gray-200">
         <div class="flex items-start justify-between mb-4">
           <div>
             <p class="text-sm font-medium text-gray-600 mb-1">Total Cases</p>
-            <h3 class="text-3xl font-bold" style="color: var(--color-primary-normal)">28</h3>
+            <h3 class="text-3xl font-bold" style="color: var(--color-primary-normal)">{{ totals.totalCases }}</h3>
           </div>
           <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
             <Icon name="mdi:briefcase" class="w-6 h-6" style="color: var(--color-primary-normal)" />
           </div>
         </div>
-        <p class="text-sm text-red-600 font-medium">-0.1% from last month</p>
+        <p class="text-sm text-gray-500 font-medium">All cases assigned</p>
       </div>
 
-      <!-- New Requests -->
-      <div class="bg-white rounded-xl p-6 border border-gray-200">
-        <div class="flex items-start justify-between mb-4">
-          <div>
-            <p class="text-sm font-medium text-gray-600 mb-1">New Requests</p>
-            <h3 class="text-3xl font-bold" style="color: var(--color-primary-normal)">8</h3>
-          </div>
-          <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
-            <Icon name="mdi:account-multiple-plus" class="w-6 h-6" style="color: var(--color-primary-normal)" />
-          </div>
-        </div>
-        <p class="text-sm text-red-600 font-medium">-0.1% from last month</p>
-      </div>
-
-      <!-- Ongoing Cases -->
       <div class="bg-white rounded-xl p-6 border border-gray-200">
         <div class="flex items-start justify-between mb-4">
           <div>
             <p class="text-sm font-medium text-gray-600 mb-1">Ongoing Cases</p>
-            <h3 class="text-3xl font-bold" style="color: var(--color-primary-normal)">2</h3>
+            <h3 class="text-3xl font-bold" style="color: var(--color-primary-normal)">{{ totals.ongoingCases }}</h3>
           </div>
           <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
             <Icon name="mdi:trending-up" class="w-6 h-6" style="color: var(--color-primary-normal)" />
           </div>
         </div>
-        <p class="text-sm text-green-600 font-medium">+2.3% from last month</p>
+        <p class="text-sm text-gray-500 font-medium">Active court proceedings</p>
+      </div>
+
+      <div class="bg-white rounded-xl p-6 border border-gray-200">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <p class="text-sm font-medium text-gray-600 mb-1">Pending Bookings</p>
+            <h3 class="text-3xl font-bold" style="color: var(--color-primary-normal)">{{ totals.pendingBookings }}</h3>
+          </div>
+          <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
+            <Icon name="mdi:account-multiple-plus" class="w-6 h-6" style="color: var(--color-primary-normal)" />
+          </div>
+        </div>
+        <p class="text-sm text-gray-500 font-medium">Awaiting confirmation</p>
+      </div>
+
+      <div class="bg-white rounded-xl p-6 border border-gray-200">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <p class="text-sm font-medium text-gray-600 mb-1">Cases This Month</p>
+            <h3 class="text-3xl font-bold" style="color: var(--color-primary-normal)">{{ totals.currentMonthCases }}</h3>
+          </div>
+          <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
+            <Icon name="mdi:calendar-check" class="w-6 h-6" style="color: var(--color-primary-normal)" />
+          </div>
+        </div>
+        <p class="text-sm text-gray-500 font-medium">New case activity</p>
       </div>
     </div>
 
@@ -95,7 +91,7 @@
                 <div
                   class="w-full rounded-t-lg transition-all"
                   :style="{
-                    height: `${(data.value / 20) * 100}%`,
+                    height: `${(data.value / chartMax) * 100}%`,
                     background: 'var(--color-primary-normal)'
                   }"
                 ></div>
@@ -161,21 +157,58 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { navigateTo } from '#app'
+import { useApiFetch } from '~/composables/useApiFetch'
+import { useAuthStore } from '~/stores/auth'
 
-const chartData = ref([
-  { month: 'Jan', value: 15 },
-  { month: 'Feb', value: 8 },
-  { month: 'Mar', value: 17 },
-  { month: 'Apr', value: 13 },
-  { month: 'May', value: 12 },
-  { month: 'Jun', value: 7 },
-  { month: 'Jul', value: 5 },
-  { month: 'Aug', value: 18 },
-  { month: 'Sep', value: 14 },
-  { month: 'Oct', value: 15 },
-  { month: 'Nov', value: 20 },
-  { month: 'Dec', value: 17 }
-])
+type CasesPerMonthItem = {
+  month: string
+  year: number
+  count: number
+}
+
+type LawyerDashboardResponse = {
+  total_cases: number
+  total_ongoing_cases: number
+  total_pending_bookings: number
+  cases_per_month: CasesPerMonthItem[]
+}
+
+const authStore = useAuthStore()
+const apiFetch = useApiFetch()
+const dashboardData = ref<LawyerDashboardResponse | null>(null)
+
+const chartData = computed(() => {
+  return (dashboardData.value?.cases_per_month || []).map(item => ({
+    month: item.month,
+    value: item.count,
+  }))
+})
+
+const chartMax = computed(() => {
+  const values = chartData.value.map(item => item.value)
+  return Math.max(1, ...values)
+})
+
+const totals = computed(() => {
+  const casesPerMonth = dashboardData.value?.cases_per_month || []
+  const lastMonth = casesPerMonth[casesPerMonth.length - 1]
+
+  return {
+    totalCases: dashboardData.value?.total_cases ?? 0,
+    ongoingCases: dashboardData.value?.total_ongoing_cases ?? 0,
+    pendingBookings: dashboardData.value?.total_pending_bookings ?? 0,
+    currentMonthCases: lastMonth?.count ?? 0,
+  }
+})
+
+const fetchDashboard = async () => {
+  if (authStore.user?.role !== 'lawyer') return
+  dashboardData.value = await apiFetch('/api/lawyers/dashboard/')
+}
+
+onMounted(() => {
+  fetchDashboard()
+})
 </script>
