@@ -46,6 +46,8 @@ const isLoadingMessages = ref(false)
 const currentPage = ref(1)
 const hasMoreMessages = ref(true)
 const roomDetails = ref<any>(null)
+const abortController = ref<AbortController | null>(null)
+const currentFetchingConversationId = ref<string | null>(null)
 
 // Get display name for conversation
 const conversationUserName = computed(() => {
@@ -103,13 +105,32 @@ const markDeliveredUpTo = (messageId: string) => {
 const fetchMessages = async (page = 1) => {
   if (!props.conversationId) return
   
+  // Cancel previous request if still pending
+  if (abortController.value) {
+    abortController.value.abort()
+    console.log('❌ Aborted previous fetch request for conversation:', currentFetchingConversationId.value)
+  }
+  
+  // Create new abort controller for this request
+  abortController.value = new AbortController()
+  currentFetchingConversationId.value = props.conversationId
+  const conversationId = props.conversationId
+  
   isLoadingMessages.value = true
+  console.log('⏳ Starting to fetch messages for conversation:', conversationId)
   
   try {
-    const response = await chatApi.getMessages(props.conversationId, {
+    const response = await chatApi.getMessages(conversationId, {
       page,
       page_size: 50
     })
+    
+    // Only update state if this is still the current conversation
+    if (conversationId !== currentFetchingConversationId.value) {
+      console.log('⏭️ Ignoring message response for old conversation:', conversationId)
+      console.log('⏭️ Current conversation is now:', currentFetchingConversationId.value)
+      return
+    }
     
     const transformedMessages = response.results.map(transformMessage)
     
@@ -121,11 +142,25 @@ const fetchMessages = async (page = 1) => {
     
     hasMoreMessages.value = !!response.next
     currentPage.value = page
+    console.log(' Messages loaded for conversation:', conversationId, transformedMessages.length)
+    
+    // Only clear loading if this is the current conversation
+    if (conversationId === currentFetchingConversationId.value) {
+      isLoadingMessages.value = false
+    }
   } catch (error: any) {
+    // Ignore abort errors
+    if (error.name === 'AbortError') {
+      console.log('⏹ Fetch request was cancelled for conversation:', conversationId)
+      return
+    }
     console.error('Error fetching messages:', error)
-    toast.error('Failed to load messages')
-  } finally {
-    isLoadingMessages.value = false
+    
+    // Only show error and clear loading if this is the current conversation
+    if (conversationId === currentFetchingConversationId.value) {
+      toast.error('Failed to load messages')
+      isLoadingMessages.value = false
+    }
   }
 }
 
@@ -177,6 +212,12 @@ const handleTyping = () => {
 
 // Watch for conversation change
 watch(() => props.conversationId, (newConversationId, oldConversationId) => {
+  // Clear previous messages when switching conversations
+  if (newConversationId !== oldConversationId) {
+    messages.value = []
+    console.log('Conversation changed, clearing messages')
+  }
+  
   // Connect to new conversation
   if (newConversationId) {
     currentPage.value = 1

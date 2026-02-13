@@ -11,14 +11,17 @@ interface ChatMessage {
 
 interface RoomUpdatedMessage {
   type: 'room_updated'
-  id: string
   room_id: string
-  message: string
-  created_at: string
-  sender: {
+  last_message: {
     id: string
-    name: string
-    email: string
+    message: string
+    created_at: string
+    room_id: string
+    sender: {
+      id: string
+      name: string
+      email: string
+    }
   }
 }
 

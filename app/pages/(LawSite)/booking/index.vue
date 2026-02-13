@@ -16,6 +16,8 @@ const pageSize = ref(10)
 const searchQuery = ref('')
 const selectedStatus = ref<'pending' | 'accepted' | 'rejected'>('pending')
 const isLoading = ref(false)
+const abortController = ref<AbortController | null>(null)
+const currentFetchingStatus = ref<'pending' | 'accepted' | 'rejected'>('pending')
 
 const statusOptions = [
   { value: 'pending', label: 'Pending' },
@@ -24,22 +26,58 @@ const statusOptions = [
 ]
 
 const fetchBookings = async () => {
+  // Cancel previous request if still pending
+  if (abortController.value) {
+    abortController.value.abort()
+    console.log('❌ Aborted previous bookings fetch for status:', currentFetchingStatus.value)
+  }
+  
+  // Create new abort controller for this request
+  abortController.value = new AbortController()
+  currentFetchingStatus.value = selectedStatus.value
+  const statusToFetch = selectedStatus.value
+  
   isLoading.value = true
+  console.log('⏳ Starting to fetch bookings for status:', statusToFetch)
+  
   try {
     const params = {
       page: currentPage.value,
       page_size: pageSize.value,
-      status: selectedStatus.value,
+      status: statusToFetch,
     }
 
     const response = await bookingsApi.getBookingsReceived(params)
+    
+    // Only update state if this is still the current status
+    if (statusToFetch !== currentFetchingStatus.value) {
+      console.log('⏭️ Ignoring booking response for old status:', statusToFetch)
+      console.log('⏭️ Current status is now:', currentFetchingStatus.value)
+      return
+    }
+    
     data.value = response.results || []
     totalCount.value = response.count || 0
+    console.log('✅ Bookings loaded for status:', statusToFetch, response.results?.length)
+    
+    // Only clear loading if this is the current status
+    if (statusToFetch === currentFetchingStatus.value) {
+      isLoading.value = false
+    }
   } catch (error: any) {
+    // Ignore abort errors
+    if (error.name === 'AbortError') {
+      console.log('⏹️ Bookings fetch was cancelled for status:', statusToFetch)
+      return
+    }
+    
     console.error('Error fetching bookings:', error)
-    toast.error('Failed to load bookings')
-  } finally {
-    isLoading.value = false
+    
+    // Only show error and clear loading if this is the current status
+    if (statusToFetch === currentFetchingStatus.value) {
+      toast.error('Failed to load bookings')
+      isLoading.value = false
+    }
   }
 }
 

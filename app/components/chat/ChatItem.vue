@@ -120,7 +120,7 @@ const getInitials = (name: string): string => {
           <!-- Sent Status - single check -->
           <Icon
             v-else-if="message.status === 'sent'"
-            icon="mdi:check"
+            icon="mdi:check-all"
             class="w-4 h-4 text-gray-400"
           />
           

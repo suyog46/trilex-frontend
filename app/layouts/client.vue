@@ -101,7 +101,7 @@ const handleBackToHome = () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-gray-50">
+  <div class="h-[95vh] flex flex-col bg-gray-50">
     <header class="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40">
       <div class="h-16 flex items-center justify-between px-8">
         <div class="flex items-center gap-4">
@@ -154,10 +154,10 @@ const handleBackToHome = () => {
       </div>
     </header>
 
-    <div class="flex pt-16 flex-1">
+    <div class="flex pt-16 h-[calc(100vh-4rem)]">
       <aside
         :class="[
-          'fixed lg:static top-16 left-0 bottom-0 w-64 bg-white border-r border-gray-200 z-30 transition-transform duration-300 overflow-y-auto',
+          'fixed lg:static top-16 left-0 w-64 bg-white border-r border-gray-200 z-30 transition-transform duration-300 overflow-y-auto h-[calc(100vh-4rem)]',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         ]"
       >
@@ -228,7 +228,7 @@ const handleBackToHome = () => {
       ></div>
 
       <!-- Main Content -->
-      <main class="flex-1 overflow-auto">
+      <main class="flex-1 overflow-auto h-[calc(100vh-4rem)]">
         <div class="p-4 lg:p-8">
           <!-- Verification Banner -->
           <div

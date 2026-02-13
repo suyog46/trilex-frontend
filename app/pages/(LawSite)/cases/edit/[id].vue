@@ -89,22 +89,22 @@ const fetchCaseDetail = async () => {
         status: data.status,
         client: data.client?.id,
         client_details: {
-          full_name: data.client_details.full_name,
-          address: data.client_details.address,
-          email: data.client_details.email || "",
-          phone: data.client_details.phone,
-          date_of_birth: data.client_details.date_of_birth,
-          citizenship_number: data.client_details.citizenship_number,
-          gender: (data.client_details.gender || "male") as "male" | "female" | "other",
+          full_name: data.client_details?.full_name,
+          address: data.client_details?.address,
+          email: data.client_details?.email || "",
+          phone: data.client_details?.phone,
+          date_of_birth: data.client_details?.date_of_birth,
+          citizenship_number: data.client_details?.citizenship_number,
+          gender: (data.client_details?.gender || "male") as "male" | "female" | "other",
         },
         waris: data.waris ? {
-          full_name: data.waris.full_name || "",
-          email: data.waris.email || "",
-          address: data.waris.address || "",
-          phone: data.waris.phone || "",
-          date_of_birth: data.waris.date_of_birth || "",
-          citizenship_number: data.waris.citizenship_number || "",
-          gender: (data.waris.gender || "male") as "male" | "female" | "other",
+          full_name: data.waris?.full_name || "",
+          email: data.waris?.email || "",
+          address: data.waris?.address || "",
+          phone: data.waris?.phone || "",
+          date_of_birth: data.waris?.date_of_birth || "",
+          citizenship_number: data.waris?.citizenship_number || "",
+          gender: (data.waris?.gender || "male") as "male" | "female" | "other",
         } : {
           full_name: "",
           email: "",
@@ -171,7 +171,7 @@ const handleClientSelect = (client: RegisteredClient) => {
   selectedClient.value = client
   setFieldValue('client', client.id)
   showClientDialog.value = false
-  toast.success(`Linked to client: ${client.verification.full_name}`)
+  toast.success(`Linked to client: ${client.verification?.full_name || 'Client'}`)
 }
 
 const removeClientLink = () => {
@@ -393,15 +393,15 @@ onMounted(() => {
             <div v-if="selectedClient" class="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-4">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                  <img 
+                  <!-- <img 
                     v-if="selectedClient.verification.passport_size_photo"
                     :src="selectedClient.verification.passport_size_photo.url" 
                     alt="Client photo"
                     class="w-12 h-12 rounded-full object-cover"
-                  />
+                  /> -->
                   <div>
-                    <p class="font-medium text-gray-900">{{ selectedClient.verification.full_name }}</p>
-                    <p class="text-sm text-gray-600">{{ selectedClient.user.email }}</p>
+                    <p class="font-medium text-gray-900">{{ selectedClient?.verification?.full_name || '' }}</p>
+                    <p class="text-sm text-gray-600">{{ selectedClient?.user?.email || '' }}</p>
                   </div>
                 </div>
                 <Button 

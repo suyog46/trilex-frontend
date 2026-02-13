@@ -4,14 +4,15 @@ import { Icon } from '@iconify/vue'
 import ChatItem from './ChatItem.vue'
 
 interface MessageItem {
-  id: string
+id: string
   content: string
   createdAt: string
   isRead: boolean
   senderId: string
   senderName: string
   senderProfile: string | null
-  status: string
+  status: 'sending' | 'sent' | 'delivered' | 'read'
+  tempId?: string
 }
 
 interface Props {
@@ -61,7 +62,8 @@ const handleScroll = () => {
 watch(() => props.messages, (newMessages, oldMessages) => {
   if (newMessages.length > oldMessages.length) {
     nextTick(() => {
-      scrollToBottom()
+      console.log('New message arrived, scrolling to bottom')
+      scrollToBottom(true)
     })
   }
 }, { deep: true })

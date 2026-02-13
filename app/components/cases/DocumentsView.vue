@@ -19,6 +19,8 @@ const props = withDefaults(defineProps<Props>(), {
 const activeTab = ref<'draft' | 'ongoing' | 'completed' | 'registered'>('draft')
 const isLoadingCases = ref(false)
 const cases = ref<CaseListItem[]>([])
+const casesAbortController = ref<AbortController | null>(null)
+const currentFetchingStatus = ref<'draft' | 'ongoing' | 'completed' | 'registered'>('draft')
 
 // Selected case and folder state
 const selectedCase = ref<CaseListItem | null>(null)
@@ -29,6 +31,8 @@ const clientDocuments = ref<DocumentItem[]>([])
 const internalDocuments = ref<DocumentItem[]>([])
 const firmDocuments = ref<DocumentItem[]>([])
 const isLoadingDocuments = ref(false)
+const documentsAbortController = ref<AbortController | null>(null)
+const currentFetchingCaseId = ref<string | null>(null)
 
 // Upload dialog state
 const showUploadDialog = ref(false)
@@ -38,24 +42,46 @@ const isClientScope = computed(() => props.scope === 'client')
 
 // Fetch cases for active tab
 const fetchCases = async (status: string) => {
+  if (casesAbortController.value) {
+    casesAbortController.value.abort()
+  }
+  casesAbortController.value = new AbortController()
+  currentFetchingStatus.value = status as 'draft' | 'ongoing' | 'completed' | 'registered'
+  const statusToFetch = status
   isLoadingCases.value = true
   try {
     const response = await casesApi.getCasesList({
-      status,
+      status: statusToFetch,
       page: 1,
       page_size: 100,
     })
+    if (statusToFetch !== currentFetchingStatus.value) {
+      return
+    }
     cases.value = response.results
   } catch (error) {
+    if ((error as Error)?.name === 'AbortError') {
+      return
+    }
     console.error('Error fetching cases:', error)
-    toast.error('Failed to load cases')
+    if (statusToFetch === currentFetchingStatus.value) {
+      toast.error('Failed to load cases')
+    }
   } finally {
-    isLoadingCases.value = false
+    if (statusToFetch === currentFetchingStatus.value) {
+      isLoadingCases.value = false
+    }
   }
 }
 
 // Fetch documents for selected case
 const fetchDocuments = async (caseId: string) => {
+  if (documentsAbortController.value) {
+    documentsAbortController.value.abort()
+  }
+  documentsAbortController.value = new AbortController()
+  currentFetchingCaseId.value = caseId
+  const caseIdToFetch = caseId
   isLoadingDocuments.value = true
   try {
     // Fetch client documents
@@ -63,6 +89,9 @@ const fetchDocuments = async (caseId: string) => {
       scope: 'client',
       page_size: 100,
     })
+    if (caseIdToFetch !== currentFetchingCaseId.value) {
+      return
+    }
     clientDocuments.value = clientResponse.results
 
     // Fetch internal (my) documents and firm documents only for lawyers
@@ -71,6 +100,9 @@ const fetchDocuments = async (caseId: string) => {
         scope: 'my',
         page_size: 100,
       })
+      if (caseIdToFetch !== currentFetchingCaseId.value) {
+        return
+      }
       internalDocuments.value = internalResponse.results
 
       // Fetch firm documents
@@ -78,13 +110,23 @@ const fetchDocuments = async (caseId: string) => {
         scope: 'firm',
         page_size: 100,
       })
+      if (caseIdToFetch !== currentFetchingCaseId.value) {
+        return
+      }
       firmDocuments.value = firmResponse.results
     }
   } catch (error) {
+    if ((error as Error)?.name === 'AbortError') {
+      return
+    }
     console.error('Error fetching documents:', error)
-    toast.error('Failed to load documents')
+    if (caseIdToFetch === currentFetchingCaseId.value) {
+      toast.error('Failed to load documents')
+    }
   } finally {
-    isLoadingDocuments.value = false
+    if (caseIdToFetch === currentFetchingCaseId.value) {
+      isLoadingDocuments.value = false
+    }
   }
 }
 
@@ -92,12 +134,16 @@ const fetchDocuments = async (caseId: string) => {
 watch(activeTab, (newTab) => {
   selectedCase.value = null
   selectedFolder.value = null
+  cases.value = []
   fetchCases(newTab)
 }, { immediate: true })
 
 // Handle case selection
 const handleCaseSelect = (caseItem: CaseListItem) => {
   selectedCase.value = caseItem
+  clientDocuments.value = []
+  internalDocuments.value = []
+  firmDocuments.value = []
   
   // For clients, automatically open client folder
   if (isClientScope.value) {

@@ -46,15 +46,30 @@ const searchQuery = ref('')
 const data = ref<CaseListItem[]>([])
 const totalCount = ref(0)
 const isLoading = ref(false)
+const abortController = ref<AbortController | null>(null)
+const currentFetchingScope = ref<'personal' | 'firm'>('personal')
 
 const fetchData = async (page: number, size: number, search: string, filters: Record<string, string>) => {
+  // Cancel previous request if still pending
+  if (abortController.value) {
+    abortController.value.abort()
+    console.log('❌ Aborted previous cases fetch for scope:', currentFetchingScope.value)
+  }
+  
+  // Create new abort controller for this request
+  abortController.value = new AbortController()
+  currentFetchingScope.value = caseScope.value
+  const scopeToFetch = caseScope.value
+  
   isLoading.value = true
+  console.log('⏳ Starting to fetch cases for scope:', scopeToFetch)
+  
   try {
     const params: any = {
       page,
       page_size: size,
       status: 'completed',
-      case_scope: caseScope.value,
+      case_scope: scopeToFetch,
     }
     
     if (search) params.search = search
@@ -65,13 +80,35 @@ const fetchData = async (page: number, size: number, search: string, filters: Re
     
     const response = await casesApi.getCasesList(params)
     
+    // Only update state if this is still the current scope
+    if (scopeToFetch !== currentFetchingScope.value) {
+      console.log('⏭️ Ignoring cases response for old scope:', scopeToFetch)
+      console.log('⏭️ Current scope is now:', currentFetchingScope.value)
+      return
+    }
+    
     data.value = response.results
     totalCount.value = response.count
+    console.log('✅ Cases loaded for scope:', scopeToFetch, response.results?.length)
+    
+    // Only clear loading if this is the current scope
+    if (scopeToFetch === currentFetchingScope.value) {
+      isLoading.value = false
+    }
   } catch (error) {
+    // Ignore abort errors
+    if ((error as Error).name === 'AbortError') {
+      console.log('Cases fetch was cancelled for scope:', scopeToFetch)
+      return
+    }
+    
     console.error('Error fetching data:', error)
-    toast.error('Failed to load cases')
-  } finally {
-    isLoading.value = false
+    
+    // Only show error and clear loading if this is the current scope
+    if (scopeToFetch === currentFetchingScope.value) {
+      toast.error('Failed to load cases')
+      isLoading.value = false
+    }
   }
 }
 
@@ -113,7 +150,7 @@ const handleAction = (action: string, caseData: any) => {
   
   switch (action) {
     case 'edit':
-      navigateTo(`/lawyer/cases/edit/${caseData.id}`)
+      navigateTo(`/cases/edit/${caseData.id}`)
       break
     case 'assign':
       selectedCase.value = caseData

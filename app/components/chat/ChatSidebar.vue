@@ -104,14 +104,15 @@ watch(searchQuery, () => {
 })
 
 watch(roomUpdates, (updates) => {
-
-console.log('Received room updates:', updates)
+  console.log('Received room updates:', updates)
+  
   for (let i = processedRoomUpdates.value; i < updates.length; i += 1) {
     const update = updates[i]
-    if (!update) continue
+    if (!update || !update.last_message) continue
 
     const roomIndex = chatRooms.value.findIndex(room => room.id === update.room_id)
     if (roomIndex === -1) {
+      // Room doesn't exist yet, fetch all conversations
       fetchConversations()
       continue
     }
@@ -119,20 +120,23 @@ console.log('Received room updates:', updates)
     const room = chatRooms.value[roomIndex]
     if (!room) continue
 
-    const isSameMessage = room.last_message?.id === update.id
+    // Check if this is a new message (different from current last message)
+    const isSameMessage = room.last_message?.id === update.last_message.id
     if (!isSameMessage) {
+      // Update the last message with the new data from socket
       room.last_message = {
-        id: update.id,
-        sender: update.sender?.name || update.sender?.email || '',
-        message: update.message,
-        created_at: update.created_at
+        id: update.last_message.id,
+        sender: update.last_message.sender?.name || update.last_message.sender?.email || '',
+        message: update.last_message.message,
+        created_at: update.last_message.created_at
       }
-      room.updated_at = update.created_at
-    }
-
-    if (roomIndex > 0) {
-      chatRooms.value.splice(roomIndex, 1)
-      chatRooms.value.unshift(room)
+      room.updated_at = update.last_message.created_at
+      
+      // Move this room to the top if it's not already at position 0
+      if (roomIndex > 0) {
+        chatRooms.value.splice(roomIndex, 1)
+        chatRooms.value.unshift(room)
+      }
     }
   }
 
