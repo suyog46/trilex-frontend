@@ -104,6 +104,8 @@ watch(searchQuery, () => {
 })
 
 watch(roomUpdates, (updates) => {
+
+console.log('Received room updates:', updates)
   for (let i = processedRoomUpdates.value; i < updates.length; i += 1) {
     const update = updates[i]
     if (!update) continue

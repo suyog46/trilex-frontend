@@ -1,4 +1,4 @@
-import { ref, onUnmounted } from 'vue'
+import { ref } from 'vue'
 
 interface ChatMessage {
   type: string
@@ -22,19 +22,33 @@ interface RoomUpdatedMessage {
   }
 }
 
-
+// Global singleton state - shared across all component instances
+const globalSocket = ref<WebSocket | null>(null)
+const globalIsConnected = ref(false)
+const globalMessages = ref<ChatMessage[]>([])
+const globalRoomUpdates = ref<RoomUpdatedMessage[]>([])
+const globalMessageUpdates = ref<Map<string, { message_id: string, created_at: string, status: 'sending' | 'sent' | 'delivered' | 'read' }>>(new Map())
+const globalTypingUsers = ref<string[]>([])
 
 export const useChatSocket = () => {
-  const socket = ref<WebSocket | null>(null)
-  const isConnected = ref(false)
-  const messages = ref<ChatMessage[]>([])
-  const roomUpdates = ref<RoomUpdatedMessage[]>([])
-  const messageUpdates = ref<Map<string, { message_id: string, created_at: string, status: 'sending' | 'sent' | 'delivered' | 'read' }>>(new Map())
-  const typingUsers = ref<string[]>([])
+  // Use global singleton refs instead of creating new ones
+  const socket = globalSocket
+  const isConnected = globalIsConnected
+  const messages = globalMessages
+  const roomUpdates = globalRoomUpdates
+  const messageUpdates = globalMessageUpdates
+  const typingUsers = globalTypingUsers
 
   const connect = (conversationId: string) => {
+    console.log(' Connect called with conversationId:', conversationId)
+    console.log('Current socket state:', {
+      exists: !!socket.value,
+      readyState: socket.value?.readyState,
+      isConnected: isConnected.value
+    })
+    
     if (socket.value?.readyState === WebSocket.OPEN) {
-      console.log('WebSocket already connected')
+      console.log(' WebSocket already connected')
       // Join room if provided
       if (conversationId) {
         joinRoom(conversationId)
@@ -45,16 +59,17 @@ export const useChatSocket = () => {
     const authStore = useAuthStore()
     const accessToken = authStore.accessToken
     if (!accessToken) {
-      console.error('No access token available for WebSocket connection')
+      console.error(' No access token available for WebSocket connection')
       return
     }
 
+    console.log('Creating new WebSocket connection...')
     const wsUrl = `wss://trilex-1.onrender.com/ws/socket/?token=${accessToken}`
     
     socket.value = new WebSocket(wsUrl)
 
     socket.value.onopen = () => {
-      console.log('WebSocket connected globally')
+      console.log(' WebSocket connected globally')
       isConnected.value = true
       // Join the room if conversationId is provided
       if (conversationId) {
@@ -126,10 +141,14 @@ export const useChatSocket = () => {
   }
 
   const disconnect = () => {
+    console.log(' Disconnect called')
     if (socket.value) {
       socket.value.close()
       socket.value = null
       isConnected.value = false
+      console.log(' WebSocket disconnected and cleaned up')
+    } else {
+      console.log('ℹ No socket to disconnect')
     }
   }
 
@@ -166,14 +185,22 @@ export const useChatSocket = () => {
   }
 
   const joinRoom = (roomId: string) => {
-    console.log('Joining room:', roomId)
+    console.log('Attempting to join room:', {
+      roomId,
+      socketExists: !!socket.value,
+      socketState: socket.value?.readyState,
+      isOpen: socket.value?.readyState === WebSocket.OPEN,
+      isConnected: isConnected.value
+    })
+    
     if (socket.value?.readyState === WebSocket.OPEN) {
       socket.value.send(JSON.stringify({
         action: 'join_room',
         room_id: roomId
       }))
+      console.log(' Join room message sent for:', roomId)
     } else {
-      console.warn('WebSocket not ready, cannot join room')
+      console.warn(' WebSocket not ready, cannot join room. Socket state:', socket.value?.readyState)
     }
   }
 
@@ -194,9 +221,7 @@ export const useChatSocket = () => {
   //   }
   // }
 
-  onUnmounted(() => {
-    disconnect()
-  })
+  // No automatic cleanup - socket managed globally by auth store
 
   return {
     socket,
