@@ -18,6 +18,109 @@ const formatTime = (dateString: string) => {
   })
 }
 
+const escapeHtml = (value: string) =>
+  value.replace(/[&<>"']/g, (char) => {
+    const map: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    }
+    return map[char] || char
+  })
+
+const formatInline = (value: string) => {
+  const escaped = escapeHtml(value)
+  return escaped
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`(.+?)`/g, '<code class="px-1 py-0.5 bg-gray-100 rounded">$1</code>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+}
+
+const renderLookupMessage = (value: string) => {
+  if (!value) return ''
+
+  const lines = value.replace(/\r\n/g, '\n').split('\n')
+  const htmlParts: string[] = []
+  let listItems: string[] = []
+  let listType: 'ordered' | 'unordered' | null = null
+
+  const flushList = () => {
+    if (!listItems.length || !listType) return
+    const listTag = listType === 'ordered' ? 'ol' : 'ul'
+    const listClass = listType === 'ordered' ? 'list-decimal' : 'list-disc'
+    htmlParts.push(
+      `<${listTag} class="ml-5 ${listClass} space-y-1">${listItems
+        .map((item) => `<li>${item}</li>`)
+        .join('')}</${listTag}>`
+    )
+    listItems = []
+    listType = null
+  }
+
+  for (const line of lines) {
+    const trimmed = line.trim()
+
+    if (!trimmed) {
+      flushList()
+      continue
+    }
+
+    if (trimmed === '---') {
+      flushList()
+      htmlParts.push('<hr class="my-3 border-gray-200" />')
+      continue
+    }
+
+    const headingMatch = trimmed.match(/^(#{1,3})\s+(.+)$/)
+    if (headingMatch && headingMatch[1] && headingMatch[2]) {
+      flushList()
+      const level = headingMatch[1].length
+      const content = formatInline(headingMatch[2])
+      const headingClass =
+        level === 1
+          ? 'text-lg font-semibold text-gray-900'
+          : level === 2
+          ? 'text-base font-semibold text-gray-900'
+          : 'text-sm font-semibold text-gray-900'
+      htmlParts.push(`<h${level} class="${headingClass}">${content}</h${level}>`)
+      continue
+    }
+
+    if (trimmed.startsWith('> ')) {
+      flushList()
+      const content = formatInline(trimmed.slice(2))
+      htmlParts.push(
+        `<blockquote class="border-l-4 border-gray-200 pl-3 text-gray-700 italic">${content}</blockquote>`
+      )
+      continue
+    }
+
+    const orderedMatch = trimmed.match(/^\d+\.\s+(.+)$/)
+    if (orderedMatch && orderedMatch[1]) {
+      if (listType && listType !== 'ordered') flushList()
+      listType = 'ordered'
+      listItems.push(formatInline(orderedMatch[1]))
+      continue
+    }
+
+    const unorderedMatch = trimmed.match(/^[\-\u2022]\s+(.+)$/)
+    if (unorderedMatch && unorderedMatch[1]) {
+      if (listType && listType !== 'unordered') flushList()
+      listType = 'unordered'
+      listItems.push(formatInline(unorderedMatch[1]))
+      continue
+    }
+
+    flushList()
+    htmlParts.push(`<p class="text-gray-800">${formatInline(trimmed)}</p>`)
+  }
+
+  flushList()
+  return htmlParts.join('')
+}
+
 const hasRecommendations = (message: ChatMessage) => {
   if (!message.recommendations) return false
   return (
@@ -82,6 +185,14 @@ const hasRecommendations = (message: ChatMessage) => {
                   <p class="text-sm text-amber-800 whitespace-pre-wrap">{{ message.message || message.answer }}</p>
                 </div>
               </div>
+            </div>
+
+            <!-- Lookup Query Type -->
+            <div v-else-if="message.query_type === 'lookup'" class="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
+              <div
+                class="space-y-3 text-sm text-gray-800"
+                v-html="renderLookupMessage(message.answer || message.message)"
+              ></div>
             </div>
 
             <!-- Normal/General Query Type -->
