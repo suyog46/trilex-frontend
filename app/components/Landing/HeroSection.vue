@@ -1,6 +1,5 @@
 <template>
   <div class="relative flex flex-col lg:flex-row justify-between items-center w-full px-10 lg:px-20 py-20 min-h-screen gap-16">
-    <!-- Left Content -->
          <div
   class="w-[700px] h-[700px] rounded-full absolute top-0 -right-40  border border-[#B5C2FB]/40
            bg-[#B5C2FB]/10  z-0
