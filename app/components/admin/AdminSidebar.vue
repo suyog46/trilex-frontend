@@ -84,7 +84,6 @@ const toggleDropdown = (title: string) => {
 
     <ul class="space-y-2 px-4 pb-20">
       <li v-for="item in links" :key="item.title">
-        <!-- Non-dropdown items -->
         <NuxtLink
           v-if="!item.isDropdown && item.link"
           :to="item.link"
@@ -99,7 +98,6 @@ const toggleDropdown = (title: string) => {
           <span>{{ item.title }}</span>
         </NuxtLink>
 
-        <!-- Dropdown items -->
         <div v-else>
           <button
             @click="toggleDropdown(item.title)"
@@ -121,7 +119,6 @@ const toggleDropdown = (title: string) => {
             />
           </button>
 
-          <!-- Dropdown children -->
           <div v-if="openDropdown === item.title" class="mt-1 space-y-1 rounded-md flex justify-center">
             <div class="flex flex-col items-start gap-4 w-full py-2">
               <NuxtLink
@@ -143,7 +140,6 @@ const toggleDropdown = (title: string) => {
       </li>
     </ul>
 
-    <!-- Logout Button -->
     <div class="absolute bottom-0 left-0 w-64 p-4 border-t border-gray-200 bg-white">
       <button
         @click="handleLogout"

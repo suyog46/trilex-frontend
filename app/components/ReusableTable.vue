@@ -75,7 +75,6 @@ const emit = defineEmits<{
   'action-dot-click': [action: string, row: TData]
 }>()
 
-// Handle row click
 const handleRowClick = (row: TData) => {
   if (props.onRowClick) {
     props.onRowClick(row)
@@ -83,7 +82,6 @@ const handleRowClick = (row: TData) => {
   emit('row-click', row)
 }
 
-// Handle action clicks
 const handleEdit = (row: TData) => {
   if (props.onEdit) {
     props.onEdit(row)
@@ -133,24 +131,20 @@ const handleActionDotClick = (action: string, row: TData) => {
   emit('action-dot-click', action, row)
 }
 
-// Check if any actions are enabled
 const hasActions = computed(() => {
   return props.canEdit || props.canDelete || props.canViewDetail || props.canAccept || props.canReject || props.canSuspend || props.showActionDots
 })
 
 const searchQuery = ref('')
 
-// Track which row has dropdown open
 const openDropdownRowId = ref<string | null>(null)
 
-// Calculate total pages
 const totalPages = computed(() => {
   if (props.totalCount === 0) return 1
   const pages = Math.ceil(props.totalCount / props.pageSize)
   return pages
 })
 
-// Simple table - no pagination logic in TanStack
 const table = useVueTable({
   get data() {
     return props.data
@@ -161,7 +155,6 @@ const table = useVueTable({
   getCoreRowModel: getCoreRowModel(),
 })
 
-// Debounce search
 let searchTimeout: NodeJS.Timeout
 const handleSearchInput = (event: Event) => {
   const value = (event.target as HTMLInputElement).value
@@ -171,7 +164,7 @@ const handleSearchInput = (event: Event) => {
   searchTimeout = setTimeout(() => {
     console.log('Emitting search with debounce:', value)
     emit('search', value)
-  }, 500) // 500ms debounce
+  }, 500) 
 }
 
 const handlePageSizeChange = (event: Event) => {
@@ -206,7 +199,6 @@ const goToLastPage = () => {
 
 <template>
   <div class="w-full space-y-4">
-    <!-- Search Input -->
     <div class="flex items-center">
       <Input
         :placeholder="searchPlaceholder"
@@ -217,7 +209,6 @@ const goToLastPage = () => {
       />
     </div>
 
-    <!-- Table -->
     <div class="rounded-md">
       <Table>
         <TableHeader>
@@ -235,12 +226,10 @@ const goToLastPage = () => {
                 :props="header.getContext()"
               />
             </TableHead>
-            <!-- Actions Header -->
             <TableHead v-if="hasActions" class="text-primary-normal text-lg w-auto">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          <!-- Loading State - Skeleton Rows -->
           <template v-if="isLoading">
             <TableRow v-for="i in pageSize" :key="`skeleton-${i}`" class="border-b border-gray-300">
               <TableCell 
@@ -255,7 +244,6 @@ const goToLastPage = () => {
               </TableCell>
             </TableRow>
           </template>
-          <!-- Loading State - Skeleton Rows -->
           <template v-if="isLoading">
             <TableRow v-for="i in pageSize" :key="`skeleton-${i}`" class="border-b border-gray-300">
               <TableCell 
@@ -270,7 +258,6 @@ const goToLastPage = () => {
               </TableCell>
             </TableRow>
           </template>
-          <!-- Data Rows -->
           <template v-else-if="table.getRowModel().rows?.length">
             <TableRow
               class="border-b border-gray-300"
@@ -291,7 +278,6 @@ const goToLastPage = () => {
                   :props="cell.getContext()"
                 />
               </TableCell>
-              <!-- Action Cells -->
               <TableCell v-if="hasActions" class="text-gray-500 text-md py-4 w-auto relative">
                 <div class="flex items-center gap-2 flex-wrap">
                   <button
@@ -344,7 +330,6 @@ const goToLastPage = () => {
               </TableCell>
             </TableRow>
           </template>
-          <!-- No Results -->
           <template v-else>
             <TableRow>
               <TableCell :colspan="columns.length + (hasActions ? 1 : 0)" class="h-24 text-center">
@@ -356,7 +341,6 @@ const goToLastPage = () => {
       </Table>
     </div>
 
-    <!-- Pagination -->
     <div class="flex items-center justify-between px-2">
       <div class="flex-1 text-sm text-muted-foreground">
         {{ totalCount }} row(s) total.

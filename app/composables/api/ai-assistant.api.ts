@@ -104,10 +104,7 @@ export interface QueryResponse {
 }
 
 export const aiAssistantApi = {
-  /**
-   * Get chat history
-   * Endpoint: GET /api/ai-assistant/history/
-   */
+
   getChatHistory: (page: number = 1, pageSize: number = 10): Promise<ChatHistoryResponse> => {
     const apiFetch = useApiFetch()
     return apiFetch(`/api/ai-assistant/history/`, {
@@ -119,10 +116,7 @@ export const aiAssistantApi = {
     })
   },
 
-  /**
-   * Send a query to AI assistant
-   * Endpoint: POST /api/ai-assistant/query/
-   */
+
   sendQuery: (payload: QueryRequest): Promise<QueryResponse> => {
     const apiFetch = useApiFetch()
     return apiFetch(`/api/ai-assistant/query/`, {

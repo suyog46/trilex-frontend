@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from '#app'
-import { ref, computed, watchEffect } from 'vue'
+import { ref, computed, watchEffect, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { toast } from 'vue-sonner'
 
@@ -8,6 +8,31 @@ const route = useRoute()
 const authStore = useAuthStore()
 const openDropdown = ref<string | null>(null)
 const isLoggingOut = ref(false)
+
+onMounted(async () => {
+  const role = authStore.user?.role
+  try {
+    if (role === 'lawyer' && !authStore.lawyerVerificationStatus) {
+      await authStore.getLawyerVerificationStatus()
+    }
+    if (role === 'firm' && !authStore.firmVerificationStatus) {
+      await authStore.getFirmVerificationStatus()
+    }
+  } catch (error) {
+    console.error('Error fetching verification status:', error)
+  }
+})
+
+const isVerificationBlocked = computed(() => {
+  const role = authStore.user?.role
+  const status =
+    role === 'lawyer'
+      ? authStore.lawyerVerificationStatus?.status
+      : role === 'firm'
+      ? authStore.firmVerificationStatus?.status
+      : 'VERIFIED'
+  return status !== 'VERIFIED'
+})
 
 const isActive = (path: string) => {
   return route.path === path
@@ -153,7 +178,9 @@ const toggleDropdown = (title: string) => {
           :to="item.link"
           class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors"
           :class="
-            isActive(item.link)
+            isVerificationBlocked
+              ? 'text-gray-400 bg-gray-50 cursor-not-allowed pointer-events-none'
+              : isActive(item.link)
               ? 'bg-primary-normal text-white'
               : 'text-gray-700 hover:bg-gray-100'
           "
@@ -167,7 +194,9 @@ const toggleDropdown = (title: string) => {
             @click="toggleDropdown(item.title)"
             class="w-full flex items-center justify-between px-4 py-3 rounded-lg font-medium transition-colors"
             :class="
-              openDropdown === item.title
+              isVerificationBlocked
+                ? 'text-gray-400 bg-gray-50 cursor-not-allowed pointer-events-none'
+                : openDropdown === item.title
                 ? 'bg-secondary text-gray-900'
                 : 'text-gray-700 hover:bg-gray-100'
             "
@@ -191,7 +220,9 @@ const toggleDropdown = (title: string) => {
                 :to="child.link"
                 class="py-2 text-sm rounded-lg transition-colors px-10 w-full"
                 :class="
-                  isActive(child.link)
+                  isVerificationBlocked
+                    ? 'text-gray-400 bg-gray-50 cursor-not-allowed pointer-events-none'
+                    : isActive(child.link)
                     ? 'bg-primary-normal text-white'
                     : 'text-gray-600 hover:bg-gray-100'
                 "

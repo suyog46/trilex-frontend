@@ -49,7 +49,6 @@ const roomDetails = ref<any>(null)
 const abortController = ref<AbortController | null>(null)
 const currentFetchingConversationId = ref<string | null>(null)
 
-// Get display name for conversation
 const conversationUserName = computed(() => {
   if (props.conversationUserName) return props.conversationUserName
   if (!roomDetails.value) return 'Unknown User'
@@ -60,7 +59,6 @@ const conversationUserName = computed(() => {
   return otherParticipant?.user.name || otherParticipant?.user.email || 'Unknown User'
 })
 
-// Get initials from user name
 const getInitials = (name: string): string => {
   return name
     .split(' ')
@@ -70,7 +68,6 @@ const getInitials = (name: string): string => {
     .substring(0, 2)
 }
 
-// Transform API messages to MessageItem format
 const transformMessage = (msg: ChatMessage): MessageItem => {
   return {
     id: msg.id,
@@ -105,19 +102,17 @@ const markDeliveredUpTo = (messageId: string) => {
 const fetchMessages = async (page = 1) => {
   if (!props.conversationId) return
   
-  // Cancel previous request if still pending
   if (abortController.value) {
     abortController.value.abort()
-    console.log('❌ Aborted previous fetch request for conversation:', currentFetchingConversationId.value)
+    console.log(' Aborted previous fetch request for conversation:', currentFetchingConversationId.value)
   }
   
-  // Create new abort controller for this request
   abortController.value = new AbortController()
   currentFetchingConversationId.value = props.conversationId
   const conversationId = props.conversationId
   
   isLoadingMessages.value = true
-  console.log('⏳ Starting to fetch messages for conversation:', conversationId)
+  console.log(' Starting to fetch messages for conversation:', conversationId)
   
   try {
     const response = await chatApi.getMessages(conversationId, {
@@ -125,10 +120,9 @@ const fetchMessages = async (page = 1) => {
       page_size: 50
     })
     
-    // Only update state if this is still the current conversation
     if (conversationId !== currentFetchingConversationId.value) {
-      console.log('⏭️ Ignoring message response for old conversation:', conversationId)
-      console.log('⏭️ Current conversation is now:', currentFetchingConversationId.value)
+      console.log('Ignoring message response for old conversation:', conversationId)
+      console.log(' Current conversation is now:', currentFetchingConversationId.value)
       return
     }
     
@@ -144,19 +138,16 @@ const fetchMessages = async (page = 1) => {
     currentPage.value = page
     console.log(' Messages loaded for conversation:', conversationId, transformedMessages.length)
     
-    // Only clear loading if this is the current conversation
     if (conversationId === currentFetchingConversationId.value) {
       isLoadingMessages.value = false
     }
   } catch (error: any) {
-    // Ignore abort errors
     if (error.name === 'AbortError') {
-      console.log('⏹ Fetch request was cancelled for conversation:', conversationId)
+      console.log(' Fetch request was cancelled for conversation:', conversationId)
       return
     }
     console.error('Error fetching messages:', error)
     
-    // Only show error and clear loading if this is the current conversation
     if (conversationId === currentFetchingConversationId.value) {
       toast.error('Failed to load messages')
       isLoadingMessages.value = false
@@ -164,23 +155,19 @@ const fetchMessages = async (page = 1) => {
   }
 }
 
-// Load more messages (pagination)
 const handleLoadMore = () => {
   if (hasMoreMessages.value && !isLoadingMessages.value) {
     fetchMessages(currentPage.value + 1)
   }
 }
 
-// Handle sending message
 const handleSendMessage = async (content: string) => {
   if (!props.conversationId || !isConnected.value) return
   
   try {
-    // Generate temporary ID for optimistic update
     const tempId = crypto.randomUUID()
     const now = new Date().toISOString()
     
-    // Add message optimistically with "sending" status
     const optimisticMessage: MessageItem = {
       id: tempId,
       content,
@@ -197,7 +184,6 @@ const handleSendMessage = async (content: string) => {
     
     messages.value.push(optimisticMessage)
     
-    // Send via socket
     sendSocketMessage({ message: content, roomId: props.conversationId, client_temp_id: tempId })
   } catch (error: any) {
     console.error('Error sending message:', error)
@@ -210,25 +196,20 @@ const handleTyping = () => {
 //   sendTypingIndicator(true)
 }
 
-// Watch for conversation change
 watch(() => props.conversationId, (newConversationId, oldConversationId) => {
-  // Clear previous messages when switching conversations
   if (newConversationId !== oldConversationId) {
     messages.value = []
     console.log('Conversation changed, clearing messages')
   }
   
-  // Connect to new conversation
   if (newConversationId) {
     currentPage.value = 1
     hasMoreMessages.value = true
     fetchMessages(1)
-    // Join the room (socket already connected globally)
     joinRoom(newConversationId)
   }
 }, { immediate: true })
 
-// Watch for message updates to replace optimistic messages and set status
 watch(messageUpdates, (newUpdates) => {
     console.log("Received message updates in the chat box", newUpdates)
   newUpdates.forEach((update, tempId) => {
@@ -268,7 +249,6 @@ watch(socketMessages, (newMessages) => {
       ? socketMessage.sender
       : socketMessage.sender?.name || socketMessage.sender?.email || ''
 
-    // Check if message already exists (by message_id or tempId)
     const exists = messages.value.some(m => m.id === messageId)
     
     if (!exists && messageId) {
@@ -288,12 +268,10 @@ watch(socketMessages, (newMessages) => {
   })
 }, { deep: true })
 
-// No cleanup needed - socket stays connected globally
 </script>
 
 <template>
   <div class="h-[90vh] flex flex-col bg-white">
-    <!-- No Conversation Selected State -->
     <div
       v-if="!conversationId"
       class="flex-1 flex flex-col items-center justify-center text-center p-8"
@@ -304,9 +282,7 @@ watch(socketMessages, (newMessages) => {
     </div>
 
     <template v-else>
-      <!-- Chat Header -->
       <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-200">
-        <!-- User Avatar -->
         <div class="relative flex-shrink-0">
           <div
             class="w-10 h-10 rounded-full bg-primary-normal text-white flex items-center justify-center text-sm font-semibold"
@@ -315,7 +291,6 @@ watch(socketMessages, (newMessages) => {
           </div>
         </div>
 
-        <!-- User Info -->
         <div class="flex-1 min-w-0">
           <h3 class="font-semibold text-gray-900 truncate">
             {{ conversationUserName }}
@@ -333,7 +308,6 @@ watch(socketMessages, (newMessages) => {
         </div> -->
       </div>
 
-      <!-- Chat Content & Input -->
       <ChatContent
         :messages="messages"
         :is-loading="isLoadingMessages"

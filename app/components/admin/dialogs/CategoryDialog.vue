@@ -75,7 +75,6 @@ const handleClose = () => {
       </DialogHeader>
 
       <div class="space-y-4 py-4">
-        <!-- Category Name -->
         <div class="space-y-2">
           <Label for="name">Category Name *</Label>
           <Input
@@ -89,7 +88,6 @@ const handleClose = () => {
           </p>
         </div>
 
-        <!-- Active Status -->
         <div class="flex items-center gap-3">
           <input
             id="active"
@@ -104,7 +102,6 @@ const handleClose = () => {
         </div>
       </div>
 
-      <!-- Dialog Actions -->
       <div class="flex gap-3 justify-end pt-4 border-t">
         <Button 
           variant="outline"

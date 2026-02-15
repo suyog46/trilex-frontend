@@ -1,9 +1,3 @@
-/**
- * Error Handler Composable
- * Handles Django API errors and formats them for use across the application
- * Supports both vee-validate forms and custom error handling
- */
-
 import type { FormContext } from 'vee-validate'
 import { toast } from 'vue-sonner'
 
@@ -22,20 +16,6 @@ export interface ErrorHandlerResult {
   hasErrors: boolean
 }
 
-/**
- * Parse Django error response into structured format
- * Django typically returns errors as:
- * {
- *   "field_name": ["error message 1", "error message 2"],
- *   "nested_field": {
- *     "sub_field": ["error message"]
- *   },
- *   "error": "error message",
- *   "message": "error message",
- *   "detail": "error message",
- *   "non_field_errors": ["error message"]
- * }
- */
 const parseDjangoErrors = (errorData: DjangoErrorResponse): FormattedError[] => {
   const errors: FormattedError[] = []
 
@@ -92,14 +72,6 @@ const parseDjangoErrors = (errorData: DjangoErrorResponse): FormattedError[] => 
   return errors
 }
 
-/**
- * Handle errors for vee-validate forms
- * Sets field-specific errors on the form instance
- * 
- * @param error - The error object from API response
- * @param form - The vee-validate form instance
- * @param onGeneralError - Optional callback for non-field errors (like "detail" or "non_field_errors")
- */
 export const handleVeeValidateErrors = (
   error: any,
   form: FormContext,
@@ -108,23 +80,19 @@ export const handleVeeValidateErrors = (
   const errors: string[] = []
 
   try {
-    // Handle different error response formats from Django
     const errorData = error?.data || error?.response?.data || error
 
     if (typeof errorData === 'object' && errorData !== null) {
       const parsedErrors = parseDjangoErrors(errorData)
 
-      // Separate field errors from general errors
       parsedErrors.forEach(({ field, message }) => {
         if (
           field === 'detail' ||
           field === 'non_field_errors' ||
           field === 'message'
         ) {
-          // General errors
           errors.push(message)
         } else {
-          // Field-specific errors
           form.setFieldError(field, message)
         }
       })
@@ -132,7 +100,6 @@ export const handleVeeValidateErrors = (
       errors.push(errorData)
     }
 
-    // Call general error callback if provided
     if (errors.length > 0 && onGeneralError) {
       errors.forEach(onGeneralError)
     }
@@ -148,12 +115,6 @@ export const handleVeeValidateErrors = (
   }
 }
 
-/**
- * Generic error handler for any error response
- * Returns structured error information
- * 
- * @param error - The error object from API response
- */
 export const parseApiError = (error: any): ErrorHandlerResult => {
   const formErrors = new Map<string, string>()
   const generalErrors: string[] = []

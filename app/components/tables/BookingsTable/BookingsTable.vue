@@ -21,26 +21,21 @@ const emit = defineEmits<{
   'search': [query: string]
 }>()
 
-// Dialog state
 const showDetailDialog = ref(false)
 const selectedBooking = ref<BookingResponse | null>(null)
 
-// Handle pagination change
 const handlePageChange = (page: number) => {
   emit('page-change', page)
 }
 
-// Handle page size change
 const handlePageSizeChange = (size: number) => {
   emit('page-size-change', size)
 }
 
-// Handle search
 const handleSearch = (query: string) => {
   emit('search', query)
 }
 
-// Handle view detail
 const handleViewDetail = (booking: BookingResponse) => {
   selectedBooking.value = booking
   showDetailDialog.value = true

@@ -16,7 +16,6 @@ const emit = defineEmits<{
   'assigned': []
 }>()
 
-// Search and pagination
 const searchQuery = ref('')
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -26,10 +25,8 @@ const isLoading = ref(false)
 const isAssigning = ref(false)
 const selectedLawyerId = ref<string | null>(null)
 
-// Debounce timer
 let searchTimeout: NodeJS.Timeout | null = null
 
-// Fetch lawyers
 const fetchLawyers = async () => {
   isLoading.value = true
   try {
@@ -48,7 +45,6 @@ const fetchLawyers = async () => {
   }
 }
 
-// Handle search with debounce
 const handleSearch = (value: string) => {
   searchQuery.value = value
   
@@ -62,12 +58,10 @@ const handleSearch = (value: string) => {
   }, 500)
 }
 
-// Handle lawyer selection
 const selectLawyer = (lawyerId: string) => {
   selectedLawyerId.value = lawyerId
 }
 
-// Handle assign
 const handleAssign = async () => {
   if (!selectedLawyerId.value) {
     toast.error('Please select a lawyer')
@@ -89,13 +83,11 @@ const handleAssign = async () => {
   }
 }
 
-// Handle pagination
 const handlePageChange = (page: number) => {
   currentPage.value = page
   fetchLawyers()
 }
 
-// Watch open prop to fetch data
 watch(() => props.open, (isOpen) => {
   if (isOpen) {
     selectedLawyerId.value = null
@@ -105,7 +97,6 @@ watch(() => props.open, (isOpen) => {
   }
 })
 
-// Computed for pagination
 const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value))
 </script>
 
@@ -116,7 +107,6 @@ const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value))
     @click.self="emit('update:open', false)"
   >
     <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-      <!-- Header -->
       <div class="flex items-center justify-between p-6 border-b">
         <div>
           <h2 class="text-xl font-bold text-gray-900">Assign Lawyer</h2>
@@ -130,7 +120,6 @@ const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value))
         </button>
       </div>
 
-      <!-- Search -->
       <div class="p-6 border-b">
         <div class="relative">
           <Icon icon="mdi:magnify" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -144,7 +133,6 @@ const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value))
         </div>
       </div>
 
-      <!-- Lawyers List -->
       <div class="flex-1 overflow-y-auto p-6">
         <div v-if="isLoading" class="flex items-center justify-center py-12">
           <Icon icon="mdi:loading" class="w-8 h-8 animate-spin text-primary-normal" />
@@ -163,7 +151,6 @@ const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value))
             class="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
             :class="{ 'border-primary-normal bg-primary-normal/5': selectedLawyerId === member.lawyer.id }"
           >
-            <!-- Avatar -->
             <div class="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
               <img
                 v-if="member.lawyer.verification?.passport_size_photo?.url"
@@ -176,7 +163,6 @@ const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value))
               </div>
             </div>
 
-            <!-- Info -->
             <div class="flex-1">
               <p class="font-semibold text-gray-900">
                 {{ member.lawyer.verification?.full_name || member.lawyer.user.full_name }}
@@ -185,7 +171,6 @@ const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value))
               <p class="text-xs text-gray-500 mt-1">Role: {{ member.role }}</p>
             </div>
 
-            <!-- Selected Indicator -->
             <div v-if="selectedLawyerId === member.lawyer.id" class="flex-shrink-0">
               <Icon icon="mdi:check-circle" class="w-6 h-6 text-primary-normal" />
             </div>
@@ -193,7 +178,6 @@ const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value))
         </div>
       </div>
 
-      <!-- Pagination -->
       <div v-if="totalPages > 1 && !isLoading" class="px-6 py-3 border-t flex items-center justify-center gap-2">
         <button
           @click="handlePageChange(currentPage - 1)"
@@ -214,7 +198,6 @@ const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value))
         </button>
       </div>
 
-      <!-- Footer -->
       <div class="flex gap-3 p-6 border-t">
         <button
           @click="emit('update:open', false)"

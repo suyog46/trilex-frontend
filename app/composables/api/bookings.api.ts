@@ -1,6 +1,4 @@
 import { URL } from "~/lib/constants/url"
-
-// Request/Response types
 export interface CreateBookingPayload {
   created_to: string
   case_category: string
@@ -37,10 +35,6 @@ export interface BookingsListResponse {
 }
 
 export const bookingsApi = {
-  /**
-   * Create a new booking
-   * POST /api/bookings/
-   */
   createBooking: (payload: CreateBookingPayload): Promise<BookingResponse> => {
     const apiFetch = useApiFetch()
     return apiFetch(URL.API.BOOKINGS.CREATE, {
@@ -49,10 +43,6 @@ export const bookingsApi = {
     })
   },
 
-  /**
-   * Get sent bookings (bookings created by the current user)
-   * GET /api/bookings/sent/ with pagination and status filter
-   */
   getBookingsSent: (params?: {
     page?: number
     page_size?: number
@@ -71,10 +61,6 @@ export const bookingsApi = {
     return apiFetch(url)
   },
 
-  /**
-   * Get received bookings (bookings sent to the current user)
-   * GET /api/bookings/received/ with pagination and status filter
-   */
   getBookingsReceived: (params?: {
     page?: number
     page_size?: number
@@ -93,19 +79,11 @@ export const bookingsApi = {
     return apiFetch(url)
   },
 
-  /**
-   * Get booking detail
-   * GET /api/bookings/{id}/
-   */
   getBookingDetail: (bookingId: string): Promise<BookingResponse> => {
     const apiFetch = useApiFetch()
     return apiFetch(`${URL.API.BOOKINGS.DETAIL(bookingId)}`)
   },
 
-  /**
-   * Accept a booking
-   * POST /api/bookings/{id}/accept/
-   */
   acceptBooking: (bookingId: string): Promise<BookingResponse> => {
     const apiFetch = useApiFetch()
     return apiFetch(`${URL.API.BOOKINGS.ACCEPT(bookingId)}`, {
@@ -113,10 +91,6 @@ export const bookingsApi = {
     })
   },
 
-  /**
-   * Reject a booking
-   * POST /api/bookings/{id}/reject/
-   */
   rejectBooking: (bookingId: string): Promise<BookingResponse> => {
     const apiFetch = useApiFetch()
     return apiFetch(`${URL.API.BOOKINGS.REJECT(bookingId)}`, {

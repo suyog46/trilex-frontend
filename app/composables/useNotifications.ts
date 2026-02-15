@@ -26,7 +26,6 @@ export interface NotificationMessage {
   }
 }
 
-// Global singleton state for notifications
 const globalUnreadCount = ref(0)
 const globalNotifications = ref<NotificationMessage[]>([])
 
@@ -41,7 +40,6 @@ export const useNotifications = () => {
 
   const handleNewNotification = (data: NotificationMessage) => {
     notifications.value.unshift(data)
-    // Increment unread count if notification is unread
     if (!data.notification.is_read) {
       unreadCount.value += 1
     }

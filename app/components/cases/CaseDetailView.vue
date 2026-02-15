@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, watch, useSlots } from 'vue'
 import { Icon } from '@iconify/vue'
 import type { CaseDetail } from '~/composables/api/cases.api'
 
@@ -45,7 +45,6 @@ const formatDate = (dateString: string) => {
   })
 }
 
-// Debug logging
 watch(() => props.isLoading, (newVal, oldVal) => {
   console.log('CaseDetailView - isLoading changed:', { old: oldVal, new: newVal })
 })
@@ -54,10 +53,12 @@ watch(() => props.caseDetail, (newVal) => {
   console.log('CaseDetailView - caseDetail changed:', { exists: !!newVal, data: newVal })
 })
 
-// Computed to check which section should show
 const shouldShowLoading = computed(() => props.isLoading)
 const shouldShowContent = computed(() => !props.isLoading && !!props.caseDetail)
 const shouldShowError = computed(() => !props.isLoading && !props.caseDetail)
+
+const slots = useSlots()
+const hasTarikFormSlot = computed(() => !!slots['tarik-form'])
 
 watch([shouldShowLoading, shouldShowContent, shouldShowError], ([loading, content, error]) => {
   console.log('CaseDetailView - Render state:', { loading, content, error })
@@ -71,7 +72,13 @@ watch([shouldShowLoading, shouldShowContent, shouldShowError], ([loading, conten
         <button
           v-if="onBack"
           @click="onBack"
-          class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          :disabled="isLoading || !caseDetail"
+          class="p-2 rounded-lg transition-colors"
+          :class="
+            isLoading || !caseDetail
+              ? 'cursor-not-allowed opacity-50'
+              : 'hover:bg-gray-100'
+          "
         >
           <Icon icon="mdi:arrow-left" class="w-6 h-6 text-gray-600" />
         </button>
@@ -100,7 +107,6 @@ watch([shouldShowLoading, shouldShowContent, shouldShowError], ([loading, conten
       </div>
     </div>
 
-    <!-- Loading State -->
     <div v-if="isLoading" class="space-y-6">
       <div class="bg-white rounded-lg shadow-sm p-6 space-y-4">
         <div class="h-8 bg-gray-200 rounded animate-pulse w-1/3"></div>
@@ -109,9 +115,7 @@ watch([shouldShowLoading, shouldShowContent, shouldShowError], ([loading, conten
       </div>
     </div>
 
-    <!-- Content State -->
     <div v-else-if="caseDetail" class="space-y-6">
-      <!-- Case Overview -->
       <div class="bg-white rounded-lg shadow-sm p-6 space-y-4">
         <div class="flex items-start justify-between">
           <div class="space-y-2 flex-1">
@@ -140,7 +144,6 @@ watch([shouldShowLoading, shouldShowContent, shouldShowError], ([loading, conten
         </div>
       </div>
 
-      <!-- Client Information -->
       <div class="bg-white rounded-lg shadow-sm p-6 space-y-4">
         <div class="flex items-center gap-2 mb-4">
           <Icon icon="mdi:account" class="w-5 h-5 text-primary-normal" />
@@ -199,7 +202,6 @@ watch([shouldShowLoading, shouldShowContent, shouldShowError], ([loading, conten
         </div>
       </div>
 
-      <!-- Waris Information -->
       <div v-if="caseDetail.waris" class="bg-white rounded-lg shadow-sm p-6 space-y-4">
         <div class="flex items-center gap-2 mb-4">
           <Icon icon="mdi:account-multiple" class="w-5 h-5 text-primary-normal" />
@@ -244,14 +246,17 @@ watch([shouldShowLoading, shouldShowContent, shouldShowError], ([loading, conten
         </div>
       </div>
 
-      <!-- Tarik Dates -->
-      <div v-if="caseDetail.dates.length > 0" class="bg-white rounded-lg shadow-sm p-6 space-y-4">
+      <div v-if="caseDetail.dates.length > 0 || hasTarikFormSlot" class="bg-white rounded-lg shadow-sm p-6 space-y-4">
         <div class="flex items-center gap-2 mb-4">
           <Icon icon="mdi:calendar" class="w-5 h-5 text-primary-normal" />
           <h3 class="text-lg font-semibold text-gray-900">Tarik Dates</h3>
         </div>
+
+        <div v-if="hasTarikFormSlot">
+          <slot name="tarik-form"></slot>
+        </div>
         
-        <div class="space-y-3">
+        <div v-if="caseDetail.dates.length > 0" class="space-y-3">
           <div 
             v-for="(dateItem, index) in caseDetail.dates" 
             :key="dateItem.id"
@@ -285,11 +290,14 @@ watch([shouldShowLoading, shouldShowContent, shouldShowError], ([loading, conten
             </div>
           </div>
         </div>
+
+        <div v-else class="text-center py-6 text-gray-500">
+          <Icon icon="mdi:calendar-blank" class="w-10 h-10 mx-auto mb-2 text-gray-400" />
+          <p>No dates added yet</p>
+        </div>
       </div>
 
-      <!-- Documents and Lawyers Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Documents -->
         <div class="bg-white rounded-lg shadow-sm p-6 space-y-4">
           <div class="flex items-center gap-2 mb-4">
             <Icon icon="mdi:file-document-multiple" class="w-5 h-5 text-primary-normal" />
@@ -309,7 +317,6 @@ watch([shouldShowLoading, shouldShowContent, shouldShowError], ([loading, conten
           </div>
         </div>
 
-        <!-- Assigned Lawyers -->
         <div class="bg-white rounded-lg shadow-sm p-6 space-y-4">
           <div class="flex items-center gap-2 mb-4">
             <Icon icon="mdi:account-tie" class="w-5 h-5 text-primary-normal" />
@@ -355,7 +362,6 @@ watch([shouldShowLoading, shouldShowContent, shouldShowError], ([loading, conten
         </div>
       </div>
 
-      <!-- Case Metadata -->
       <div class="bg-white rounded-lg shadow-sm p-6 space-y-4">
         <div class="flex items-center gap-2 mb-4">
           <Icon icon="mdi:information" class="w-5 h-5 text-primary-normal" />
@@ -386,7 +392,6 @@ watch([shouldShowLoading, shouldShowContent, shouldShowError], ([loading, conten
       </div>
     </div>
 
-    <!-- Error State -->
     <div v-else class="bg-white rounded-lg shadow-sm p-12 text-center">
       <Icon icon="mdi:alert-circle" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
       <p class="text-gray-600">Failed to load case details</p>

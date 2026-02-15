@@ -21,7 +21,6 @@ const messageContent = ref('')
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 let typingTimeout: NodeJS.Timeout | null = null
 
-// Auto-resize textarea based on content
 const autoResize = () => {
   if (textareaRef.value) {
     textareaRef.value.style.height = 'auto'
@@ -29,7 +28,6 @@ const autoResize = () => {
   }
 }
 
-// Handle sending message
 const handleSendMessage = () => {
   const content = messageContent.value.trim()
   
@@ -37,14 +35,12 @@ const handleSendMessage = () => {
     emit('send-message', content)
     messageContent.value = ''
     
-    // Reset textarea height
     if (textareaRef.value) {
       textareaRef.value.style.height = 'auto'
     }
   }
 }
 
-// Handle Enter key (send message) and Shift+Enter (new line)
 const handleKeydown = (event: KeyboardEvent) => {
   if (event.key === 'Enter' && !event.shiftKey) {
     event.preventDefault()
@@ -52,36 +48,26 @@ const handleKeydown = (event: KeyboardEvent) => {
   }
 }
 
-// Emit typing event when user types
 watch(messageContent, () => {
-  // Clear previous timeout
   if (typingTimeout) {
     clearTimeout(typingTimeout)
   }
   
-  // Emit typing event
   // if (messageContent.value) {
   //   emit('typing')
   // }
   
-  // Stop typing indicator after 3 seconds of inactivity
   typingTimeout = setTimeout(() => {
-    // User stopped typing
   }, 3000)
   
-  // Auto-resize textarea
   autoResize()
 })
 
-// TODO: Add file attachment support
 const handleAttachFile = () => {
-  // Implement file attachment logic
   console.log('Attach file clicked')
 }
 
-// TODO: Add emoji picker support
 const handleEmojiPicker = () => {
-  // Implement emoji picker logic
   console.log('Emoji picker clicked')
 }
 </script>
@@ -99,7 +85,6 @@ const handleEmojiPicker = () => {
         <Icon icon="mdi:attachment" class="w-6 h-6" />
       </button> -->
 
-      <!-- Message Input Container -->
       <div class="flex gap-2 justify-between relative">
         <textarea
           ref="textareaRef"
@@ -111,7 +96,6 @@ const handleEmojiPicker = () => {
           @keydown="handleKeydown"
         ></textarea>
 
-        <!-- Emoji Picker Button (inside textarea) -->
         <!-- <button
           type="button"
           class="absolute right-3 bottom-2 text-gray-500 hover:text-primary-normal transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -130,7 +114,6 @@ const handleEmojiPicker = () => {
         </button>
       </div>
 
-      <!-- Send Button -->
     <!-- </div> -->
 
   

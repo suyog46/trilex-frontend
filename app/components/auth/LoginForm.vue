@@ -34,17 +34,14 @@ const onSubmit = handleSubmit(async (values: LoginInput) => {
       setTimeout(() => {
         if (res.role === 'client') {
           if (res.is_email_verified) {
-            // Verified client → dashboard
             navigateTo('/')
           } else {
-            // Unverified client → email verification page with auto-resend flag
             navigateTo({
               path: '/check-your-email',
               query: { email: res.email, fromLogin: 'true', role: 'client' }
             })
           }
         } else if (res.role === 'lawyer') {
-          // Lawyer → verification status page (will redirect to dashboard if already verified)
           navigateTo('/lawyer/verification-status')
         } else if (res.role === 'firm') {
           navigateTo('/law-firm/verification-status')
@@ -52,13 +49,11 @@ const onSubmit = handleSubmit(async (values: LoginInput) => {
         else if(res.role == "admin"){
           navigateTo('/admin/case-categories')
         } else{
-          // Default fallback
           navigateTo('/')
         }
       }, 500)
     } else if (res.statusCode === 404 && !res.is_email_verified) {
-      // Email not verified - redirect to check-your-email with auto-resend flag
-      // This handles all roles: client, lawyer, firm
+
       toast.info('Please verify your email to continue')
       setTimeout(() => {
         navigateTo({
@@ -77,15 +72,12 @@ const onSubmit = handleSubmit(async (values: LoginInput) => {
 
 const handleGoogleSignIn = async () => {
   try {
-    // Replace with your actual Google OAuth implementation
     console.log("Google sign-in initiated");
-    // Implementation depends on your auth setup
   } catch (error) {
     console.error("Google sign-in error:", error);
   }
 };
 
-// Toggle password visibility
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value;
 };
@@ -98,7 +90,6 @@ const togglePasswordVisibility = () => {
     </h1>
 
     <form @submit.prevent="onSubmit" class="space-y-6">
-      <!-- Email Field -->
       <FormField v-slot="{ componentField }" name="email" >
         <FormItem>
           <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -117,7 +108,6 @@ const togglePasswordVisibility = () => {
         </FormItem>
       </FormField>
 
-      <!-- Password Field -->
       <FormField v-slot="{ componentField }" name="password">
         <FormItem>
           <div class="flex justify-between items-center">
@@ -154,7 +144,6 @@ const togglePasswordVisibility = () => {
         </FormItem>
       </FormField>
 
-      <!-- Submit Button -->
       <div class="w-full pt-3">
         <Button
           type="submit"
@@ -167,7 +156,6 @@ const togglePasswordVisibility = () => {
       </div>
     </form>
 
-    <!-- Register Link -->
     <p class="text-slate-600 w-full text-center">
       Don't have an account?
       <span
@@ -185,17 +173,15 @@ const togglePasswordVisibility = () => {
       </span>
     </div>
 
-    <!-- Google Sign-In Button -->
-    <Button
+    <!-- <Button
       @click="handleGoogleSignIn"
       type="button"
       class="w-full px-4 py-2 flex items-center justify-center gap-x-2 bg-[#f2f2f2] hover:bg-[#e8e8e8] border-2 border-gray-200 rounded-md font-semibold"
     >
       <Icon name="mdi:google" class="w-6 h-6" />
       <span>Continue with Google</span>
-    </Button>
+    </Button> -->
 
-    <!-- Professional Registration Option -->
     <p class="text-slate-600 w-full text-center">
       Are you a legal professional?
       <span
@@ -206,7 +192,6 @@ const togglePasswordVisibility = () => {
       </span>
     </p>
 
-    <!-- Register Options Dialog -->
     <Dialog v-model:open="showRegisterOptions">
       <DialogContent class="sm:max-w-md bg-white">
         <DialogHeader>

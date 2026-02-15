@@ -42,7 +42,6 @@ const handleFileSelect = (event: Event) => {
   
   if (!file) return
   
-  // Validate file size (max 10MB)
   if (file.size > 10 * 1024 * 1024) {
     toast.error('File size must be less than 10MB')
     return
@@ -50,7 +49,6 @@ const handleFileSelect = (event: Event) => {
   
   selectedFile.value = file
   
-  // Create preview for images
   if (file.type.startsWith('image/')) {
     const reader = new FileReader()
     reader.onload = (e) => {
@@ -93,7 +91,6 @@ const handleUpload = async () => {
       return
     }
     
-    // Emit the upload event with necessary data
     emit('uploaded', {
       title: title.value,
       description: description.value,
@@ -127,7 +124,6 @@ const handleClose = () => {
       </DialogHeader>
 
       <div class="space-y-4 py-4">
-        <!-- File Upload Area -->
         <div
           v-if="!selectedFile"
           class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-normal transition-colors cursor-pointer"
@@ -145,10 +141,8 @@ const handleClose = () => {
           />
         </div>
 
-        <!-- Selected File Preview -->
         <div v-else class="border border-gray-200 rounded-lg p-4">
           <div class="flex items-start gap-4">
-            <!-- Preview -->
             <div v-if="filePreview" class="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
               <img :src="filePreview" :alt="selectedFile.name" class="w-full h-full object-cover" />
             </div>
@@ -156,7 +150,6 @@ const handleClose = () => {
               <Icon icon="mdi:file-document" class="w-8 h-8 text-gray-400" />
             </div>
 
-            <!-- File Info -->
             <div class="flex-1 min-w-0">
               <p class="font-medium text-gray-900 truncate">{{ selectedFile.name }}</p>
               <p class="text-sm text-gray-500">
@@ -164,7 +157,6 @@ const handleClose = () => {
               </p>
             </div>
 
-            <!-- Remove Button -->
             <button
               @click="removeFile"
               class="p-1 hover:bg-gray-100 rounded transition-colors"
@@ -174,7 +166,6 @@ const handleClose = () => {
           </div>
         </div>
 
-        <!-- Title Input -->
         <div class="space-y-2">
           <label class="text-sm font-medium text-gray-700">
             Title <span class="text-red-500">*</span>
@@ -186,7 +177,6 @@ const handleClose = () => {
           />
         </div>
 
-        <!-- Description Input -->
         <div class="space-y-2">
           <label class="text-sm font-medium text-gray-700">Description</label>
           <Textarea

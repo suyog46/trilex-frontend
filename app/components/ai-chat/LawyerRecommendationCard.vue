@@ -20,17 +20,14 @@ const getLocationString = () => {
 <template>
   <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
     <div class="flex items-start gap-4">
-      <!-- Avatar -->
       <div class="w-12 h-12 rounded-full bg-primary-normal text-white flex items-center justify-center text-lg font-semibold flex-shrink-0">
         {{ lawyer.verification.full_name.charAt(0).toUpperCase() }}
       </div>
 
-      <!-- Content -->
       <div class="flex-1 min-w-0">
         <h3 class="font-semibold text-gray-900 mb-1">{{ lawyer.verification.full_name }}</h3>
         <p class="text-sm text-gray-600 mb-2">{{ lawyer.user.email }}</p>
 
-        <!-- Services -->
         <div class="flex flex-wrap gap-2 mb-2">
           <span 
             v-for="service in lawyer.profile.services" 
@@ -41,13 +38,11 @@ const getLocationString = () => {
           </span>
         </div>
 
-        <!-- Location -->
         <div class="flex items-center gap-1 text-sm text-gray-500 mb-3">
           <Icon icon="mdi:map-marker" class="w-4 h-4" />
           <span class="truncate">{{ getLocationString() }}</span>
         </div>
 
-        <!-- View Details Button -->
         <button
           @click="navigateToLawyer"
           class="w-full sm:w-auto px-4 py-2 bg-primary-normal text-white rounded-lg hover:bg-primary-dark transition-colors text-sm font-medium"

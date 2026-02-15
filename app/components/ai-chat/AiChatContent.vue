@@ -128,6 +128,8 @@ const hasRecommendations = (message: ChatMessage) => {
     message.recommendations.firms.length > 0
   )
 }
+
+const getMessageText = (message: ChatMessage) => message.answer || message.message || ''
 </script>
 
 <template>
@@ -176,7 +178,6 @@ const hasRecommendations = (message: ChatMessage) => {
             <Icon icon="mdi:robot" class="w-5 h-5" />
           </div>
           <div class="flex-1">
-            <!-- Not Legal Query Type -->
             <div v-if="message.query_type === 'not_legal'" class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 shadow-sm">
               <div class="flex items-start gap-3">
                 <Icon icon="mdi:alert-circle-outline" class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
@@ -187,7 +188,6 @@ const hasRecommendations = (message: ChatMessage) => {
               </div>
             </div>
 
-            <!-- Lookup Query Type -->
             <div v-else-if="message.query_type === 'lookup'" class="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
               <div
                 class="space-y-3 text-sm text-gray-800"
@@ -195,15 +195,12 @@ const hasRecommendations = (message: ChatMessage) => {
               ></div>
             </div>
 
-            <!-- Normal/General Query Type -->
             <div v-else-if="message.query_type === null || message.query_type === 'normal' || message.query_type === 'general'" class="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
-              <p class="text-sm text-gray-800 whitespace-pre-wrap">{{ message.message }}</p>
+              <p class="text-sm text-gray-800 whitespace-pre-wrap">{{ getMessageText(message) }}</p>
             </div>
 
-            <!-- Recommendation Query Type -->
             <div v-else-if="message.query_type === 'recommendation'">
               <div v-if="hasRecommendations(message)" class="space-y-4">
-                <!-- Category Header -->
                 <div v-if="message.recommendations?.case_category" class="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
                   <p class="text-sm text-gray-700">
                     Here are my recommendations for 
@@ -251,6 +248,10 @@ const hasRecommendations = (message: ChatMessage) => {
                   <p class="text-sm">No recommendations found. Please try refining your query.</p>
                 </div>
               </div>
+            </div>
+
+            <div v-else class="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
+              <p class="text-sm text-gray-800 whitespace-pre-wrap">{{ getMessageText(message) }}</p>
             </div>
 
             <p class="text-xs text-gray-500 mt-1">{{ formatTime(message.created_at) }}</p>

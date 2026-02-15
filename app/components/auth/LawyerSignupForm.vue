@@ -37,17 +37,14 @@ const loadingMunicipalities = ref(false)
 const loadingWards = ref(false)
 const loadingCategories = ref(false)
 
-// License photo upload state
 const licensePhotoFile = ref<File | null>(null)
 const licensePhotoPreview = ref<string>("")
 const licensePhotoId = ref<string>("")
 
-// Firm license photo upload state
 const firmLicenseFile = ref<File | null>(null)
 const firmLicensePreview = ref<string>("")
 const firmLicenseId = ref<string>("")
 
-// Schema based on mode
 const validationSchema = computed(() => {
   return toTypedSchema(props.mode === 'lawyer' ? lawyerSignupSchema : lawFirmSignupSchema)
 })
@@ -77,7 +74,6 @@ const { handleSubmit, values, setFieldValue } = useForm({
   },
 })
 
-// Fetch provinces on component mount
 onMounted(async () => {
   await fetchProvinces()
   await fetchCategories()
@@ -96,7 +92,6 @@ const fetchProvinces = async () => {
   }
 }
 
-// Fetch districts when province changes
 const fetchDistricts = async (provinceId: number) => {
   if (provinceId === 0) {
     districts.value = []
@@ -121,7 +116,6 @@ const fetchDistricts = async (provinceId: number) => {
   }
 }
 
-// Fetch municipalities when district changes
 const fetchMunicipalities = async (districtId: number) => {
   if (districtId === 0) {
     municipalities.value = []
@@ -146,7 +140,6 @@ const fetchMunicipalities = async (districtId: number) => {
   }
 }
 
-// Fetch wards when municipality changes
 const fetchWards = async (municipalityId: number) => {
   if (municipalityId === 0) {
     wards.value = []
@@ -167,7 +160,6 @@ const fetchWards = async (municipalityId: number) => {
   }
 }
 
-// Fetch categories/services
 const fetchCategories = async () => {
   loadingCategories.value = true
   try {
@@ -181,28 +173,24 @@ const fetchCategories = async () => {
   }
 }
 
-// Watch province changes
 watch(() => values.province, (newValue) => {
   if (newValue !== undefined && newValue !== null && newValue !== 0) {
     fetchDistricts(newValue)
   }
 })
 
-// Watch district changes
 watch(() => values.district, (newValue) => {
   if (newValue !== undefined && newValue !== null && newValue !== 0) {
     fetchMunicipalities(newValue)
   }
 })
 
-// Watch municipality changes
 watch(() => values.municipality, (newValue) => {
   if (newValue !== undefined && newValue !== null && newValue !== 0) {
     fetchWards(newValue)
   }
 })
 
-// Handle service selection
 const toggleService = (serviceId: string) => {
   const currentServices = values.services || []
   const updatedServices = currentServices.includes(serviceId)
@@ -211,21 +199,18 @@ const toggleService = (serviceId: string) => {
   setFieldValue("services", updatedServices)
 }
 
-// Handle license photo upload
 const handleLicensePhotoChange = async (event: Event) => {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
 
   if (!file) return
 
-  // Validate file type
   const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
   if (!allowedTypes.includes(file.type)) {
     toast.error('Invalid file type. Allowed: JPEG, PNG, GIF, WebP')
     return
   }
 
-  // Validate file size (max 5MB)
   const maxSize = 5 * 1024 * 1024
   if (file.size > maxSize) {
     toast.error('File size exceeds 5MB limit')
@@ -241,7 +226,6 @@ const handleLicensePhotoChange = async (event: Event) => {
   }
   reader.readAsDataURL(file)
 
-  // Upload file immediately
   const uploadedId = await uploadFile(file)
   if (uploadedId) {
     licensePhotoId.value = uploadedId
@@ -254,21 +238,18 @@ const handleLicensePhotoChange = async (event: Event) => {
   }
 }
 
-// Handle firm license upload
 const handleFirmLicenseChange = async (event: Event) => {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
 
   if (!file) return
 
-  // Validate file type
   const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
   if (!allowedTypes.includes(file.type)) {
     toast.error('Invalid file type. Allowed: JPEG, PNG, GIF, WebP')
     return
   }
 
-  // Validate file size (max 5MB)
   const maxSize = 5 * 1024 * 1024
   if (file.size > maxSize) {
     toast.error('File size exceeds 5MB limit')
@@ -300,12 +281,10 @@ const handleFirmLicenseChange = async (event: Event) => {
 // Handle form submission
 const onSubmit = handleSubmit(async (formValues: any) => {
   try {
-    // Validate using Zod schema
     const schema = props.mode === 'lawyer' ? lawyerSignupSchema : lawFirmSignupSchema
     const validationResult = schema.safeParse(formValues)
     
     if (!validationResult.success) {
-      // Collect all validation errors
       const errors = validationResult.error.errors
       const errorMessages = errors.map(err => {
         const field = err.path.join('.')
@@ -317,21 +296,18 @@ const onSubmit = handleSubmit(async (formValues: any) => {
       return
     }
 
-    // Validate license photo is uploaded (for lawyer mode)
     if (props.mode === 'lawyer' && !licensePhotoId.value) {
       toast.error('Please upload a license photo')
       activeStep.value = "step3"
       return
     }
 
-    // Validate firm license is uploaded (for firm mode)
     if (props.mode === 'firm' && !firmLicenseId.value) {
       toast.error('Please upload a firm license')
       activeStep.value = "step3"
       return
     }
 
-    // Validate services are selected
     if (!formValues.services || formValues.services.length === 0) {
       toast.error('Please select at least one service')
       activeStep.value = "step3"
@@ -416,7 +392,6 @@ const onSubmit = handleSubmit(async (formValues: any) => {
   }
 })
 
-// Toggle password visibility
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value
 }
@@ -425,13 +400,10 @@ const toggleConfirmPasswordVisibility = () => {
   showConfirmPassword.value = !showConfirmPassword.value
 }
 
-// Navigate to next step
 const goToNextStep = async () => {
-  // Validate current step before proceeding using Zod schema
   const schema = props.mode === 'lawyer' ? lawyerSignupSchema : lawFirmSignupSchema
   const validationResult = schema.safeParse(values)
   
-  // Define which fields to check for current step
   const stepFields = activeStep.value === "step1" 
     ? ["email", "password", "confirmPassword"]
     : activeStep.value === "step2"
@@ -440,7 +412,6 @@ const goToNextStep = async () => {
     ? ["services", "fullName", "dateOfBirth", "barId", "gender", "firmName", "ownerName", "firmId"]
     : []
 
-  // Filter validation errors to only show errors for current step
   if (!validationResult.success) {
     const stepErrors = validationResult.error.errors.filter(err => {
       const field = err.path[0] as string
@@ -466,7 +437,6 @@ const goToNextStep = async () => {
   }
 }
 
-// Navigate to previous step
 const goToPreviousStep = () => {
   if (activeStep.value === "step2") {
     activeStep.value = "step1"
@@ -498,9 +468,7 @@ const title = computed(() => props.mode === "lawyer" ? "Lawyer Registration" : "
         :steps="steps"
         width="full"
       >
-        <!-- STEP 1: Account -->
         <TabsContent value="step1" class="space-y-5" force-mount v-show="activeStep === 'step1'">
-          <!-- Email Field -->
           <FormField v-slot="{ componentField }" name="email">
             <FormItem>
               <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -519,7 +487,6 @@ const title = computed(() => props.mode === "lawyer" ? "Lawyer Registration" : "
             </FormItem>
           </FormField>
 
-          <!-- Password Field -->
           <FormField v-slot="{ componentField }" name="password">
             <FormItem>
               <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -548,7 +515,6 @@ const title = computed(() => props.mode === "lawyer" ? "Lawyer Registration" : "
             </FormItem>
           </FormField>
 
-          <!-- Confirm Password Field -->
           <FormField v-slot="{ componentField }" name="confirmPassword">
             <FormItem>
               <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -577,7 +543,6 @@ const title = computed(() => props.mode === "lawyer" ? "Lawyer Registration" : "
             </FormItem>
           </FormField>
 
-          <!-- Next Button -->
           <div class="w-full pt-5">
             <Button
               type="button"
@@ -589,9 +554,7 @@ const title = computed(() => props.mode === "lawyer" ? "Lawyer Registration" : "
           </div>
         </TabsContent>
 
-        <!-- STEP 2: Address -->
         <TabsContent value="step2" class="space-y-5" force-mount v-show="activeStep === 'step2'">
-          <!-- Province Dropdown -->
           <FormField v-slot="{ componentField }" name="province">
             <FormItem>
               <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -613,7 +576,6 @@ const title = computed(() => props.mode === "lawyer" ? "Lawyer Registration" : "
             </FormItem>
           </FormField>
 
-          <!-- District Dropdown -->
           <FormField v-slot="{ componentField }" name="district">
             <FormItem>
               <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -635,7 +597,6 @@ const title = computed(() => props.mode === "lawyer" ? "Lawyer Registration" : "
             </FormItem>
           </FormField>
 
-          <!-- Municipality Dropdown -->
           <FormField v-slot="{ componentField }" name="municipality">
             <FormItem>
               <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -657,7 +618,6 @@ const title = computed(() => props.mode === "lawyer" ? "Lawyer Registration" : "
             </FormItem>
           </FormField>
 
-          <!-- Ward Number Field -->
           <FormField v-slot="{ componentField }" name="ward">
             <FormItem>
               <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -679,7 +639,6 @@ const title = computed(() => props.mode === "lawyer" ? "Lawyer Registration" : "
             </FormItem>
           </FormField>
 
-          <!-- Navigation Buttons -->
           <div class="w-full pt-5 flex gap-4">
             <Button
               type="button"
@@ -698,9 +657,7 @@ const title = computed(() => props.mode === "lawyer" ? "Lawyer Registration" : "
           </div>
         </TabsContent>
 
-        <!-- STEP 3: Lawyer or Firm Information -->
         <TabsContent value="step3" class="space-y-5" force-mount v-show="activeStep === 'step3'">
-          <!-- Services Selection -->
           <FormField name="services">
             <FormItem>
               <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -733,9 +690,7 @@ const title = computed(() => props.mode === "lawyer" ? "Lawyer Registration" : "
             </FormItem>
           </FormField>
 
-          <!-- LAWYER MODE FIELDS -->
           <template v-if="mode === 'lawyer'">
-            <!-- Full Name Field -->
             <FormField v-slot="{ componentField }" name="fullName">
               <FormItem>
                 <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -754,7 +709,6 @@ const title = computed(() => props.mode === "lawyer" ? "Lawyer Registration" : "
               </FormItem>
             </FormField>
 
-            <!-- Date of Birth Field -->
             <FormField v-slot="{ componentField }" name="dateOfBirth">
               <FormItem>
                 <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -772,7 +726,6 @@ const title = computed(() => props.mode === "lawyer" ? "Lawyer Registration" : "
               </FormItem>
             </FormField>
 
-            <!-- Bar ID Field -->
             <FormField v-slot="{ componentField }" name="barId">
               <FormItem>
                 <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -791,7 +744,6 @@ const title = computed(() => props.mode === "lawyer" ? "Lawyer Registration" : "
               </FormItem>
             </FormField>
 
-            <!-- Gender Field -->
             <FormField v-slot="{ componentField }" name="gender">
               <FormItem>
                 <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -813,7 +765,6 @@ const title = computed(() => props.mode === "lawyer" ? "Lawyer Registration" : "
               </FormItem>
             </FormField>
 
-            <!-- License Photo Upload -->
             <FormField name="licensePhoto">
               <FormItem>
                 <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -851,7 +802,6 @@ const title = computed(() => props.mode === "lawyer" ? "Lawyer Registration" : "
 
           <!-- FIRM MODE FIELDS -->
           <template v-else>
-            <!-- Firm Name Field -->
             <FormField v-slot="{ componentField }" name="firmName">
               <FormItem>
                 <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -870,7 +820,6 @@ const title = computed(() => props.mode === "lawyer" ? "Lawyer Registration" : "
               </FormItem>
             </FormField>
 
-            <!-- Owner Name Field -->
             <FormField v-slot="{ componentField }" name="ownerName">
               <FormItem>
                 <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -889,7 +838,6 @@ const title = computed(() => props.mode === "lawyer" ? "Lawyer Registration" : "
               </FormItem>
             </FormField>
 
-            <!-- Firm ID Field -->
             <FormField v-slot="{ componentField }" name="firmId">
               <FormItem>
                 <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -908,7 +856,6 @@ const title = computed(() => props.mode === "lawyer" ? "Lawyer Registration" : "
               </FormItem>
             </FormField>
 
-            <!-- Firm License Field -->
             <FormField name="firmLicense">
               <FormItem>
                 <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -944,7 +891,6 @@ const title = computed(() => props.mode === "lawyer" ? "Lawyer Registration" : "
             </FormField>
           </template>
 
-          <!-- Navigation Buttons -->
           <div class="w-full pt-5 flex gap-4">
             <Button
               type="button"

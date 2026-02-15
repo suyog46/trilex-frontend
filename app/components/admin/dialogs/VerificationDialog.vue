@@ -68,7 +68,6 @@ const handleClose = () => {
         </AlertDialogDescription>
       </AlertDialogHeader>
 
-      <!-- Rejection Reason Input (only show for reject) -->
       <div v-if="isRejecting" class="space-y-3 py-4">
         <Label for="reason">Rejection Reason *</Label>
         <textarea
@@ -82,7 +81,6 @@ const handleClose = () => {
         </p>
       </div>
 
-      <!-- Dialog Actions -->
       <div class="flex gap-3 justify-end pt-4">
         <AlertDialogCancel as-child>
           <Button variant="outline" @click="handleClose">

@@ -29,7 +29,7 @@ const fetchBookings = async () => {
   // Cancel previous request if still pending
   if (abortController.value) {
     abortController.value.abort()
-    console.log('❌ Aborted previous bookings fetch for status:', currentFetchingStatus.value)
+    console.log(' Aborted previous bookings fetch for status:', currentFetchingStatus.value)
   }
   
   // Create new abort controller for this request

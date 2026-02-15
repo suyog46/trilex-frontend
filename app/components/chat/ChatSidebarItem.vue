@@ -58,7 +58,6 @@ const getInitials = (name: string) => {
     ]"
     @click="emit('select', conversation.id)"
   >
-    <!-- User Avatar -->
     <div class="relative flex-shrink-0">
       <div
         v-if="conversation.userProfile"
@@ -77,14 +76,12 @@ const getInitials = (name: string) => {
         {{ getInitials(conversation.userName) }}
       </div>
       
-      <!-- Online Status Indicator -->
       <div
         v-if="conversation.isOnline"
         class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"
       ></div>
     </div>
 
-    <!-- Conversation Details -->
     <div class="flex-1 min-w-0">
       <div class="flex items-start justify-between mb-1">
         <h4 :class="[

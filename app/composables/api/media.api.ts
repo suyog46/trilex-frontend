@@ -9,16 +9,9 @@ export interface MediaUploadResponse {
 }
 
 export const mediaApi = {
-  /**
-   * Upload a media file (image, document, etc.)
-   * POST /api/media/upload/
-   * @param file - The file to upload
-   * @returns Promise with upload response containing the media ID
-   */
   upload: (file: File): Promise<MediaUploadResponse> => {
     const apiFetch = useApiFetch()
     
-    // Create FormData for file upload
     const formData = new FormData()
     formData.append('file', file)
     
@@ -29,39 +22,28 @@ export const mediaApi = {
   },
 }
 
-/**
- * Composable for handling image uploads
- * Manages file selection, upload progress, and error handling
- */
 export const useMediaUpload = () => {
   const isUploading = ref(false)
   const uploadError = ref<string | null>(null)
   const uploadProgress = ref(0)
 
-  /**
-   * Upload a single file and return its ID
-   * @param file - The file to upload
-   * @returns Promise with the uploaded media ID
-   */
   const uploadFile = async (file: File): Promise<string | null> => {
     isUploading.value = true
     uploadError.value = null
     uploadProgress.value = 0
 
     try {
-      // Validate file type
       const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf']
       if (!allowedTypes.includes(file.type)) {
         throw new Error('Invalid file type. Allowed: JPEG, PNG, GIF, WebP, PDF')
       }
 
-      // Validate file size (max 10MB)
       const maxSize = 10 * 1024 * 1024
       if (file.size > maxSize) {
         throw new Error('File size exceeds 10MB limit')
       }
 
-      uploadProgress.value = 50 // Simulate progress
+      uploadProgress.value = 50
 
       const response = await mediaApi.upload(file)
 
@@ -76,11 +58,6 @@ export const useMediaUpload = () => {
     }
   }
 
-  /**
-   * Handle file input change and upload
-   * @param event - File input change event
-   * @returns Promise with the uploaded media ID
-   */
   const handleFileInput = async (event: Event): Promise<string | null> => {
     const input = event.target as HTMLInputElement
     const file = input.files?.[0]
@@ -93,16 +70,10 @@ export const useMediaUpload = () => {
     return uploadFile(file)
   }
 
-  /**
-   * Clear upload error
-   */
   const clearError = () => {
     uploadError.value = null
   }
 
-  /**
-   * Reset upload state
-   */
   const reset = () => {
     isUploading.value = false
     uploadError.value = null

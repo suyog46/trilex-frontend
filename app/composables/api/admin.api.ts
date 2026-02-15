@@ -1,6 +1,5 @@
 import { URL } from "~/lib/constants/url"
 
-// Case Categories
 export interface CaseCategory {
   id: string
   name: string
@@ -13,7 +12,6 @@ export interface CreateCategoriesInput {
   is_active: boolean
 }
 
-// Firm Verifications
 export interface FirmVerification {
   id?: string
   firm_name: string
@@ -27,7 +25,6 @@ export interface FirmVerification {
   }
 }
 
-// Lawyer Bar Verifications
 export interface LawyerBarVerification {
   id?: string
   full_name: string
@@ -42,7 +39,6 @@ export interface LawyerBarVerification {
   }
 }
 
-// Client Verifications
 export interface ClientVerification {
   id?: string
   user?: {
@@ -76,11 +72,8 @@ export interface VerificationListResponse<T> {
   previous?: string
 }
 
-// Case Categories API
 export const caseCategoryApi = {
-  /**
-   * Get all case categories (for admin)
-   */
+
   getCategories: (params?: { page?: number; page_size?: number }): Promise<VerificationListResponse<CaseCategory>> => {
     const apiFetch = useApiFetch()
     return apiFetch(URL.API.ADMIN.CASE_CATEGORIES, {
@@ -88,17 +81,13 @@ export const caseCategoryApi = {
     })
   },
 
-  /**
-   * Get case category by ID
-   */
+
   getCategoryById: (id: string): Promise<CaseCategory> => {
     const apiFetch = useApiFetch()
     return apiFetch(`${URL.API.ADMIN.CASE_CATEGORIES}${id}/`)
   },
 
-  /**
-   * Create case category
-   */
+
   createCategory: (payload: CreateCategoriesInput): Promise<CaseCategory> => {
     const apiFetch = useApiFetch()
     return apiFetch(URL.API.ADMIN.CASE_CATEGORIES, {
@@ -107,9 +96,7 @@ export const caseCategoryApi = {
     })
   },
 
-  /**
-   * Update case category
-   */
+
   updateCategory: (id: string, payload: CreateCategoriesInput): Promise<CaseCategory> => {
     const apiFetch = useApiFetch()
     return apiFetch(`${URL.API.ADMIN.CASE_CATEGORIES}${id}/`, {
@@ -118,9 +105,6 @@ export const caseCategoryApi = {
     })
   },
 
-  /**
-   * Delete case category
-   */
   deleteCategory: (id: string): Promise<void> => {
     const apiFetch = useApiFetch()
     return apiFetch(`${URL.API.ADMIN.CASE_CATEGORIES}${id}/`, {
@@ -129,11 +113,8 @@ export const caseCategoryApi = {
   },
 }
 
-// Firm Verifications API
 export const firmVerificationApi = {
-  /**
-   * Get firm verifications
-   */
+
   getVerifications: (params?: { 
     page?: number
     page_size?: number
@@ -145,9 +126,7 @@ export const firmVerificationApi = {
     })
   },
 
-  /**
-   * Approve firm verification
-   */
+
   approveVerification: (verificationId: string): Promise<{ message: string }> => {
     const apiFetch = useApiFetch()
     return apiFetch(`${URL.API.ADMIN.FIRM_VERIFICATIONS}${verificationId}/approve/`, {
@@ -158,9 +137,6 @@ export const firmVerificationApi = {
     })
   },
 
-  /**
-   * Reject firm verification
-   */
   rejectVerification: (verificationId: string, rejectionReason: string): Promise<{ message: string }> => {
     const apiFetch = useApiFetch()
     return apiFetch(`${URL.API.ADMIN.FIRM_VERIFICATIONS}${verificationId}/reject/`, {
@@ -172,11 +148,8 @@ export const firmVerificationApi = {
   },
 }
 
-// Lawyer Bar Verifications API
 export const lawyerBarVerificationApi = {
-  /**
-   * Get lawyer bar verifications
-   */
+
   getVerifications: (params?: {
     page?: number
     page_size?: number
@@ -188,9 +161,7 @@ export const lawyerBarVerificationApi = {
     })
   },
 
-  /**
-   * Approve lawyer bar verification
-   */
+
   approveVerification: (verificationId: string): Promise<{ message: string }> => {
     const apiFetch = useApiFetch()
     return apiFetch(`${URL.API.ADMIN.LAWYER_VERIFICATIONS}${verificationId}/approve/`, {
@@ -201,9 +172,7 @@ export const lawyerBarVerificationApi = {
     })
   },
 
-  /**
-   * Reject lawyer bar verification
-   */
+ 
   rejectVerification: (verificationId: string, rejectionReason: string): Promise<{ message: string }> => {
     const apiFetch = useApiFetch()
     return apiFetch(`${URL.API.ADMIN.LAWYER_VERIFICATIONS}${verificationId}/reject/`, {
@@ -215,11 +184,8 @@ export const lawyerBarVerificationApi = {
   },
 }
 
-// Client Verifications API
 export const clientVerificationApi = {
-  /**
-   * Get client verifications
-   */
+
   getVerifications: (params?: {
     page?: number
     page_size?: number
@@ -231,9 +197,7 @@ export const clientVerificationApi = {
     })
   },
 
-  /**
-   * Approve client verification
-   */
+
   approveVerification: (verificationId: string): Promise<{ message: string }> => {
     const apiFetch = useApiFetch()
     return apiFetch(`${URL.API.ADMIN.CLIENT_VERIFICATIONS}${verificationId}/approve/`, {
@@ -244,9 +208,7 @@ export const clientVerificationApi = {
     })
   },
 
-  /**
-   * Reject client verification
-   */
+
   rejectVerification: (verificationId: string, rejectionReason: string): Promise<{ message: string }> => {
     const apiFetch = useApiFetch()
     return apiFetch(`${URL.API.ADMIN.CLIENT_VERIFICATIONS}${verificationId}/reject/`, {

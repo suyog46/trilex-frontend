@@ -28,7 +28,6 @@ interface RoomUpdatedMessage {
   }
 }
 
-// Global singleton state - shared across all component instances
 const globalSocket = ref<WebSocket | null>(null)
 const globalIsConnected = ref(false)
 const globalMessages = ref<ChatMessage[]>([])
@@ -39,7 +38,6 @@ const globalUnreadNotificationCount = ref(0)
 const globalNotifications = ref<any[]>([])
 
 export const useChatSocket = () => {
-  // Use global singleton refs instead of creating new ones
   const socket = globalSocket
   const isConnected = globalIsConnected
   const messages = globalMessages
@@ -59,7 +57,6 @@ export const useChatSocket = () => {
     
     if (socket.value?.readyState === WebSocket.OPEN) {
       console.log(' WebSocket already connected')
-      // Join room if provided
       if (conversationId) {
         joinRoom(conversationId)
       }
@@ -81,7 +78,6 @@ export const useChatSocket = () => {
     socket.value.onopen = () => {
       console.log(' WebSocket connected globally')
       isConnected.value = true
-      // Join the room if conversationId is provided
       if (conversationId) {
         joinRoom(conversationId)
       }
@@ -102,13 +98,11 @@ export const useChatSocket = () => {
             message_id: data.message_id || data.id,
             id: data.id
           }
-          // New message received
           messages.value.push(normalized)
           break
         }
 
         case 'message_sent':
-          // Message was saved
           if (data.client_temp_id) {
             messageUpdates.value.set(data.client_temp_id, {
               message_id: data.message_id,
@@ -120,7 +114,6 @@ export const useChatSocket = () => {
           break
 
         case 'message_delivered':
-          // Message was delivered
           if (data.client_temp_id) {
             const existing = messageUpdates.value.get(data.client_temp_id)
             if (existing) {
@@ -131,7 +124,6 @@ export const useChatSocket = () => {
           break
 
         case 'message_read':
-          // Message was read
           if (data.client_temp_id) {
             const existing = messageUpdates.value.get(data.client_temp_id)
             if (existing) {
@@ -157,7 +149,6 @@ export const useChatSocket = () => {
           }
           const notificationTitle = data.notification.title || 'New notification'
           const notificationMessage = data.notification.message || ''
-          // Show toast notification
           toast(notificationTitle, {
             description: notificationMessage,
             action: {
@@ -204,7 +195,6 @@ export const useChatSocket = () => {
       return
     }
 
-    // Initialize tracking for this message as 'sending'
     messageUpdates.value.set(client_temp_id, {
       message_id: '',
       created_at: '',
@@ -249,25 +239,6 @@ export const useChatSocket = () => {
       console.warn(' WebSocket not ready, cannot join room. Socket state:', socket.value?.readyState)
     }
   }
-
-  // TODO: Uncomment when typing indicator is needed
-  // const handleTyping = (data: any) => {
-  //   if (data.isTyping && !typingUsers.value.includes(data.userId)) {
-  //     typingUsers.value.push(data.userId)
-  //   } else if (!data.isTyping) {
-  //     typingUsers.value = typingUsers.value.filter(id => id !== data.userId)
-  //   }
-  // }
-
-  // TODO: Uncomment when message read status is needed
-  // const updateMessageReadStatus = (data: any) => {
-  //   const message = messages.value.find(m => m.id === data.messageId)
-  //   if (message) {
-  //     message.read = true
-  //   }
-  // }
-
-  // No automatic cleanup - socket managed globally by auth store
 
   return {
     socket,

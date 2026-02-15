@@ -57,7 +57,6 @@ const handleCancel = () => {
     @click.self="handleCancel"
   >
     <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 space-y-6">
-      <!-- Header -->
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div class="p-3 bg-red-100 rounded-lg">
@@ -74,7 +73,6 @@ const handleCancel = () => {
         </button>
       </div>
 
-      <!-- Content -->
       <div class="space-y-4">
         <div class="bg-red-50 border border-red-200 rounded-lg p-4">
           <p class="text-sm text-gray-700">
@@ -95,7 +93,6 @@ const handleCancel = () => {
         </div>
       </div>
 
-      <!-- Actions -->
       <div class="flex gap-3 pt-2">
         <button
           @click="handleCancel"

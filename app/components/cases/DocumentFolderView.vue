@@ -65,7 +65,6 @@ const openFolder = (folderId: 'client' | 'internal' | 'firm') => {
         class="group relative bg-white border-2 border-gray-200 rounded-xl p-6 cursor-pointer transition-all duration-200 hover:border-primary-normal hover:shadow-lg"
         @click="openFolder(folder.id as 'client' | 'internal' | 'firm')"
       >
-        <!-- Folder Icon -->
         <div class="flex items-start gap-4">
           <div
             :class="[
@@ -89,7 +88,6 @@ const openFolder = (folderId: 'client' | 'internal' | 'firm') => {
               {{ folder.description }}
             </p>
 
-            <!-- File Count Badge -->
             <div class="flex items-center gap-2">
               <span
                 :class="[
@@ -102,14 +100,12 @@ const openFolder = (folderId: 'client' | 'internal' | 'firm') => {
             </div>
           </div>
 
-          <!-- Arrow Icon -->
           <Icon
             icon="mdi:chevron-right"
             class="w-6 h-6 text-gray-400 group-hover:text-primary-normal group-hover:translate-x-1 transition-all"
           />
         </div>
 
-        <!-- Hover Effect Border -->
         <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-normal/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
       </div>
     </div>

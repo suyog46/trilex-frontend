@@ -7,6 +7,7 @@ import UserAvatar from '@/components/ui/UserAvatar.vue'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '~/stores/auth'
 import { toast } from 'vue-sonner'
+import auth from '~/middleware/auth';
 
 const authStore = useAuthStore()
 const isLoadingVerification = ref(false)
@@ -17,9 +18,12 @@ const dropdownRef = ref<HTMLElement | null>(null)
 onMounted(async () => {
   isLoadingVerification.value = true
   try {
-    if (!authStore.lawyerVerificationStatus) {
+    if(authStore.user?.role === 'lawyer' && !authStore.lawyerVerificationStatus) {
       await authStore.getLawyerVerificationStatus()
+    } else if(authStore.user?.role === 'firm' && !authStore.firmVerificationStatus) {
+      await authStore.getFirmVerificationStatus()
     }
+
   } catch (error) {
     console.error('Error fetching verification status:', error)
   } finally {
@@ -60,8 +64,9 @@ const handleLogout = async () => {
 }
 
 const isVerificationBlocked = computed(() => {
-  const status = authStore.lawyerVerificationStatus?.status
-  return status === 'PENDING' || status === 'REJECTED'
+  const status =authStore?.user?.role === 'lawyer' ? authStore.lawyerVerificationStatus?.status : authStore.firmVerificationStatus?.status 
+  console.log('Verification status:', status)
+  return status !== 'VERIFIED'
 })
 
 const verificationMessage = computed(() => {
@@ -98,7 +103,8 @@ const verificationMessage = computed(() => {
             <Button
               v-if="authStore.user?.role !== 'client'"
               @click="navigateTo('/cases/create-case')"
-              class="bg-primary-normal hover:bg-primary-normal/90 text-white px-4 py-2"
+              :disabled="isVerificationBlocked"
+              class="bg-primary-normal hover:bg-primary-normal/90 text-white px-4 py-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <Icon icon="mdi:plus" class="w-5 h-5 mr-2" />
               Create Case

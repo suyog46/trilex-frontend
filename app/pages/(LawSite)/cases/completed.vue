@@ -53,7 +53,7 @@ const fetchData = async (page: number, size: number, search: string, filters: Re
   // Cancel previous request if still pending
   if (abortController.value) {
     abortController.value.abort()
-    console.log('❌ Aborted previous cases fetch for scope:', currentFetchingScope.value)
+    console.log(' Aborted previous cases fetch for scope:', currentFetchingScope.value)
   }
   
   // Create new abort controller for this request

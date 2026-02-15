@@ -1,6 +1,4 @@
 import { URL } from "~/lib/constants/url"
-
-// Types
 export interface Category {
   id: string
   name: string
@@ -41,6 +39,13 @@ export interface CaseDate {
   date: string
   remark: string
   assigned_to_name: string
+}
+
+export interface CreateCaseDateInput {
+  date_type: "tarik"
+  date: string
+  remark?: string
+  assigned_to_name?: string
 }
 
 export interface CreateCaseInput {
@@ -262,19 +267,11 @@ export interface CaseDetail {
 }
 
 export const casesApi = {
-  /**
-   * Get category by ID
-   * GET /api/cases/categories/{id}/
-   */
   getCategoryById: (categoryId: string): Promise<Category> => {
     const apiFetch = useApiFetch()
     return apiFetch(`/api/cases/categories/${categoryId}/`)
   },
 
-  /**
-   * Fetch case categories
-   * GET /api/cases/categories/
-   */
   getCategories: (params?: { active?: boolean; page?: number; page_size?: number }): Promise<{ results: Category[] }> => {
     const apiFetch = useApiFetch()
     return apiFetch(URL.API.CASES.CATEGORIES, {
@@ -282,10 +279,6 @@ export const casesApi = {
     })
   },
 
-  /**
-   * Create a new case
-   * POST /api/cases/
-   */
   createCase: (data: CreateCaseInput): Promise<any> => {
     const apiFetch = useApiFetch()
     return apiFetch(URL.API.CASES.CREATE, {
@@ -294,10 +287,6 @@ export const casesApi = {
     })
   },
 
-  /**
-   * Get list of registered clients
-   * GET /api/clients/
-   */
   getClients: (params?: { page?: number; page_size?: number; search?: string }): Promise<ClientsListResponse> => {
     const apiFetch = useApiFetch()
     return apiFetch(URL.API.CLIENTS.LIST, {
@@ -305,10 +294,6 @@ export const casesApi = {
     })
   },
 
-  /**
-   * Get list of cases with filters
-   * GET /api/cases/list/
-   */
   getCasesList: (params?: {
     case_category?: string
     case_scope?: string
@@ -326,10 +311,6 @@ export const casesApi = {
     })
   },
 
-  /**
-   * Assign lawyer to a case
-   * POST /api/cases/{case_id}/assign-lawyer/
-   */
   assignLawyer: (caseId: string, lawyerId: string): Promise<any> => {
     const apiFetch = useApiFetch()
     return apiFetch(`/api/cases/${caseId}/assign-lawyer/`, {
@@ -338,10 +319,6 @@ export const casesApi = {
     })
   },
 
-  /**
-   * Get firm members (lawyers)
-   * GET /api/firms/me/members/
-   */
   getFirmMembers: (params?: { page?: number; page_size?: number; search?: string }): Promise<FirmMembersResponse> => {
     const apiFetch = useApiFetch()
     return apiFetch('/api/firms/me/members/', {
@@ -349,19 +326,11 @@ export const casesApi = {
     })
   },
 
-  /**
-   * Get case details by ID
-   * GET /api/cases/{case_id}/
-   */
   getCaseDetail: (caseId: string): Promise<CaseDetail> => {
     const apiFetch = useApiFetch()
     return apiFetch(`/api/cases/${caseId}/`)
   },
 
-  /**
-   * Update case by ID
-   * PATCH /api/cases/{case_id}/update/
-   */
   updateCase: (caseId: string, data: UpdateCaseInput): Promise<CaseDetail> => {
     const apiFetch = useApiFetch()
     return apiFetch(`/api/cases/${caseId}/update/`, {
@@ -370,10 +339,6 @@ export const casesApi = {
     })
   },
 
-  /**
-   * Get documents for a case
-   * GET /api/cases/{case_id}/documents/
-   */
   getCaseDocuments: (caseId: string, params?: {
     page?: number
     page_size?: number
@@ -385,13 +350,17 @@ export const casesApi = {
     })
   },
 
-  /**
-   * Upload document to a case
-   * POST /api/cases/{case_id}/documents/upload/
-   */
   uploadCaseDocument: (caseId: string, data: UploadDocumentInput): Promise<DocumentItem> => {
     const apiFetch = useApiFetch()
     return apiFetch(`/api/cases/${caseId}/documents/upload/`, {
+      method: 'POST',
+      body: data,
+    })
+  },
+
+  createCaseDate: (caseId: string, data: CreateCaseDateInput): Promise<CaseDetail['dates'][number]> => {
+    const apiFetch = useApiFetch()
+    return apiFetch(`/api/cases/${caseId}/dates/`, {
       method: 'POST',
       body: data,
     })

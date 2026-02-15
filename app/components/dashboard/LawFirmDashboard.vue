@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- Header with Add Team Member Button -->
     <div class="flex items-center justify-between mb-8">
       <h1 class="text-3xl font-bold" style="color: var(--color-primary-normal)">Dashboard</h1>
       <button
@@ -13,7 +12,6 @@
       </button>
     </div>
 
-    <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <div class="bg-white rounded-xl p-6 border border-gray-200">
         <div class="flex items-start justify-between mb-4">
@@ -68,9 +66,7 @@
       </div>
     </div>
 
-    <!-- Charts Section -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Overview Chart -->
       <div class="lg:col-span-2 bg-white rounded-xl p-6 border border-gray-200">
         <div class="flex items-center justify-between mb-6">
           <div>
@@ -79,7 +75,6 @@
           </div>
         </div>
 
-        <!-- Bar Chart -->
         <div class="h-80">
           <div class="h-full flex items-end justify-between gap-2">
             <div
@@ -130,7 +125,6 @@
           </svg>
         </div>
 
-        <!-- Days of Week -->
         <div class="flex justify-between text-xs text-gray-600 mb-6">
           <span>Sun</span>
           <span>Mon</span>
@@ -141,7 +135,6 @@
           <span>Sat</span>
         </div>
 
-        <!-- Date Range -->
         <div class="flex items-center justify-between">
           <button>
             <Icon name="mdi:chevron-left" class="w-5 h-5 text-gray-600" />

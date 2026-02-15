@@ -61,19 +61,11 @@ export interface ClientVerificationSubmit {
 }
 
 export const verificationApi = {
-  /**
-   * Get lawyer verification status
-   * GET /api/lawyers/bar-verification/me/
-   */
   getLawyerVerificationStatus: (): Promise<LawyerVerificationStatus> => {
     const apiFetch = useApiFetch()
     return apiFetch(URL.API.VERIFICATION.LAWYER_STATUS)
   },
 
-  /**
-   * Submit/Resubmit lawyer verification
-   * POST /api/lawyers/bar-verification/
-   */
   submitLawyerVerification: (data: LawyerVerificationSubmit): Promise<LawyerVerificationStatus> => {
     const apiFetch = useApiFetch()
     return apiFetch(URL.API.VERIFICATION.LAWYER_SUBMIT, {
@@ -82,19 +74,11 @@ export const verificationApi = {
     })
   },
 
-  /**
-   * Get firm verification status
-   * GET /api/firms/verification/me/
-   */
   getFirmVerificationStatus: (): Promise<FirmVerificationStatus> => {
     const apiFetch = useApiFetch()
     return apiFetch(URL.API.VERIFICATION.FIRM_STATUS)
   },
 
-  /**
-   * Submit/Resubmit firm verification
-   * POST /api/firms/verification/
-   */
   submitFirmVerification: (data: FirmVerificationSubmit): Promise<FirmVerificationStatus> => {
     const apiFetch = useApiFetch()
     return apiFetch(URL.API.VERIFICATION.FIRM_SUBMIT, {
@@ -103,19 +87,11 @@ export const verificationApi = {
     })
   },
 
-  /**
-   * Get client verification status
-   * GET /api/clients/verification/me/
-   */
   getClientVerificationStatus: (): Promise<ClientVerificationStatus> => {
     const apiFetch = useApiFetch()
     return apiFetch(URL.API.VERIFICATION.CLIENT_STATUS)
   },
 
-  /**
-   * Submit/Resubmit client verification
-   * POST /api/clients/verification/
-   */
   submitClientVerification: (data: ClientVerificationSubmit): Promise<ClientVerificationStatus> => {
     const apiFetch = useApiFetch()
     return apiFetch(URL.API.VERIFICATION.CLIENT_SUBMIT, {

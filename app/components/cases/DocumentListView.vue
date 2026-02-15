@@ -82,7 +82,6 @@ const downloadDocument = (doc: DocumentItem) => {
       </button>
     </div>
 
-    <!-- Loading State -->
     <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div v-for="i in 6" :key="i" class="bg-white rounded-xl p-6 border border-gray-200">
         <div class="space-y-4">
@@ -93,7 +92,6 @@ const downloadDocument = (doc: DocumentItem) => {
       </div>
     </div>
 
-    <!-- Empty State -->
     <div v-else-if="documents.length === 0" class="text-center py-12">
       <Icon icon="mdi:file-document-outline" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
       <p class="text-gray-600 mb-4">No documents found</p>
@@ -105,7 +103,6 @@ const downloadDocument = (doc: DocumentItem) => {
       </button>
     </div>
 
-    <!-- Documents Grid -->
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div
         v-for="doc in documents"

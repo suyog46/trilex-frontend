@@ -142,7 +142,6 @@ onUnmounted(() => {
           ]"
         >
           <nav class="w-full h-full flex items-center justify-between px-4 md:px-8">
-            <!-- Logo -->
             <div class="flex-shrink-0">
               <NuxtLink to="/" class="flex items-center gap-2">
                 <span class="text-2xl font-bold bg-gradient-to-r from-primary-normal to-primary-normal-hover bg-clip-text text-transparent">
@@ -151,7 +150,6 @@ onUnmounted(() => {
               </NuxtLink>
             </div>
 
-            <!-- Desktop Navigation Links -->
             <ul class="hidden lg:flex gap-7 text-lg font-medium">
               <li v-for="link in navLinks" :key="link.path">
                 <NuxtLink
@@ -168,7 +166,6 @@ onUnmounted(() => {
               </li>
             </ul>
 
-            <!-- Right Side Actions -->
             <div class="flex items-center gap-4">
               <!-- Search Button (Hidden on mobile) -->
               <!-- <button
@@ -195,7 +192,6 @@ onUnmounted(() => {
                 <NotificationDropdown />
               </div>
 
-              <!-- Mobile Menu Button -->
               <DisclosureButton class="lg:hidden inline-flex items-center justify-center p-2 rounded-lg transition-colors"
                 :class="isSticky ? 'hover:bg-primary-normal-hover' : 'hover:bg-primary-light-active'"
                 :aria-label="open ? 'Close menu' : 'Open menu'"
@@ -206,9 +202,7 @@ onUnmounted(() => {
                 />
               </DisclosureButton>
 
-              <!-- User Menu / Login Button -->
               <div class="flex items-center gap-2">
-                <!-- Show user menu only if authenticated -->
                 <template v-if="isAuthenticated">
                   <Menu as="div" class="relative">
                     <MenuButton
@@ -222,7 +216,6 @@ onUnmounted(() => {
                     >
                     
                       <Icon icon="mdi:account" class="w-5 h-5 text-primary-normal" />
-                      <!-- Show verified checkmark only if user has verification status VERIFIED -->
                       <Icon 
                         v-if="isVerified"
                         icon="mdi:check-circle" 
@@ -231,7 +224,6 @@ onUnmounted(() => {
                     </MenuButton>
 
                     <MenuItems class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none z-50 overflow-hidden data-[closed]:hidden data-[open]:block">
-                      <!-- User Info Section -->
                       <div class="px-4 py-4 border-b border-primary-light-active">
                         <div class="flex items-center gap-3">
                           <div class="flex items-center justify-center w-10 h-10 rounded-full bg-primary-normal text-white font-semibold">
@@ -263,7 +255,6 @@ onUnmounted(() => {
                         </MenuItem>
                       </div> -->
 
-                      <!-- Dashboard Button -->
                       <div class="px-4 py-2 border-t border-primary-light-active">
                         <NuxtLink
                           :to="dashboardAction.path"
@@ -273,7 +264,6 @@ onUnmounted(() => {
                         </NuxtLink>
                       </div>
 
-                      <!-- Logout Button -->
                       <div class="px-4 py-2">
                         <button
                           @click="handleLogout"
@@ -287,7 +277,6 @@ onUnmounted(() => {
                   </Menu>
                 </template>
 
-                <!-- Show login button only if not authenticated -->
                 <NuxtLink
                   v-else
                   to="/login"
@@ -300,10 +289,8 @@ onUnmounted(() => {
           </nav>
         </header>
 
-        <!-- Mobile Menu Panel -->
         <DisclosurePanel class="lg:hidden fixed top-16 left-0 right-0 bg-primary-normal z-40">
           <div class="px-4 py-4 space-y-3">
-            <!-- Mobile Navigation Links -->
             <NuxtLink
               v-for="link in navLinks"
               :key="link.path"
@@ -313,7 +300,6 @@ onUnmounted(() => {
               {{ link.title }}
             </NuxtLink>
 
-            <!-- Mobile Menu Divider -->
             <div class="border-t border-primary-normal-hover py-3">
               <!-- Mobile User Menu Items (only if authenticated) -->
               <!-- <template v-if="isAuthenticated">
@@ -328,9 +314,7 @@ onUnmounted(() => {
               </template> -->
             </div>
 
-            <!-- Mobile Buttons -->
             <div class="flex gap-2 pt-3 border-t border-primary-normal-hover">
-              <!-- Show dashboard/logout if authenticated -->
               <template v-if="isAuthenticated">
                 <NuxtLink
                   :to="dashboardAction.path"
@@ -346,7 +330,6 @@ onUnmounted(() => {
                 </button>
               </template>
 
-              <!-- Show login/register if not authenticated -->
               <template v-else>
                 <NuxtLink
                   to="/login"
@@ -365,7 +348,6 @@ onUnmounted(() => {
           </div>
         </DisclosurePanel>
 
-        <!-- Spacer div for sticky header -->
         <div v-if="isSticky" class="h-16" />
       </template>
     </Disclosure>

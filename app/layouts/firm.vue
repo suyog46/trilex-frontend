@@ -13,8 +13,8 @@ const route = useRoute()
 onMounted(async () => {
   isLoadingVerification.value = true
   try {
-    if (!authStore.firmVerificationStatus) {
-      await authStore.getFirmVerificationStatus()
+    if (!authStore.isInitialized) {
+      await authStore.initializeAuth()
     }
   } catch (error) {
     console.error('Error fetching verification status:', error)
@@ -24,15 +24,15 @@ onMounted(async () => {
 })
 
 const isVerificationBlocked = computed(() => {
-  const status = authStore.firmVerificationStatus?.status
-  return status === 'PENDING' || status === 'REJECTED'
+  const status = authStore.user?.verification?.status
+  return status !== 'VERIFIED'
 })
 
 const verificationMessage = computed(() => {
-  if (authStore.firmVerificationStatus?.status === 'PENDING') {
+  if (authStore.user?.verification?.status === 'PENDING') {
     return 'Your verification is under review. Dashboard features are temporarily disabled.'
   }
-  if (authStore.firmVerificationStatus?.status === 'REJECTED') {
+  if (authStore.user?.verification?.status === 'REJECTED') {
     return 'Your verification was rejected. Please resubmit to regain access.'
   }
   return ''
@@ -61,15 +61,16 @@ const hideNavbarSection = computed(() => route.path === '/law-firm/ai-assistant'
           </div>
 
           <div class="flex items-center gap-6">
-            <button class="relative">
+            <!-- <button class="relative">
               <Icon icon="mdi:email-outline" class="w-6 h-6 text-gray-600" />
               <span class="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full"></span>
             </button>
             <button class="relative">
               <Icon icon="mdi:bell-outline" class="w-6 h-6 text-gray-600" />
               <span class="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full"></span>
-            </button>
+            </button> -->
 
+             
             <div class="flex items-center  gap-2 justify-center  ">
               <span class="font-medium text-gray-700">{{ authStore.user?.email || 'User' }}</span>
               <div class="flex items-center">

@@ -35,10 +35,8 @@ const searchQuery = ref('')
 const chatRooms = ref<ChatRoom[]>([])
 const isLoading = ref(false)
 
-// Transform chat rooms to conversation items
 const conversations = computed<ConversationItem[]>(() => {
   return chatRooms.value.map(room => {
-    // Find the other participant (not the current user)
     const currentUserEmail = authStore.user?.email
     const otherParticipant = room.participants.find(p => p.user.email !== currentUserEmail)
     
@@ -73,7 +71,6 @@ const handleSelectConversation = (conversationId: string) => {
   })
 }
 
-// Fetch conversations from API
 const fetchConversations = async () => {
   isLoading.value = true
   try {
@@ -82,7 +79,6 @@ const fetchConversations = async () => {
       page_size: 50
     })
     
-    // Sort by latest message date (newest first)
     const sorted = response.results.sort((a, b) => {
       const dateA = new Date(a.last_message?.created_at || a.updated_at).getTime()
       const dateB = new Date(b.last_message?.created_at || b.updated_at).getTime()
@@ -120,7 +116,6 @@ watch(roomUpdates, (updates) => {
 
     const roomIndex = chatRooms.value.findIndex(room => room.id === update.room_id)
     if (roomIndex === -1) {
-      // Room doesn't exist yet, fetch all conversations
       fetchConversations()
       continue
     }
@@ -128,10 +123,8 @@ watch(roomUpdates, (updates) => {
     const room = chatRooms.value[roomIndex]
     if (!room) continue
 
-    // Check if this is a new message (different from current last message)
     const isSameMessage = room.last_message?.id === update.last_message.id
     if (!isSameMessage) {
-      // Update the last message with the new data from socket
       room.last_message = {
         id: update.last_message.id,
         sender: update.last_message.sender?.name || update.last_message.sender?.email || '',
@@ -140,7 +133,6 @@ watch(roomUpdates, (updates) => {
       }
       room.updated_at = update.last_message.created_at
       
-      // Move this room to the top if it's not already at position 0
       if (roomIndex > 0) {
         chatRooms.value.splice(roomIndex, 1)
         chatRooms.value.unshift(room)
@@ -154,11 +146,9 @@ watch(roomUpdates, (updates) => {
 
 <template>
   <div class="h-full flex flex-col bg-white border-r border-gray-200">
-    <!-- Sidebar Header -->
     <div class="p-4 border-b border-gray-200">
       <h2 class="text-xl font-bold text-gray-900 mb-4">Messages</h2>
       
-      <!-- Search Bar -->
       <div class="relative">
         <Icon
           icon="mdi:magnify"
@@ -173,9 +163,7 @@ watch(roomUpdates, (updates) => {
       </div>
     </div>
 
-    <!-- Conversations List -->
     <div class="flex-1 overflow-y-auto">
-      <!-- Loading State -->
       <div v-if="isLoading" class="space-y-2 p-4">
         <div v-for="i in 5" :key="i" class="flex items-start gap-3">
           <div class="w-12 h-12 bg-gray-200 rounded-full animate-pulse"></div>
@@ -185,8 +173,6 @@ watch(roomUpdates, (updates) => {
           </div>
         </div>
       </div>
-
-      <!-- Empty State -->
       <div
         v-else-if="conversations.length === 0"
         class="flex flex-col items-center justify-center py-12 px-4 text-center"
@@ -198,7 +184,6 @@ watch(roomUpdates, (updates) => {
         </p>
       </div>
 
-      <!-- Conversations -->
       <div v-else>
         <ChatSidebarItem
           v-for="conversation in conversations"

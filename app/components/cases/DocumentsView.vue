@@ -22,11 +22,9 @@ const cases = ref<CaseListItem[]>([])
 const casesAbortController = ref<AbortController | null>(null)
 const currentFetchingStatus = ref<'draft' | 'ongoing' | 'completed' | 'registered'>('draft')
 
-// Selected case and folder state
 const selectedCase = ref<CaseListItem | null>(null)
 const selectedFolder = ref<'client' | 'internal' | 'firm' | null>(null)
 
-// Documents state
 const clientDocuments = ref<DocumentItem[]>([])
 const internalDocuments = ref<DocumentItem[]>([])
 const firmDocuments = ref<DocumentItem[]>([])
@@ -34,13 +32,10 @@ const isLoadingDocuments = ref(false)
 const documentsAbortController = ref<AbortController | null>(null)
 const currentFetchingCaseId = ref<string | null>(null)
 
-// Upload dialog state
 const showUploadDialog = ref(false)
 
-// Show only client folder for clients
 const isClientScope = computed(() => props.scope === 'client')
 
-// Fetch cases for active tab
 const fetchCases = async (status: string) => {
   if (casesAbortController.value) {
     casesAbortController.value.abort()
@@ -74,7 +69,6 @@ const fetchCases = async (status: string) => {
   }
 }
 
-// Fetch documents for selected case
 const fetchDocuments = async (caseId: string) => {
   if (documentsAbortController.value) {
     documentsAbortController.value.abort()
@@ -84,7 +78,6 @@ const fetchDocuments = async (caseId: string) => {
   const caseIdToFetch = caseId
   isLoadingDocuments.value = true
   try {
-    // Fetch client documents
     const clientResponse = await casesApi.getCaseDocuments(caseId, {
       scope: 'client',
       page_size: 100,
@@ -94,7 +87,6 @@ const fetchDocuments = async (caseId: string) => {
     }
     clientDocuments.value = clientResponse.results
 
-    // Fetch internal (my) documents and firm documents only for lawyers
     if (!isClientScope.value) {
       const internalResponse = await casesApi.getCaseDocuments(caseId, {
         scope: 'my',
@@ -105,7 +97,6 @@ const fetchDocuments = async (caseId: string) => {
       }
       internalDocuments.value = internalResponse.results
 
-      // Fetch firm documents
       const firmResponse = await casesApi.getCaseDocuments(caseId, {
         scope: 'firm',
         page_size: 100,
@@ -130,7 +121,6 @@ const fetchDocuments = async (caseId: string) => {
   }
 }
 
-// Watch tab changes to fetch cases
 watch(activeTab, (newTab) => {
   selectedCase.value = null
   selectedFolder.value = null
@@ -138,14 +128,12 @@ watch(activeTab, (newTab) => {
   fetchCases(newTab)
 }, { immediate: true })
 
-// Handle case selection
 const handleCaseSelect = (caseItem: CaseListItem) => {
   selectedCase.value = caseItem
   clientDocuments.value = []
   internalDocuments.value = []
   firmDocuments.value = []
   
-  // For clients, automatically open client folder
   if (isClientScope.value) {
     selectedFolder.value = 'client'
   } else {
@@ -155,15 +143,12 @@ const handleCaseSelect = (caseItem: CaseListItem) => {
   fetchDocuments(caseItem.id)
 }
 
-// Handle folder selection
 const handleFolderSelect = (folder: 'client' | 'internal' | 'firm') => {
   selectedFolder.value = folder
 }
 
-// Handle back navigation
 const handleBack = () => {
   if (selectedFolder.value) {
-    // For clients, go back to case list directly
     if (isClientScope.value) {
       selectedCase.value = null
       selectedFolder.value = null
@@ -175,7 +160,6 @@ const handleBack = () => {
   }
 }
 
-// Handle document upload
 const handleUploadClick = () => {
   showUploadDialog.value = true
 }
@@ -187,7 +171,6 @@ const handleDocumentUploaded = async (data: UploadDocumentInput) => {
     await casesApi.uploadCaseDocument(selectedCase.value.id, data)
     toast.success('Document uploaded successfully')
     
-    // Refresh documents
     await fetchDocuments(selectedCase.value.id)
   } catch (error) {
     console.error('Error uploading document:', error)
@@ -195,13 +178,10 @@ const handleDocumentUploaded = async (data: UploadDocumentInput) => {
   }
 }
 
-// Handle document delete
 const handleDocumentDelete = async (documentId: string) => {
-  // TODO: Implement delete API when available
   toast.info('Delete functionality coming soon')
 }
 
-// Get current folder documents
 const currentDocuments = computed(() => {
   if (selectedFolder.value === 'client') {
     return clientDocuments.value
@@ -213,12 +193,10 @@ const currentDocuments = computed(() => {
   return []
 })
 
-// Get folder type for upload dialog
 const uploadFolderType = computed(() => {
   if (isClientScope.value) {
     return 'client'
   }
-  // For firm folder, use internal scope for uploads
   if (selectedFolder.value === 'firm') {
     return 'internal'
   }
@@ -246,7 +224,6 @@ const uploadFolderType = computed(() => {
       </div>
     </div>
 
-    <!-- Case not selected - Show tabs and case list -->
     <div v-if="!selectedCase" class="bg-white rounded-lg shadow-sm p-6">
       <Tabs v-model="activeTab">
         <TabsList class="grid w-full grid-cols-4 mb-6">
@@ -256,7 +233,6 @@ const uploadFolderType = computed(() => {
           <TabsTrigger value="registered">Registered</TabsTrigger>
         </TabsList>
 
-        <!-- Loading State -->
         <div v-if="isLoadingCases" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div v-for="i in 6" :key="i" class="border border-gray-200 rounded-lg p-4">
             <div class="space-y-3">
@@ -267,13 +243,11 @@ const uploadFolderType = computed(() => {
           </div>
         </div>
 
-        <!-- Empty State -->
         <div v-else-if="cases.length === 0" class="text-center py-12">
           <Icon icon="mdi:folder-open-outline" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <p class="text-gray-600">No {{ activeTab }} cases found</p>
         </div>
 
-        <!-- Cases Grid -->
         <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div
             v-for="caseItem in cases"
@@ -311,9 +285,7 @@ const uploadFolderType = computed(() => {
       </Tabs>
     </div>
 
-    <!-- Case selected - Show folders or documents -->
     <div v-else class="bg-white rounded-lg shadow-sm p-6">
-      <!-- Folder View (only for lawyers) -->
       <DocumentFolderView
         v-if="!selectedFolder && !isClientScope"
         :client-files-count="clientDocuments.length"
@@ -323,7 +295,6 @@ const uploadFolderType = computed(() => {
         @open-folder="handleFolderSelect"
       />
 
-      <!-- Document List View (for clients, shown directly) -->
       <DocumentListView
         v-if="selectedFolder"
         :documents="currentDocuments"
@@ -335,7 +306,6 @@ const uploadFolderType = computed(() => {
       />
     </div>
 
-    <!-- Upload Dialog -->
     <UploadDocumentDialog
       v-if="selectedFolder"
       :open="showUploadDialog"

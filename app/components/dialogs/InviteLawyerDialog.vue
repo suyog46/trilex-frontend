@@ -246,12 +246,10 @@ const handlePageChange = (page: number) => {
             </div>
           </div>
 
-          <!-- Filters -->
           <div class="space-y-4">
             <h3 class="text-sm font-medium text-gray-700">Filters</h3>
             
             <div class="grid grid-cols-2 gap-4">
-              <!-- Province Filter -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Province</label>
                 <select
@@ -266,7 +264,6 @@ const handlePageChange = (page: number) => {
                 </select>
               </div>
 
-              <!-- District Filter -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">District</label>
                 <select
@@ -282,7 +279,6 @@ const handlePageChange = (page: number) => {
               </div>
             </div>
 
-            <!-- Services Filter -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Services</label>
               <div class="grid grid-cols-2 gap-2 max-h-[150px] overflow-y-auto">
@@ -299,9 +295,7 @@ const handlePageChange = (page: number) => {
             </div>
           </div>
 
-          <!-- Two Column Layout -->
           <div class="grid grid-cols-2 gap-6">
-            <!-- Search Results -->
             <div class="space-y-3 border-r border-gray-200 pr-6">
               <div class="flex items-center justify-between">
                 <h3 class="text-sm font-medium text-gray-700">
@@ -325,7 +319,6 @@ const handlePageChange = (page: number) => {
                       : 'border-gray-200 hover:border-primary-normal hover:bg-blue-50'
                   ]"
                 >
-                  <!-- Profile Picture -->
                   <div class="flex-shrink-0">
                     <img
                       :src="lawyer.verification?.license_photo?.url"
@@ -335,7 +328,6 @@ const handlePageChange = (page: number) => {
                     />
                   </div>
 
-                  <!-- Lawyer Info -->
                   <div class="flex-1 min-w-0">
                     <p class="font-semibold text-gray-900 text-sm">{{ lawyer.verification?.full_name }}</p>
                     <p class="text-xs text-gray-600 truncate">{{ lawyer.user?.email }}</p>
@@ -348,7 +340,6 @@ const handlePageChange = (page: number) => {
                 <p class="text-gray-500 text-sm">No lawyers found. Try adjusting your search filters.</p>
               </div>
 
-              <!-- Pagination -->
               <div v-if="searchResults.length > 0" class="flex items-center justify-between pt-4 border-t border-gray-200">
                 <span class="text-xs text-gray-600">
                   Page {{ currentPage }} of {{ Math.ceil(totalCount / pageSize) }}
@@ -372,12 +363,10 @@ const handlePageChange = (page: number) => {
               </div>
             </div>
 
-            <!-- Selected Lawyer Details -->
             <div class="space-y-4 pl-6">
               <h3 class="text-sm font-medium text-gray-700">Selected Lawyer</h3>
               
               <div v-if="selectedLawyer" class="bg-gray-50 rounded-lg p-4 space-y-4">
-                <!-- Profile Picture and Name -->
                 <div class="flex flex-col items-center space-y-3">
                   <img
                     :src="selectedLawyer.verification?.license_photo?.url"
@@ -391,9 +380,7 @@ const handlePageChange = (page: number) => {
                   </div>
                 </div>
 
-                <!-- Details -->
                 <div class="space-y-3 text-sm">
-                  <!-- Phone -->
                   <div v-if="selectedLawyer?.profile?.phone_number" class="flex items-start gap-3">
                     <Icon icon="mdi:phone" class="w-4 h-4 text-gray-500 flex-shrink-0 mt-0.5" />
                     <div>
@@ -402,7 +389,6 @@ const handlePageChange = (page: number) => {
                     </div>
                   </div>
 
-                  <!-- Services -->
                   <div v-if="selectedLawyer?.profile?.services && selectedLawyer.profile.services.length > 0">
                     <p class="text-gray-600 font-medium mb-2">Expertise</p>
                     <div class="flex flex-wrap gap-2">
@@ -416,7 +402,6 @@ const handlePageChange = (page: number) => {
                     </div>
                   </div>
 
-                  <!-- Location -->
                   <div v-if="selectedLawyer?.profile?.address" class="flex items-start gap-3">
                     <Icon icon="mdi:map-marker" class="w-4 h-4 text-gray-500 flex-shrink-0 mt-0.5" />
                     <div>
@@ -428,7 +413,6 @@ const handlePageChange = (page: number) => {
                   </div>
                 </div>
 
-                <!-- Invite Button -->
                 <button
                   @click="handleInviteLawyer"
                   :disabled="isInviting"

@@ -34,7 +34,6 @@ const formatCourtType = (courtType: string): string => {
   return labelMap[courtType] || courtType
 }
 
-// Helper to get status color
 const getStatusColor = (status: string): string => {
   switch (status) {
     case 'pending':
@@ -48,7 +47,6 @@ const getStatusColor = (status: string): string => {
   }
 }
 
-// Handle opening chat
 const handleOpenChat = async () => {
   if (!props.booking) return
   isProcessing.value = true
@@ -81,7 +79,6 @@ const handleOpenChat = async () => {
       </DialogHeader>
 
       <div v-if="booking" class="py-6 space-y-6">
-        <!-- Status Badge -->
         <div class="flex items-center justify-between">
           <h3 class="text-sm font-medium text-gray-700">Status</h3>
           <span
@@ -94,7 +91,6 @@ const handleOpenChat = async () => {
           </span>
         </div>
 
-        <!-- Lawyer/Firm Info -->
         <div class="bg-gray-50 rounded-lg p-4 space-y-3">
           <h4 class="text-sm font-medium text-gray-900">Lawyer/Firm Information</h4>
           <div class="flex items-center gap-3">
@@ -109,7 +105,6 @@ const handleOpenChat = async () => {
           </div>
         </div>
 
-        <!-- Case Information -->
         <div class="space-y-3">
           <h4 class="text-sm font-medium text-gray-900">Case Information</h4>
 
@@ -137,7 +132,6 @@ const handleOpenChat = async () => {
           </div>
         </div>
 
-        <!-- Date Information -->
         <div class="grid grid-cols-2 gap-4">
           <div class="bg-gray-50 p-3 rounded-lg">
             <p class="text-xs text-gray-600 mb-1">Booking Date</p>
@@ -166,7 +160,6 @@ const handleOpenChat = async () => {
           </div>
         </div>
 
-        <!-- Your Details -->
         <div class="bg-primary-light/30 rounded-lg p-4 space-y-2">
           <h4 class="text-sm font-medium text-gray-900">Your Information</h4>
           <p class="text-sm text-gray-700">

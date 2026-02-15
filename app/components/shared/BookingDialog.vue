@@ -24,7 +24,6 @@ const emit = defineEmits<{
 
 const authStore = useAuthStore()
 
-// Form state
 const courtType = ref<string>('district')
 const caseCategory = ref<string>('')
 const description = ref<string>('')
@@ -148,9 +147,7 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- Booking Form -->
         <div class="space-y-4">
-          <!-- Case Category -->
           <div class="space-y-2">
             <label class="block text-sm font-medium text-gray-700">
               <span class="text-red-500">*</span> Case Category
@@ -171,7 +168,6 @@ onMounted(() => {
             </select>
           </div>
 
-          <!-- Court Type -->
           <div class="space-y-2">
             <label class="block text-sm font-medium text-gray-700">
               <span class="text-red-500">*</span> Court Type
@@ -190,7 +186,6 @@ onMounted(() => {
             </select>
           </div>
 
-          <!-- Description -->
           <div class="space-y-2">
             <label class="block text-sm font-medium text-gray-700">
               <span class="text-red-500">*</span> Description
@@ -203,7 +198,6 @@ onMounted(() => {
             />
           </div>
 
-          <!-- Booking Date -->
           <div class="space-y-2">
             <label class="block text-sm font-medium text-gray-700">
               <span class="text-red-500">*</span> Preferred Date

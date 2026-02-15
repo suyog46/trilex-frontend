@@ -1,6 +1,4 @@
 import { URL } from "~/lib/constants/url"
-
-// Types
 export interface FirmUser {
   email: string
   role: string
@@ -148,10 +146,6 @@ export interface FirmInvitationsResponse {
 }
 
 export const firmsApi = {
-  /**
-   * Get all firms with pagination and filters
-   * GET /api/firms/
-   */
   getFirms: (params?: FirmListParams): Promise<PaginatedResponse<Firm>> => {
     const apiFetch = useApiFetch()
     const queryParams = new URLSearchParams()
@@ -167,19 +161,11 @@ export const firmsApi = {
     return apiFetch(url)
   },
 
-  /**
-   * Get firm by ID
-   * GET /api/firms/{firm_id}/
-   */
   getFirmById: (firmId: string): Promise<Firm> => {
     const apiFetch = useApiFetch()
     return apiFetch(`/api/firms/${firmId}/`)
   },
 
-  /**
-   * Get firm members
-   * GET /api/firms/me/members/
-   */
   getFirmMembers: (params?: { page?: number; page_size?: number }): Promise<FirmMembersResponse> => {
     const apiFetch = useApiFetch()
     const queryParams = new URLSearchParams()
@@ -191,10 +177,6 @@ export const firmsApi = {
     return apiFetch(url)
   },
 
-  /**
-   * Add lawyer to firm
-   * POST /api/firms/me/invite-lawyer/{lawyer_id}/
-   */
   addMember: (lawyerId: string): Promise<FirmMember> => {
     const apiFetch = useApiFetch()
     return apiFetch(`/api/firms/me/invite-lawyer/${lawyerId}/`, {
@@ -202,10 +184,6 @@ export const firmsApi = {
     })
   },
 
-  /**
-   * Remove lawyer from firm
-   * DELETE /api/firms/me/members/{member_id}/
-   */
   removeMember: (memberId: string): Promise<void> => {
     const apiFetch = useApiFetch()
     return apiFetch(`/api/firms/me/members/${memberId}/`, {
@@ -213,10 +191,6 @@ export const firmsApi = {
     })
   },
 
-  /**
-   * Get firm invitations
-   * GET /api/firms/me/invitations/
-   */
   getFirmInvitations: (params?: { page?: number; page_size?: number }): Promise<FirmInvitationsResponse> => {
     const apiFetch = useApiFetch()
     const queryParams = new URLSearchParams()

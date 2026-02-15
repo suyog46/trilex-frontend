@@ -9,7 +9,6 @@ defineProps<{
 
 const authStore = useAuthStore()
 
-// Compute dashboard path based on user role
 const dashboardPath = computed(() => {
   const role = authStore.user?.role
   switch (role) {

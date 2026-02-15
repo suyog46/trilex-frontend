@@ -21,7 +21,6 @@ export const useApiFetch = () => {
   const apiFetch = $fetch.create({
     baseURL: config.public.apiBase,
     onRequest({ request, options }) {
-      // Always read fresh token from store
       let token = null
       if (authStore.accessToken) {
         token = typeof authStore.accessToken === 'object' && 'value' in authStore.accessToken 
@@ -52,7 +51,6 @@ export const useApiFetch = () => {
     onResponseError({ response }) {
       console.error(' API Error:', response.status, response.statusText, response._data)
       
-      // Handle different HTTP status codes
       if (response.status === 401) {
         authStore.logout()
       }

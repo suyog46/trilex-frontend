@@ -23,7 +23,6 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const totalCount = ref(0)
 
-// Fetch clients
 const fetchClients = async () => {
   loading.value = true
   try {
@@ -42,31 +41,26 @@ const fetchClients = async () => {
   }
 }
 
-// Debounced search
 const debouncedSearch = useDebounceFn(() => {
   currentPage.value = 1
   fetchClients()
 }, 500)
 
-// Watch search query
 watch(searchQuery, () => {
   debouncedSearch()
 })
 
-// Watch open state to fetch data
 watch(() => props.open, (isOpen) => {
   if (isOpen) {
     fetchClients()
   }
 })
 
-// Handle client selection
 const selectClient = (client: RegisteredClient) => {
   emit('select', client)
   emit('update:open', false)
 }
 
-// Handle pagination
 const nextPage = () => {
   if (currentPage.value * pageSize.value < totalCount.value) {
     currentPage.value++
@@ -95,7 +89,6 @@ const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value))
       </DialogHeader>
 
       <div class="space-y-4 flex-1 overflow-hidden flex flex-col">
-        <!-- Search Input -->
         <div class="flex gap-2">
           <Input
             v-model="searchQuery"
@@ -104,7 +97,6 @@ const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value))
           />
         </div>
 
-        <!-- Clients List -->
         <div class="flex-1 overflow-y-auto border rounded-md">
           <div v-if="loading" class="flex items-center justify-center py-8">
             <Icon icon="mdi:loading" class="w-8 h-8 animate-spin text-primary-normal" />
@@ -123,7 +115,6 @@ const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value))
               @click="selectClient(client)"
             >
               <div class="flex items-center gap-4">
-                <!-- Photo -->
                 <div class="w-12 h-12 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
                   <img
                     v-if="client.verification?.passport_size_photo?.url"
@@ -136,7 +127,6 @@ const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value))
                   </div>
                 </div>
 
-                <!-- Info -->
                 <div class="flex-1 min-w-0">
                   <h3 class="font-semibold text-gray-900 truncate">
                     {{ client.verification?.full_name || 'N/A' }}
@@ -149,7 +139,6 @@ const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value))
                   </p>
                 </div>
 
-                <!-- Select Icon -->
                 <div class="flex-shrink-0">
                   <Icon icon="mdi:chevron-right" class="w-6 h-6 text-gray-400" />
                 </div>
@@ -158,7 +147,6 @@ const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value))
           </div>
         </div>
 
-        <!-- Pagination -->
         <div v-if="totalCount > pageSize" class="flex items-center justify-between border-t pt-4">
           <div class="text-sm text-gray-600">
             Page {{ currentPage }} of {{ totalPages }} ({{ totalCount }} total)

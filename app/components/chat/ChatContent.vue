@@ -36,7 +36,6 @@ const emit = defineEmits<{
 const messagesContainer = ref<HTMLDivElement | null>(null)
 const hasScrolledToBottom = ref(false)
 
-// Scroll to bottom of messages
 const scrollToBottom = (smooth = true) => {
   if (messagesContainer.value) {
     messagesContainer.value.scrollTo({
@@ -46,7 +45,6 @@ const scrollToBottom = (smooth = true) => {
   }
 }
 
-// Handle scroll to load more messages
 const handleScroll = () => {
   if (messagesContainer.value) {
     const { scrollTop } = messagesContainer.value
@@ -58,7 +56,6 @@ const handleScroll = () => {
   }
 }
 
-// Watch messages and scroll to bottom when new message arrives
 watch(() => props.messages, (newMessages, oldMessages) => {
   if (newMessages.length > oldMessages.length) {
     nextTick(() => {
@@ -68,7 +65,6 @@ watch(() => props.messages, (newMessages, oldMessages) => {
   }
 }, { deep: true })
 
-// Watch conversation ID and scroll to bottom when changed
 watch(() => props.conversationId, () => {
   hasScrolledToBottom.value = false
   nextTick(() => {
@@ -89,18 +85,15 @@ onMounted(() => {
 
 <template>
   <div class="flex-1 flex flex-col bg-gray-50 h-full overflow-y-scroll">
-    <!-- Messages Container -->
     <div
       ref="messagesContainer"
       class="flex-1 overflow-y-auto px-6 py-4"
       @scroll="handleScroll"
     >
-      <!-- Loading More Indicator (at top) -->
       <div v-if="isLoading" class="flex justify-center py-4">
         <Icon icon="mdi:loading" class="w-6 h-6 text-primary-normal animate-spin" />
       </div>
 
-      <!-- Empty State -->
       <div
         v-if="messages.length === 0 && !isLoading"
         class="flex flex-col items-center justify-center h-full text-center"
@@ -110,7 +103,6 @@ onMounted(() => {
         <p class="text-sm text-gray-600">Start the conversation by sending a message below</p>
       </div>
 
-      <!-- Messages List -->
       <div v-else>
         <ChatItem
           v-for="message in messages"
@@ -118,7 +110,6 @@ onMounted(() => {
           :message="message"
         />
 
-        <!-- Typing Indicator -->
         <div v-if="typingUsers.length > 0" class="flex gap-3 mb-4">
           <div class="w-8 h-8 rounded-full bg-gray-300"></div>
           <div class="flex items-center gap-1 px-4 py-2 bg-gray-100 rounded-lg rounded-tl-none">

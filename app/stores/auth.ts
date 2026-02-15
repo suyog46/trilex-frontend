@@ -1,9 +1,3 @@
-/**
- * Pinia Auth Store (Setup Style)
- * Centralized authentication state management
- * Handles login, logout, token refresh, and user state
- */
-
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { User, AuthResponse, LoginInput, AuthError, LawyerRegisterInput, UserRegisterInput, LawyerSignupInput, LawFirmSignupInput,
@@ -12,14 +6,12 @@ import { authApi } from '~/composables/api/auth.api'
 import { verificationApi } from '~/composables/api/verification.api'
 import { useChatSocket } from '~/composables/useChatSocket'
 
-// Helper function to extract user_id from JWT token
 const extractUserIdFromToken = (token: string | undefined): string | null => {
   if (!token) return null
   try {
     const parts = token.split('.')
     if (parts.length !== 3 || !parts[1]) return null
     
-    // Decode the payload (second part)
     const decodedPayload = atob(parts[1])
     const payload = JSON.parse(decodedPayload)
     return payload.user_id || null
@@ -30,7 +22,6 @@ const extractUserIdFromToken = (token: string | undefined): string | null => {
 }
 
 export const useAuthStore = defineStore('auth', () => {
-  // State
   const user = ref<User | null>(null)
   const isLoading = ref(false)
   const error = ref<AuthError | null>(null)
@@ -39,7 +30,6 @@ export const useAuthStore = defineStore('auth', () => {
   const firmVerificationStatus = ref<FirmVerificationStatus | null>(null)
   const clientVerificationStatus = ref<ClientVerificationStatus | null>(null)
 
-  // Chat socket instance
   const { connect: connectChatSocket, disconnect: disconnectChatSocket } = useChatSocket()
 
   const accessToken = useCookie<string | null>('access_token', {
@@ -63,9 +53,7 @@ export const useAuthStore = defineStore('auth', () => {
     sameSite: 'strict',
   })
 
-  // Computed
   const isAuthenticated = computed(() => {
-    // Check if we have an access token in the cookie
     const hasToken = accessToken.value !== null && accessToken.value !== undefined && accessToken.value !== ''
     console.log('isAuthenticated check:', { hasToken, tokenValue: accessToken.value })
     return hasToken
@@ -75,14 +63,11 @@ export const useAuthStore = defineStore('auth', () => {
   const isAdmin = computed(() => user.value?.role === 'admin')
   const userId = computed(() => user.value?.id || null)
 
-  // Error handler
   const handleError = (err: any): AuthError => {
-    // Extract error message from different Django response formats
     const errorData = err?.data || err?.response?.data || err
     
     let message = 'An error occurred'
     
-    // Try to extract message from common Django error response formats
     if (typeof errorData === 'object' && errorData !== null) {
       if (errorData.error && typeof errorData.error === 'string') {
         message = errorData.error
@@ -110,7 +95,6 @@ export const useAuthStore = defineStore('auth', () => {
     return authError
   }
 
-  // Initialize auth state (on app startup / SSR)
   const initializeAuth = async () => {
     if (isInitialized.value) {
       console.log('initializeAuth: Already initialized, skipping')
@@ -119,7 +103,6 @@ export const useAuthStore = defineStore('auth', () => {
 
     isLoading.value = true
     try {
-      // Check if we have a token from cookie
       const tokenValue = accessToken.value
       const role = userRole.value
       
@@ -132,7 +115,6 @@ export const useAuthStore = defineStore('auth', () => {
       if (tokenValue && tokenValue.length > 0) {
         console.log('initializeAuth: Token found, user IS authenticated')
         
-        // Try to fetch full user details from role-based /me endpoint
         try {
           const userDetails = role === 'lawyer'
             ? await authApi.lawyerMe()
@@ -153,11 +135,9 @@ export const useAuthStore = defineStore('auth', () => {
           }
           console.log('User details fetched from /me:', user.value)
           
-          // Connect to chat socket after successful initialization
           connectChatSocket('')
         } catch (meError) {
           console.error('Failed to fetch user details from /me during init:', meError)
-          // Fallback to basic user restoration from token
           if (role) {
             user.value = {
               id: extractUserIdFromToken(tokenValue) || '',
@@ -167,7 +147,6 @@ export const useAuthStore = defineStore('auth', () => {
             } as User
             console.log('User role restored from cookie:', role)
             
-            // Connect to chat socket even with fallback user
             connectChatSocket('')
           }
         }
@@ -191,7 +170,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Login
   const login = async (payload: LoginInput) => {
     isLoading.value = true
     error.value = null
@@ -199,11 +177,9 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await authApi.login(payload)
 
-      // Handle new API response format
       const accessTokenValue = response.access || response.accessToken
       const refreshTokenValue = response.refresh || response.refreshToken
 
-      // Store tokens in cookies
       if (accessTokenValue) {
         accessToken.value = accessTokenValue
       }
@@ -211,12 +187,10 @@ export const useAuthStore = defineStore('auth', () => {
         refreshToken.value = refreshTokenValue
       }
 
-      // Store role in cookie for persistence across reloads
       if (response.role) {
         userRole.value = response.role
       }
 
-      // Fetch full user details from role-based /me endpoint
       try {
         const role = response.role as string
         const userDetails = role === 'lawyer'
@@ -238,7 +212,6 @@ export const useAuthStore = defineStore('auth', () => {
         }
       } catch (meError) {
         console.error('Failed to fetch user details from /me:', meError)
-        // Fallback to basic user object
         user.value = {
           id: extractUserIdFromToken(accessTokenValue) || '',
           email: response.email,
@@ -247,7 +220,6 @@ export const useAuthStore = defineStore('auth', () => {
         } as User
       }
 
-      // Connect to chat socket after successful login
       connectChatSocket('')
 
       return {
@@ -257,7 +229,6 @@ export const useAuthStore = defineStore('auth', () => {
         is_email_verified: response.is_email_verified,
       }
     } catch (err: any) {
-      // Handle not verified error (404 with email_not_verified message)
       if (err?.status === 404 && err?.data?.message === 'Email not verified') {
         return {
           success: false,
@@ -275,7 +246,6 @@ export const useAuthStore = defineStore('auth', () => {
       isLoading.value = false 
     }
   }
-
 
   const registerUser = async (payload: UserRegisterInput) => {
     isLoading.value = true
@@ -304,7 +274,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Lawyer Registration (with file uploads)
   const registerLawyer = async (payload: LawyerRegisterInput) => {
     isLoading.value = true
     error.value = null
@@ -333,7 +302,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Lawyer Signup (new flow with address and services)
   const registerLawyerSignup = async (payload: LawyerSignupInput) => {
     isLoading.value = true
     error.value = null
@@ -363,7 +331,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Law Firm Signup (new flow with address and services)
   const registerLawFirmSignup = async (payload: LawFirmSignupInput) => {
     isLoading.value = true
     error.value = null
@@ -394,13 +361,11 @@ export const useAuthStore = defineStore('auth', () => {
   }
   
   
-  // Logout
   const logout = async () => {
     isLoading.value = true
     error.value = null
 
     try {
-      // Disconnect chat socket before clearing auth
       disconnectChatSocket()
       
       accessToken.value = null
@@ -409,15 +374,12 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = null
       isLoading.value = false
       isInitialized.value = false
-      // Call logout endpoint to invalidate token on server
-      // await authApi.logout()
     } catch (err) {
       console.warn('Logout API call failed, clearing local state anyway')
     } 
 
   } 
 
-  // Forgot Password
   const forgotPassword = async (payload: ForgotPasswordInput) => {
     isLoading.value = true
     error.value = null
@@ -433,7 +395,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Verify Forgot Password OTP
   const verifyForgotPasswordOtp = async (payload: VerifyForgotPasswordOtpInput) => {
     isLoading.value = true
     error.value = null
@@ -449,7 +410,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Reset Password
   const resetPassword = async (payload: ResetPasswordInput & { token: string }) => {
     isLoading.value = true
     error.value = null
@@ -468,7 +428,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Refresh token
   const refreshAccessToken = async () => {
     if (!refreshToken.value) {
       await logout()
@@ -494,12 +453,10 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Clear error
   const clearError = () => {
     error.value = null
   }
 
-  // Get lawyer verification status
   const getLawyerVerificationStatus = async () => {
     try {
       const status = await verificationApi.getLawyerVerificationStatus()
@@ -512,7 +469,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Submit lawyer verification
   const submitLawyerVerification = async (data: any) => {
     isLoading.value = true
     try {
@@ -527,7 +483,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Get firm verification status
   const getFirmVerificationStatus = async () => {
     try {
       const status = await verificationApi.getFirmVerificationStatus()
@@ -540,7 +495,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Submit firm verification
   const submitFirmVerification = async (data: any) => {
     isLoading.value = true
     try {
@@ -555,7 +509,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Get client verification status
   const getClientVerificationStatus = async () => {
     try {
       const status = await verificationApi.getClientVerificationStatus()
@@ -568,7 +521,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Submit client verification
   const submitClientVerification = async (data: any) => {
     isLoading.value = true
     try {
@@ -584,7 +536,6 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   return {
-    // State
     user,
     isLoading,
     error,
@@ -595,13 +546,11 @@ export const useAuthStore = defineStore('auth', () => {
     firmVerificationStatus,
     clientVerificationStatus,
 
-    // Computed
     isAuthenticated,
     isLawyer,
     isAdmin,
     userId,
 
-    // Methods
     initializeAuth,
     login,
     registerUser,

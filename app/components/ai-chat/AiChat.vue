@@ -47,7 +47,6 @@ const handleSendQuery = async (query: string) => {
   try {
     const response = await aiAssistantApi.sendQuery({ query })
 
-    // Add AI response to messages
     const aiMessage: ChatMessage = {
       sender: 'ai',
       message: response.answer,

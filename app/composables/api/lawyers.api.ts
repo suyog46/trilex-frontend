@@ -1,4 +1,3 @@
-// Types
 export interface LawyerUser {
   email: string
   role: string
@@ -126,10 +125,6 @@ export interface LawyerFirmInvitationsResponse {
 }
 
 export const lawyersApi = {
-  /**
-   * Get all lawyers with pagination and filters
-   * GET /api/lawyers/
-   */
   getLawyers: (params?: LawyerListParams): Promise<PaginatedResponse<Lawyer>> => {
     const apiFetch = useApiFetch()
     const queryParams = new URLSearchParams()
@@ -145,19 +140,11 @@ export const lawyersApi = {
     return apiFetch(url)
   },
 
-  /**
-   * Get lawyer by ID
-   * GET /api/lawyers/{lawyer_id}/
-   */
   getLawyerById: (lawyerId: string): Promise<Lawyer> => {
     const apiFetch = useApiFetch()
     return apiFetch(`/api/lawyers/${lawyerId}/`)
   },
 
-  /**
-   * Suspend a lawyer
-   * PATCH /api/lawyers/{lawyer_id}/suspend/
-   */
   suspendLawyer: (lawyerId: string): Promise<any> => {
     const apiFetch = useApiFetch()
     return apiFetch(`/api/lawyers/${lawyerId}/suspend/`, {
@@ -165,10 +152,6 @@ export const lawyersApi = {
     })
   },
 
-  /**
-   * Get lawyer firm invitations
-   * GET /api/lawyers/me/invitations/
-   */
   getLawyerFirmInvitations: (params?: { page?: number; page_size?: number }): Promise<LawyerFirmInvitationsResponse> => {
     const apiFetch = useApiFetch()
     const queryParams = new URLSearchParams()
@@ -180,11 +163,6 @@ export const lawyersApi = {
     return apiFetch(url)
   },
 
-  /**
-   * Respond to firm invitation
-   * POST /api/lawyers/me/invitations/{invitation_id}/{action}/
-   * action: 'accept' or 'reject'
-   */
   respondToFirmInvitation: (invitationId: string, action: 'accept' | 'reject'): Promise<any> => {
     const apiFetch = useApiFetch()
     return apiFetch(`/api/lawyers/me/invitations/${invitationId}/${action}/`, {

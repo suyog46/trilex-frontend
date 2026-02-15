@@ -18,9 +18,7 @@ const { handleSubmit } = useForm({
   validationSchema: toTypedSchema(userRegisterSchema),
 })
 
-// Test toast on component mount
 
-// Handle registration form submission
 const onSubmit = handleSubmit(async (values: UserRegisterInput) => {
   const result = await authStore.registerUser({
     email: values.email,
@@ -29,7 +27,6 @@ const onSubmit = handleSubmit(async (values: UserRegisterInput) => {
 
   if (result.success) {
     toast.success('Registration successful! Check your email to verify your account.')
-    // Redirect to check-your-email page with email parameter
     setTimeout(() => {
       navigateTo({
         path: "/check-your-email",
@@ -41,7 +38,6 @@ const onSubmit = handleSubmit(async (values: UserRegisterInput) => {
   }
 })
 
-// Handle Google Sign-In
 const handleGoogleSignIn = async () => {
   try {
     console.log("Google sign-in initiated")
@@ -51,7 +47,6 @@ const handleGoogleSignIn = async () => {
   }
 }
 
-// Toggle password visibility
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value
 }
@@ -68,7 +63,6 @@ const isLoading = computed(() => authStore.isLoading)
 
 
     <form @submit="onSubmit" class="space-y-4">
-      <!-- Email Field -->
       <FormField v-slot="{ componentField }" name="email">
         <FormItem>
           <FormLabel class="text-lg text-gray-700 font-semibold">
@@ -165,7 +159,7 @@ const isLoading = computed(() => authStore.isLoading)
       </span>
     </p>
 
-    <div class="w-full relative flex justify-center items-center">
+    <!-- <div class="w-full relative flex justify-center items-center">
       <div class="w-[80px] h-1 border-b-2 border-primary-normal" />
       <span class="px-2 absolute text-lg text-primary-normal font-semibold top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[2] bg-white">
         OR
@@ -179,9 +173,8 @@ const isLoading = computed(() => authStore.isLoading)
     >
       <Icon name="mdi:google" class="w-6 h-6" />
       <span>Continue with Google</span>
-    </Button>
+    </Button> -->
 
-    <!-- Professional Registration Option -->
     <p class="text-slate-600 w-full text-center">
       Are you a legal professional?
       <span
@@ -192,7 +185,6 @@ const isLoading = computed(() => authStore.isLoading)
       </span>
     </p>
 
-    <!-- Register Options Dialog -->
     <Dialog v-model:open="showRegisterOptions">
       <DialogContent class="sm:max-w-md bg-white">
         <DialogHeader>
