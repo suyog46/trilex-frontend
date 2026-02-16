@@ -81,7 +81,7 @@ const firmId = computed(() => {
       </div>
 
       <NuxtLink
-        :to="`/client/firms/${firmId}`"
+        :to="`/s/${firmId}`"
         class="w-full py-3 mt-4 bg-primary-normal text-white font-semibold rounded-xl hover:bg-primary-normal-hover transition-all duration-300 text-center flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-primary-normal/20"
       >
         View Details

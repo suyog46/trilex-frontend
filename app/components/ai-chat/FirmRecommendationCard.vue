@@ -8,7 +8,7 @@ interface Props {
 const props = defineProps<Props>()
 
 const navigateToFirm = () => {
-  navigateTo(`/client/firm/${props.firm.id}`)
+  navigateTo(`/client/firms/${props.firm.id}`)
 }
 
 const getLocationString = () => {
