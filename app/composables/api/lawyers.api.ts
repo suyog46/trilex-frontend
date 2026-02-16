@@ -87,6 +87,7 @@ export interface LawyerListParams {
   province?: number
   district?: number
   services?: string
+  has_firm?:false
 }
 
 export interface FirmLicense {
@@ -135,7 +136,7 @@ export const lawyersApi = {
     if (params?.province) queryParams.append('province', params.province.toString())
     if (params?.district) queryParams.append('district', params.district.toString())
     if (params?.services) queryParams.append('services', params.services)
-    
+    if(params?.has_firm !== undefined) queryParams.append('has_firm', params.has_firm.toString())
     const url = queryParams.toString() ? `/api/lawyers/?${queryParams.toString()}` : '/api/lawyers/'
     return apiFetch(url)
   },

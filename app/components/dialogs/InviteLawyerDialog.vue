@@ -109,6 +109,7 @@ const performSearch = async () => {
       services: selectedServices.value.length > 0 ? selectedServices.value.join(',') : undefined,
       page: currentPage.value,
       page_size: pageSize.value,
+      has_firm:false
     })
     
     searchResults.value = result.results || []

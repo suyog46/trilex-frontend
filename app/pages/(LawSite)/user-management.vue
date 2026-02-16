@@ -15,7 +15,6 @@ definePageMeta({
   middleware: ['auth', 'verification'],
 })
 
-// View mode state
 const viewMode = ref<'table' | 'grid'>('table')
 const activeTab = ref('members')
 
@@ -60,6 +59,7 @@ const fetchMembers = async (page: number, size: number) => {
     const result = await firmsApi.getFirmMembers({
       page,
       page_size: size,
+      has_firm:false
     })
 
     members.value = result.results || []
